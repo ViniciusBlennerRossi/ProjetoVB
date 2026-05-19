@@ -14,39 +14,40 @@
     .login-page::before { display: none; }
     .login-art {
       flex: 1; position: relative; overflow: hidden;
-      background:
-        repeating-linear-gradient(90deg, #F5C7D3 0 14px, #FCEAEF 14px 28px);
-      padding: 56px 48px;
+      background: repeating-linear-gradient(90deg, #F5C7D3 0 14px, #FCEAEF 14px 28px);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 40px;
+      gap: 32px;
     }
-    .login-art::before {
-      content: ""; position: absolute; inset: 0;
-      background: radial-gradient(circle at center, transparent 30%, rgba(255,255,255,0.45) 75%);
-      pointer-events: none;
-    }
+    /* Logo como marca d'água — Fiore (padrão) */
     .login-art-logo {
-      width: 260px; max-width: 80%;
+      width: 72%; max-width: 420px; min-width: 220px;
       position: relative; z-index: 1;
-      border-radius: 20px;
-      box-shadow: 0 24px 48px -16px rgba(140,40,80,0.25), 0 0 0 1px rgba(255,255,255,0.5);
-      background: #fff;
       display: block;
+      opacity: 0.18;
+      filter: saturate(0.6) contrast(1.1);
+      border-radius: 0; background: transparent; box-shadow: none;
     }
     .login-art-quote {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 26px; line-height: 1.25;
-      font-style: italic; font-weight: 500;
-      max-width: 340px;
+      font-size: 34px; line-height: 1.22;
+      font-style: italic; font-weight: 600;
+      max-width: 380px;
       text-align: center;
       color: #5C0D2B;
       position: relative; z-index: 1;
     }
-    .login-art-foot {
-      font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
-      color: #8C0D38; font-weight: 600;
-      position: relative; z-index: 1;
+    .login-art-foot { display: none; }
+
+    /* Prateada — gradiente roxo */
+    .login-art.tenant-prateada {
+      background: linear-gradient(155deg, #2D0045 0%, #6E3B7A 55%, #9B5BB5 100%);
     }
+    .login-art.tenant-prateada .login-art-logo {
+      opacity: 0.22;
+      filter: brightness(2) saturate(0) contrast(1.2);
+    }
+    .login-art.tenant-prateada .login-art-quote { color: rgba(255,255,255,0.88); }
+
     @media (max-width: 900px) { .login-art { display: none; } }
 
     .login-side {
@@ -184,18 +185,18 @@
   let _lojaAtual = null;
   Tenant.inicializarTenant().then(loja => {
     _lojaAtual = loja;
+    const artPanel = document.querySelector('.login-art');
     if (loja?.slug === 'fiore') {
-      document.getElementById('art-logo').src   = 'Imagens/logo.png';
+      document.getElementById('art-logo').src  = 'Imagens/logo.png';
       document.getElementById('brand-name').textContent = 'Fiore';
       document.getElementById('brand-sub').textContent  = 'Pijamas · Gestão';
       document.getElementById('art-quote').textContent  = '"Conforto que veste como uma carícia."';
-      document.getElementById('art-foot').textContent   = 'Fiore · Desde 2019';
     } else if (loja?.slug === 'prateada') {
-      document.getElementById('art-logo').src   = 'Imagens/logo2.png';
+      document.getElementById('art-logo').src  = 'Imagens/logo2.png';
       document.getElementById('brand-name').textContent = 'Prateada';
       document.getElementById('brand-sub').textContent  = 'Salão · Gestão';
       document.getElementById('art-quote').textContent  = '"Beleza que se traduz em confiança."';
-      document.getElementById('art-foot').textContent   = 'Prateada Salão';
+      artPanel?.classList.add('tenant-prateada');
     } else if (loja?.nome) {
       document.getElementById('brand-name').textContent = loja.nome;
     }

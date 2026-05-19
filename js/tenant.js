@@ -63,6 +63,11 @@ const Tenant = (() => {
   // Aplica o tema da loja via CSS custom properties e atualiza
   // o título da página e o cabeçalho da sidebar.
   // ---------------------------------------------------------------
+  function _luminosidade(hex) {
+    const { r, g, b } = _hexParaRgb(hex);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+
   function aplicarTema(loja) {
     if (!loja) return;
 
@@ -77,6 +82,26 @@ const Tenant = (() => {
     r.style.setProperty('--primary-light', clarear(primary, 15));
     r.style.setProperty('--sidebar',       sidebar);
     r.style.setProperty('--sidebar2',      clarear(sidebar, 12));
+
+    // Adapta cores do texto da sidebar conforme luminosidade do fundo
+    const sidebarEscura = _luminosidade(sidebar) < 0.4;
+    if (sidebarEscura) {
+      r.style.setProperty('--nav-text',          'rgba(255,255,255,0.72)');
+      r.style.setProperty('--nav-text-active',   '#ffffff');
+      r.style.setProperty('--nav-section-text',  'rgba(255,255,255,0.38)');
+      r.style.setProperty('--sidebar-user-bg',   'rgba(255,255,255,0.1)');
+      r.style.setProperty('--sidebar-user-border','rgba(255,255,255,0.12)');
+      r.style.setProperty('--nav-active-bg',     'rgba(255,255,255,0.15)');
+      r.style.setProperty('--sidebar-border-color','rgba(255,255,255,0.1)');
+    } else {
+      r.style.setProperty('--nav-text',          'var(--text2)');
+      r.style.setProperty('--nav-text-active',   'var(--text)');
+      r.style.setProperty('--nav-section-text',  'var(--text3)');
+      r.style.setProperty('--sidebar-user-bg',   'var(--white)');
+      r.style.setProperty('--sidebar-user-border','var(--border)');
+      r.style.setProperty('--nav-active-bg',     'var(--white)');
+      r.style.setProperty('--sidebar-border-color','var(--border)');
+    }
 
     // Título da aba do navegador
     if (document.title) {
