@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FuncionÃ¡rios â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Funcionários — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -13,9 +13,9 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ‘¤ FuncionÃ¡rios</div>
+      <div class="topbar-title">👤 Funcionários</div>
       <div class="topbar-actions">
-        <button class="btn btn-primary" onclick="abrirModal()">+ Novo FuncionÃ¡rio</button>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Novo Funcionário</button>
       </div>
     </div>
     <div class="page-content">
@@ -25,14 +25,14 @@
 
       <div class="card" style="padding:14px 18px;margin-bottom:20px">
         <div class="search-input-wrap">
-          <span class="search-icon">ðŸ”</span>
+          <span class="search-icon">🔍</span>
           <input type="text" id="busca" class="form-control" placeholder="Buscar por nome ou cargo..." oninput="filtrar()" />
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title">ðŸ‘¤ Quadro de FuncionÃ¡rios</div>
+          <div class="card-title">👤 Quadro de Funcionários</div>
           <span id="count-label" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -43,12 +43,12 @@
   </div>
 </div>
 
-<!-- Modal FuncionÃ¡rio -->
+<!-- Modal Funcionário -->
 <div class="modal-overlay" id="modal-func">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title" id="modal-titulo">Novo FuncionÃ¡rio</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-func')">âœ•</button>
+      <div class="modal-title" id="modal-titulo">Novo Funcionário</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-func')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="func-id" />
@@ -64,11 +64,11 @@
       </div>
       <div class="form-row cols-2">
         <div class="form-group">
-          <label class="form-label">Cargo / FunÃ§Ã£o *</label>
+          <label class="form-label">Cargo / Função *</label>
           <input type="text" id="func-cargo" class="form-control" placeholder="Ex: Vendedora, Caixa..." />
         </div>
         <div class="form-group">
-          <label class="form-label">SalÃ¡rio (R$)</label>
+          <label class="form-label">Salário (R$)</label>
           <input type="number" id="func-salario" class="form-control" step="0.01" min="0" placeholder="0,00" />
         </div>
       </div>
@@ -84,7 +84,7 @@
       </div>
       <div class="form-row cols-2">
         <div class="form-group">
-          <label class="form-label">Data de AdmissÃ£o</label>
+          <label class="form-label">Data de Admissão</label>
           <input type="date" id="func-admissao" class="form-control" />
         </div>
         <div class="form-group">
@@ -92,30 +92,30 @@
           <select id="func-contrato" class="form-control form-select">
             <option value="clt">CLT</option>
             <option value="pj">PJ</option>
-            <option value="autonomo">AutÃ´nomo</option>
-            <option value="estagio">EstÃ¡gio</option>
-            <option value="temporario">TemporÃ¡rio</option>
+            <option value="autonomo">Autônomo</option>
+            <option value="estagio">Estágio</option>
+            <option value="temporario">Temporário</option>
           </select>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">EndereÃ§o</label>
-        <input type="text" id="func-endereco" class="form-control" placeholder="Rua, NÂº, Bairro, Cidade" />
+        <label class="form-label">Endereço</label>
+        <input type="text" id="func-endereco" class="form-control" placeholder="Rua, Nº, Bairro, Cidade" />
       </div>
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes</label>
-        <textarea id="func-obs" class="form-control" rows="2" placeholder="ComissÃµes, horÃ¡rios, benefÃ­cios..."></textarea>
+        <label class="form-label">Observações</label>
+        <textarea id="func-obs" class="form-control" rows="2" placeholder="Comissões, horários, benefícios..."></textarea>
       </div>
       <div class="form-group">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
           <input type="checkbox" id="func-ativo" checked style="width:16px;height:16px;accent-color:var(--primary)" />
-          <span class="form-label" style="margin:0">FuncionÃ¡rio ativo</span>
+          <span class="form-label" style="margin:0">Funcionário ativo</span>
         </label>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-func')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvar()">ðŸ’¾ Salvar</button>
+      <button class="btn btn-primary" onclick="salvar()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -125,7 +125,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirPermissao('funcionarios')) throw '';
   Tenant.inicializarTenant();
@@ -143,7 +143,7 @@
       renderStats();
       filtrar();
     } catch(e) {
-      mostrarToast('Erro ao carregar funcionÃ¡rios', 'danger');
+      mostrarToast('Erro ao carregar funcionários', 'danger');
     } finally {
       ocultarLoader();
     }
@@ -153,11 +153,11 @@
     const ativos = _funcCache.filter(f => f.ativo !== false);
     const inativos = _funcCache.filter(f => f.ativo === false);
     document.getElementById('stats-area').innerHTML = `
-      <div class="stat-card"><div class="stat-icon green">ðŸ‘¤</div>
-        <div class="stat-info"><div class="stat-value">${ativos.length}</div><div class="stat-label">FuncionÃ¡rios Ativos</div></div></div>
-      <div class="stat-card"><div class="stat-icon pink">ðŸ’¸</div>
+      <div class="stat-card"><div class="stat-icon green">👤</div>
+        <div class="stat-info"><div class="stat-value">${ativos.length}</div><div class="stat-label">Funcionários Ativos</div></div></div>
+      <div class="stat-card"><div class="stat-icon pink">💸</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(_totalFolha)}</div><div class="stat-label">Folha de Pagamento</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">ðŸ“‹</div>
+      <div class="stat-card"><div class="stat-icon orange">📋</div>
         <div class="stat-info"><div class="stat-value">${inativos.length}</div><div class="stat-label">Inativos</div></div></div>`;
   }
 
@@ -169,23 +169,23 @@
       (f.cargo || '').toLowerCase().includes(busca)
     ).sort((a, b) => a.nome.localeCompare(b.nome));
 
-    document.getElementById('count-label').textContent = lista.length + ' funcionÃ¡rios';
+    document.getElementById('count-label').textContent = lista.length + ' funcionários';
     renderTabela(lista);
   }
 
-  const contratos = { clt:'CLT', pj:'PJ', autonomo:'AutÃ´nomo', estagio:'EstÃ¡gio', temporario:'TemporÃ¡rio' };
+  const contratos = { clt:'CLT', pj:'PJ', autonomo:'Autônomo', estagio:'Estágio', temporario:'Temporário' };
 
   function renderTabela(lista) {
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸ‘¤</div>
-        <div class="empty-title">Nenhum funcionÃ¡rio cadastrado</div>
+        `<div class="empty-state"><div class="empty-icon">👤</div>
+        <div class="empty-title">Nenhum funcionário cadastrado</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Cadastrar</button></div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>Nome</th><th>Cargo</th><th>Contrato</th><th>SalÃ¡rio</th><th>AdmissÃ£o</th><th>Telefone</th><th>Status</th><th>AÃ§Ãµes</th>
+      <th>Nome</th><th>Cargo</th><th>Contrato</th><th>Salário</th><th>Admissão</th><th>Telefone</th><th>Status</th><th>Ações</th>
     </tr></thead><tbody>`;
 
     lista.forEach(f => {
@@ -206,8 +206,8 @@
         <td>${Fmt.telefone(f.telefone)}</td>
         <td>${badgeStatus(f.ativo !== false ? 'ativo' : 'inativo')}</td>
         <td><div class="td-actions">
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${f.id})">âœï¸</button>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="excluir(${f.id})">ðŸ—‘ï¸</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${f.id})">✏️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="excluir(${f.id})">🗑️</button>
         </div></td>
       </tr>`;
     });
@@ -229,7 +229,7 @@
     document.getElementById('func-endereco').value = f ? (f.endereco || '') : '';
     document.getElementById('func-obs').value = f ? (f.observacoes || '') : '';
     document.getElementById('func-ativo').checked = f ? (f.ativo !== false) : true;
-    document.getElementById('modal-titulo').textContent = f ? 'Editar FuncionÃ¡rio' : 'Novo FuncionÃ¡rio';
+    document.getElementById('modal-titulo').textContent = f ? 'Editar Funcionário' : 'Novo Funcionário';
     Modal.abrir('modal-func');
   }
 
@@ -238,9 +238,9 @@
   function excluir(id) {
     const f = _funcCache.find(x => x.id === id);
     if (!f) return;
-    confirmar(`Excluir funcionÃ¡rio <strong>${f.nome}</strong>?`, async () => {
+    confirmar(`Excluir funcionário <strong>${f.nome}</strong>?`, async () => {
       await DB.Funcionarios.deletar(id);
-      mostrarToast('FuncionÃ¡rio excluÃ­do', 'danger');
+      mostrarToast('Funcionário excluído', 'danger');
       await carregar();
     });
   }
@@ -267,7 +267,7 @@
       ativo: document.getElementById('func-ativo').checked
     });
 
-    mostrarToast(id ? 'FuncionÃ¡rio atualizado!' : 'FuncionÃ¡rio cadastrado!', 'success');
+    mostrarToast(id ? 'Funcionário atualizado!' : 'Funcionário cadastrado!', 'success');
     Modal.fechar('modal-func');
     await carregar();
   }
@@ -276,4 +276,3 @@
 </script>
 </body>
 </html>
-

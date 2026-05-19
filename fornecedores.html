@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fornecedores â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Fornecedores — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -13,7 +13,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ­ Fornecedores</div>
+      <div class="topbar-title">🏭 Fornecedores</div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="abrirModal()">+ Novo Fornecedor</button>
       </div>
@@ -22,14 +22,14 @@
 
       <div class="card" style="padding:14px 18px; margin-bottom:20px">
         <div class="search-input-wrap">
-          <span class="search-icon">ðŸ”</span>
+          <span class="search-icon">🔍</span>
           <input type="text" id="busca" class="form-control" placeholder="Buscar por nome, CNPJ ou cidade..." oninput="filtrar()" />
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title">ðŸ­ Lista de Fornecedores</div>
+          <div class="card-title">🏭 Lista de Fornecedores</div>
           <span id="count-label" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -45,13 +45,13 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="modal-titulo">Novo Fornecedor</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-forn')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-forn')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="forn-id" />
       <div class="form-row cols-2">
         <div class="form-group">
-          <label class="form-label">Nome / RazÃ£o Social *</label>
+          <label class="form-label">Nome / Razão Social *</label>
           <input type="text" id="forn-nome" class="form-control" placeholder="Nome do fornecedor" />
         </div>
         <div class="form-group">
@@ -62,7 +62,7 @@
       <div class="form-row cols-2">
         <div class="form-group">
           <label class="form-label">Nome do Contato</label>
-          <input type="text" id="forn-contato" class="form-control" placeholder="Pessoa responsÃ¡vel" />
+          <input type="text" id="forn-contato" class="form-control" placeholder="Pessoa responsável" />
         </div>
         <div class="form-group">
           <label class="form-label">Telefone / WhatsApp</label>
@@ -81,8 +81,8 @@
       </div>
       <hr style="border:none;border-top:1px solid var(--border);margin:14px 0" />
       <div class="form-group">
-        <label class="form-label">EndereÃ§o</label>
-        <input type="text" id="forn-endereco" class="form-control" placeholder="Rua, NÂº, Bairro" />
+        <label class="form-label">Endereço</label>
+        <input type="text" id="forn-endereco" class="form-control" placeholder="Rua, Nº, Bairro" />
       </div>
       <div class="form-row cols-2">
         <div class="form-group">
@@ -104,13 +104,13 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes / CondiÃ§Ãµes de Pagamento</label>
+        <label class="form-label">Observações / Condições de Pagamento</label>
         <textarea id="forn-obs" class="form-control" rows="2" placeholder="Prazo, descontos, produtos fornecidos..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-forn')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvar()">ðŸ’¾ Salvar</button>
+      <button class="btn btn-primary" onclick="salvar()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -120,7 +120,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirPermissao('fornecedores')) throw '';
   Tenant.inicializarTenant();
@@ -159,14 +159,14 @@
   function renderTabela(lista) {
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸ­</div>
+        `<div class="empty-state"><div class="empty-icon">🏭</div>
         <div class="empty-title">Nenhum fornecedor cadastrado</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Cadastrar</button></div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>Nome</th><th>CNPJ/CPF</th><th>Contato</th><th>Telefone</th><th>Cidade</th><th>Compras</th><th>AÃ§Ãµes</th>
+      <th>Nome</th><th>CNPJ/CPF</th><th>Contato</th><th>Telefone</th><th>Cidade</th><th>Compras</th><th>Ações</th>
     </tr></thead><tbody>`;
 
     lista.forEach(f => {
@@ -192,8 +192,8 @@
         <td>${f.cidade ? f.cidade+(f.estado?'/'+f.estado:'') : '-'}</td>
         <td>${totalCompras > 0 ? Fmt.moeda(totalCompras) : '-'}</td>
         <td><div class="td-actions">
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${f.id})">âœï¸</button>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="excluir(${f.id})">ðŸ—‘ï¸</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${f.id})">✏️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="excluir(${f.id})">🗑️</button>
         </div></td>
       </tr>`;
     });
@@ -225,7 +225,7 @@
     if (!f) return;
     confirmar(`Excluir fornecedor <strong>${f.nome}</strong>?`, async () => {
       await DB.Fornecedores.deletar(id);
-      mostrarToast('Fornecedor excluÃ­do', 'danger');
+      mostrarToast('Fornecedor excluído', 'danger');
       await carregar();
     });
   }
@@ -258,4 +258,3 @@
 </script>
 </body>
 </html>
-

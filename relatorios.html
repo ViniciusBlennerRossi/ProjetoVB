@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RelatÃ³rios â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Relatórios — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -28,29 +28,29 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ“ˆ RelatÃ³rios</div>
+      <div class="topbar-title">📈 Relatórios</div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" onclick="exportarCSV()">â¬‡ï¸ Exportar CSV</button>
-        <button class="btn btn-primary" onclick="gerarRelatorio()">ðŸ”„ Atualizar</button>
+        <button class="btn btn-ghost" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+        <button class="btn btn-primary" onclick="gerarRelatorio()">🔄 Atualizar</button>
       </div>
     </div>
     <div class="page-content">
 
-      <!-- Filtro de perÃ­odo -->
+      <!-- Filtro de período -->
       <div class="card" style="padding:14px 18px; margin-bottom:20px">
         <div class="periodo-ctrl">
-          <label class="form-label" style="margin:0; font-weight:700">PerÃ­odo:</label>
+          <label class="form-label" style="margin:0; font-weight:700">Período:</label>
           <select id="periodo-preset" class="form-control form-select" style="max-width:200px" onchange="onPresetChange()">
-            <option value="mes_atual">Este mÃªs</option>
-            <option value="mes_anterior">MÃªs anterior</option>
-            <option value="trimestre">Ãšltimo trimestre</option>
-            <option value="semestre">Ãšltimo semestre</option>
+            <option value="mes_atual">Este mês</option>
+            <option value="mes_anterior">Mês anterior</option>
+            <option value="trimestre">Último trimestre</option>
+            <option value="semestre">Último semestre</option>
             <option value="ano">Este ano</option>
             <option value="custom">Personalizado</option>
           </select>
           <div id="custom-datas" style="display:flex; gap:8px; align-items:center; display:none">
             <input type="date" id="data-inicio" class="form-control" style="max-width:150px" />
-            <span>atÃ©</span>
+            <span>até</span>
             <input type="date" id="data-fim" class="form-control" style="max-width:150px" />
           </div>
           <button class="btn btn-primary btn-sm" onclick="gerarRelatorio()">Gerar</button>
@@ -60,13 +60,13 @@
       <!-- KPIs -->
       <div class="kpi-row" id="kpis-area"></div>
 
-      <!-- Grid de relatÃ³rios -->
+      <!-- Grid de relatórios -->
       <div class="grid grid-2" style="margin-bottom:24px">
 
         <!-- Vendas por forma de pagamento -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">ðŸ’³ Vendas por Forma de Pagamento</div>
+            <div class="card-title">💳 Vendas por Forma de Pagamento</div>
           </div>
           <div class="card-body" id="chart-formas"></div>
         </div>
@@ -74,7 +74,7 @@
         <!-- Produtos mais vendidos -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">ðŸ† Top 10 Produtos Mais Vendidos</div>
+            <div class="card-title">🏆 Top 10 Produtos Mais Vendidos</div>
           </div>
           <div class="card-body" id="chart-produtos"></div>
         </div>
@@ -84,7 +84,7 @@
         <!-- Vendas por categoria -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">ðŸ‘— Vendas por Categoria</div>
+            <div class="card-title">👗 Vendas por Categoria</div>
           </div>
           <div class="card-body" id="chart-categorias"></div>
         </div>
@@ -92,16 +92,16 @@
         <!-- Estoque atual por categoria -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">ðŸ“¦ Estoque por Categoria</div>
+            <div class="card-title">📦 Estoque por Categoria</div>
           </div>
           <div class="card-body" id="chart-estoque"></div>
         </div>
       </div>
 
-      <!-- Tabela de vendas do perÃ­odo -->
+      <!-- Tabela de vendas do período -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">ðŸ“‹ Vendas do PerÃ­odo</div>
+          <div class="card-title">📋 Vendas do Período</div>
           <span id="count-vendas" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -118,7 +118,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirPermissao('relatorios')) throw '';
   Tenant.inicializarTenant();
@@ -132,7 +132,7 @@
   let _prodsCache = [];
   let _cobrancasPendentes = [];
 
-  // Pre-carrega produtos e categorias na inicializaÃ§Ã£o
+  // Pre-carrega produtos e categorias na inicialização
   async function init() {
     const [prods, cats] = await Promise.all([DB.Produtos.ativos(), DB.Categorias.todas()]);
     _prodsCache = prods;
@@ -196,7 +196,7 @@
       renderEstoqueCategoria();
       renderTabelaVendas();
     } catch(e) {
-      mostrarToast('Erro ao gerar relatÃ³rio', 'danger');
+      mostrarToast('Erro ao gerar relatório', 'danger');
     } finally {
       ocultarLoader();
     }
@@ -212,8 +212,8 @@
 
     document.getElementById('kpis-area').innerHTML = `
       <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(totalVendas)}</div><div class="kpi-lbl">Total de Vendas</div></div>
-      <div class="kpi-box"><div class="kpi-val">${qtdVendas}</div><div class="kpi-lbl">NÂº de Vendas</div></div>
-      <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(ticketMedio)}</div><div class="kpi-lbl">Ticket MÃ©dio</div></div>
+      <div class="kpi-box"><div class="kpi-val">${qtdVendas}</div><div class="kpi-lbl">Nº de Vendas</div></div>
+      <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(ticketMedio)}</div><div class="kpi-lbl">Ticket Médio</div></div>
       <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(totalDesconto)}</div><div class="kpi-lbl">Total de Descontos</div></div>
       <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(totalReceber)}</div><div class="kpi-lbl">A Receber (total)</div></div>`;
   }
@@ -228,7 +228,7 @@
     const max = sorted[0] ? sorted[0][1] : 1;
 
     if (!sorted.length) {
-      document.getElementById('chart-formas').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">ðŸ’³</div><div class="empty-title">Sem dados</div></div>';
+      document.getElementById('chart-formas').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">💳</div><div class="empty-title">Sem dados</div></div>';
       return;
     }
 
@@ -266,7 +266,7 @@
       .slice(0, 10);
 
     if (!sorted.length) {
-      document.getElementById('chart-produtos').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">ðŸ†</div><div class="empty-title">Sem dados</div></div>';
+      document.getElementById('chart-produtos').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">🏆</div><div class="empty-title">Sem dados</div></div>';
       return;
     }
 
@@ -304,7 +304,7 @@
 
     const sorted = Object.entries(cats).sort((a, b) => b[1].total - a[1].total);
     if (!sorted.length) {
-      document.getElementById('chart-categorias').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">ðŸ‘—</div><div class="empty-title">Sem dados</div></div>';
+      document.getElementById('chart-categorias').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">👗</div><div class="empty-title">Sem dados</div></div>';
       return;
     }
 
@@ -338,7 +338,7 @@
 
     const sorted = Object.entries(cats).sort((a, b) => b[1].qty - a[1].qty);
     if (!sorted.length) {
-      document.getElementById('chart-estoque').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">ðŸ“¦</div><div class="empty-title">Sem produtos</div></div>';
+      document.getElementById('chart-estoque').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">📦</div><div class="empty-title">Sem produtos</div></div>';
       return;
     }
 
@@ -366,12 +366,12 @@
 
     if (!lista.length) {
       document.getElementById('tabela-vendas').innerHTML =
-        '<div class="empty-state"><div class="empty-icon">ðŸ“‹</div><div class="empty-title">Sem vendas no perÃ­odo</div></div>';
+        '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sem vendas no período</div></div>';
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>NÂº</th><th>Data</th><th>Cliente</th><th>Itens</th>
+      <th>Nº</th><th>Data</th><th>Cliente</th><th>Itens</th>
       <th>Total</th><th>Desconto</th><th>Pagamento</th><th>Status</th>
     </tr></thead><tbody>`;
 
@@ -392,9 +392,9 @@
   }
 
   function exportarCSV() {
-    if (!vendasPeriodo.length) { mostrarToast('Gere um relatÃ³rio primeiro', 'warning'); return; }
+    if (!vendasPeriodo.length) { mostrarToast('Gere um relatório primeiro', 'warning'); return; }
 
-    const linhas = [['NÂº Venda','Data','Cliente','Itens','Subtotal','Desconto','Total','Pagamento','Status']];
+    const linhas = [['Nº Venda','Data','Cliente','Itens','Subtotal','Desconto','Total','Pagamento','Status']];
     vendasPeriodo.forEach(v => {
       linhas.push([
         v.numero, Fmt.data(v.data), v.cliente || 'Consumidor',
@@ -419,4 +419,3 @@
 </script>
 </body>
 </html>
-

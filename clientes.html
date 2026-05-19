@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clientes â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Clientes — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -41,7 +41,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ‘¥ Clientes</div>
+      <div class="topbar-title">👥 Clientes</div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="abrirModal()">+ Novo Cliente</button>
       </div>
@@ -55,17 +55,17 @@
       <div class="card" style="padding:14px 18px; margin-bottom:20px">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
           <div class="search-input-wrap" style="flex:1; min-width:220px">
-            <span class="search-icon">ðŸ”</span>
+            <span class="search-icon">🔍</span>
             <input type="text" id="busca" class="form-control" placeholder="Buscar por nome, telefone ou CPF..." oninput="filtrar()" />
           </div>
           <div style="display:flex; gap:8px">
-            <button class="btn btn-ghost btn-sm" onclick="setView('grid')" id="btn-grid">âŠž Cards</button>
-            <button class="btn btn-ghost btn-sm" onclick="setView('list')" id="btn-list">â˜° Lista</button>
+            <button class="btn btn-ghost btn-sm" onclick="setView('grid')" id="btn-grid">⊞ Cards</button>
+            <button class="btn btn-ghost btn-sm" onclick="setView('list')" id="btn-list">☰ Lista</button>
           </div>
         </div>
       </div>
 
-      <!-- ConteÃºdo -->
+      <!-- Conteúdo -->
       <div id="conteudo-wrap"></div>
     </div>
   </div>
@@ -76,7 +76,7 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="modal-titulo">Novo Cliente</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-cliente')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-cliente')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="cli-id" />
@@ -106,8 +106,8 @@
       </div>
       <hr style="border:none; border-top:1px solid var(--border); margin:14px 0" />
       <div class="form-group">
-        <label class="form-label">EndereÃ§o</label>
-        <input type="text" id="cli-endereco" class="form-control" placeholder="Rua, NÂº, Bairro" />
+        <label class="form-label">Endereço</label>
+        <input type="text" id="cli-endereco" class="form-control" placeholder="Rua, Nº, Bairro" />
       </div>
       <div class="form-row cols-3">
         <div class="form-group">
@@ -133,13 +133,13 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes</label>
-        <textarea id="cli-obs" class="form-control" rows="2" placeholder="PreferÃªncias, anotaÃ§Ãµes..."></textarea>
+        <label class="form-label">Observações</label>
+        <textarea id="cli-obs" class="form-control" rows="2" placeholder="Preferências, anotações..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-cliente')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCliente()">ðŸ’¾ Salvar</button>
+      <button class="btn btn-primary" onclick="salvarCliente()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -149,7 +149,7 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="det-titulo">Perfil do Cliente</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">✕</button>
     </div>
     <div class="modal-body" id="det-body"></div>
     <div class="modal-footer" id="det-footer"></div>
@@ -161,7 +161,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
   Tenant.inicializarTenant();
@@ -210,14 +210,14 @@
     const totalFaturado = Object.values(_vendasPorCliente).reduce((s, v) => s + v, 0);
 
     document.getElementById('stats-area').innerHTML = `
-      <div class="stat-card"><div class="stat-icon pink">ðŸ‘¥</div>
+      <div class="stat-card"><div class="stat-icon pink">👥</div>
         <div class="stat-info"><div class="stat-value">${_clientesCache.length}</div><div class="stat-label">Total de Clientes</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">ðŸ’°</div>
+      <div class="stat-card"><div class="stat-icon green">💰</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalFaturado)}</div><div class="stat-label">Faturado com Clientes</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">â³</div>
-        <div class="stat-info"><div class="stat-value">${clientesComDebito}</div><div class="stat-label">Com DÃ©bito Aberto</div></div></div>
-      <div class="stat-card"><div class="stat-icon blue">ðŸ“‹</div>
-        <div class="stat-info"><div class="stat-value">${_carnesAtivosCount}</div><div class="stat-label">CarnÃªs Ativos</div></div></div>`;
+      <div class="stat-card"><div class="stat-icon orange">⏳</div>
+        <div class="stat-info"><div class="stat-value">${clientesComDebito}</div><div class="stat-label">Com Débito Aberto</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">📋</div>
+        <div class="stat-info"><div class="stat-value">${_carnesAtivosCount}</div><div class="stat-label">Carnês Ativos</div></div></div>`;
   }
 
   function filtrar() {
@@ -241,7 +241,7 @@
   function renderConteudo() {
     if (!listaFiltrada.length) {
       document.getElementById('conteudo-wrap').innerHTML =
-        `<div class="empty-state card" style="padding:60px"><div class="empty-icon">ðŸ‘¥</div>
+        `<div class="empty-state card" style="padding:60px"><div class="empty-icon">👥</div>
         <div class="empty-title">Nenhum cliente encontrado</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Cadastrar cliente</button></div></div>`;
       return;
@@ -260,17 +260,17 @@
         <div class="cliente-info">
           <div class="cliente-nome">${c.nome}</div>
           <div class="cliente-meta">
-            ${c.telefone ? `<span>ðŸ“± ${Fmt.telefone(c.telefone)}</span>` : ''}
-            ${c.cidade ? `<span>ðŸ“ ${c.cidade}${c.estado ? '/'+c.estado : ''}</span>` : ''}
+            ${c.telefone ? `<span>📱 ${Fmt.telefone(c.telefone)}</span>` : ''}
+            ${c.cidade ? `<span>📍 ${c.cidade}${c.estado ? '/'+c.estado : ''}</span>` : ''}
           </div>
           <div class="cliente-stats">
-            <span class="cliente-stat">ðŸ’° ${Fmt.moeda(totalCompras)}</span>
-            ${debito > 0 ? `<span class="cliente-stat" style="background:var(--danger-bg);color:var(--danger)">âš ï¸ ${Fmt.moeda(debito)}</span>` : ''}
+            <span class="cliente-stat">💰 ${Fmt.moeda(totalCompras)}</span>
+            ${debito > 0 ? `<span class="cliente-stat" style="background:var(--danger-bg);color:var(--danger)">⚠️ ${Fmt.moeda(debito)}</span>` : ''}
           </div>
         </div>
         <div style="display:flex; flex-direction:column; gap:4px">
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();editarCliente(${c.id})" title="Editar">âœï¸</button>
-          ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();excluirCliente(${c.id})" title="Excluir">ðŸ—‘ï¸</button>` : ''}
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();editarCliente(${c.id})" title="Editar">✏️</button>
+          ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();excluirCliente(${c.id})" title="Excluir">🗑️</button>` : ''}
         </div>
       </div>`;
     });
@@ -280,7 +280,7 @@
 
   function renderList() {
     let html = `<div class="card"><div class="table-wrapper"><table><thead><tr>
-      <th>Cliente</th><th>Telefone</th><th>CPF</th><th>Cidade</th><th>Total Compras</th><th>DÃ©bito</th><th>AÃ§Ãµes</th>
+      <th>Cliente</th><th>Telefone</th><th>CPF</th><th>Cidade</th><th>Total Compras</th><th>Débito</th><th>Ações</th>
     </tr></thead><tbody>`;
     listaFiltrada.forEach(c => {
       const debito = _cobrancasPorCliente[c.id] || 0;
@@ -295,9 +295,9 @@
         <td>${Fmt.moeda(totalCompras)}</td>
         <td>${debito > 0 ? `<span class="text-danger font-bold">${Fmt.moeda(debito)}</span>` : '<span class="text-muted">-</span>'}</td>
         <td><div class="td-actions">
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})">ðŸ‘ï¸</button>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="editarCliente(${c.id})">âœï¸</button>
-          ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirCliente(${c.id})">ðŸ—‘ï¸</button>` : ''}
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})">👁️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editarCliente(${c.id})">✏️</button>
+          ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirCliente(${c.id})">🗑️</button>` : ''}
         </div></td>
       </tr>`;
     });
@@ -330,7 +330,7 @@
     const c = _clientesCache.find(x => x.id === id);
     confirmar(`Excluir cliente <strong>${c.nome}</strong>?`, async () => {
       await DB.Clientes.deletar(id);
-      mostrarToast('Cliente excluÃ­do', 'danger');
+      mostrarToast('Cliente excluído', 'danger');
       await carregar();
     });
   }
@@ -393,8 +393,8 @@
         <div class="user-avatar" style="width:56px;height:56px;font-size:22px;background:linear-gradient(135deg,var(--primary),var(--accent))">${Fmt.inicial(c.nome)}</div>
         <div>
           <div style="font-size:18px;font-weight:800">${c.nome}</div>
-          <div style="font-size:13px;color:var(--text2)">${c.telefone ? Fmt.telefone(c.telefone) : ''} ${c.email ? 'Â· '+c.email : ''}</div>
-          ${c.cidade ? `<div style="font-size:13px;color:var(--text2)">ðŸ“ ${c.cidade}${c.estado?'/'+c.estado:''}</div>` : ''}
+          <div style="font-size:13px;color:var(--text2)">${c.telefone ? Fmt.telefone(c.telefone) : ''} ${c.email ? '· '+c.email : ''}</div>
+          ${c.cidade ? `<div style="font-size:13px;color:var(--text2)">📍 ${c.cidade}${c.estado?'/'+c.estado:''}</div>` : ''}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
@@ -404,7 +404,7 @@
         </div>
         <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);text-align:center">
           <div style="font-size:18px;font-weight:800;color:${debitoAberto>0?'var(--danger)':'var(--success)'}">${Fmt.moeda(debitoAberto)}</div>
-          <div style="font-size:12px;color:var(--text2)">DÃ©bito aberto</div>
+          <div style="font-size:12px;color:var(--text2)">Débito aberto</div>
         </div>
         <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);text-align:center">
           <div style="font-size:18px;font-weight:800">${vendasCliente.length}</div>
@@ -412,15 +412,15 @@
         </div>
       </div>
       ${vendasCliente.length ? `
-        <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">ðŸ›’ Ãšltimas Compras</h4>
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">🛒 Últimas Compras</h4>
         <div class="table-wrapper" style="margin-bottom:16px">
-          <table><thead><tr><th>NÂº</th><th>Data</th><th>Total</th><th>Status</th></tr></thead>
+          <table><thead><tr><th>Nº</th><th>Data</th><th>Total</th><th>Status</th></tr></thead>
           <tbody>${vendasHtml}</tbody></table>
         </div>` : ''}
       ${carnesCliente.length ? `
-        <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">ðŸ“„ CarnÃªs</h4>
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">📄 Carnês</h4>
         <div class="table-wrapper">
-          <table><thead><tr><th>NÂº</th><th>DescriÃ§Ã£o</th><th>Total</th><th>Parcelas</th><th>Status</th></tr></thead>
+          <table><thead><tr><th>Nº</th><th>Descrição</th><th>Total</th><th>Parcelas</th><th>Status</th></tr></thead>
           <tbody>${carnesHtml}</tbody></table>
         </div>` : ''}
       ${c.cpf ? `<div style="margin-top:12px;font-size:13px;color:var(--text2)">CPF: ${Fmt.cpf(c.cpf)}</div>` : ''}
@@ -428,7 +428,7 @@
     `;
 
     document.getElementById('det-footer').innerHTML = `
-      <button class="btn btn-outline" onclick="Modal.fechar('modal-detalhe');editarCliente(${c.id})">âœï¸ Editar</button>
+      <button class="btn btn-outline" onclick="Modal.fechar('modal-detalhe');editarCliente(${c.id})">✏️ Editar</button>
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-detalhe')">Fechar</button>`;
 
     Modal.abrir('modal-detalhe');
@@ -458,4 +458,3 @@
 </script>
 </body>
 </html>
-

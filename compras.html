@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compras â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Compras — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -13,7 +13,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸšš Compras de Mercadorias</div>
+      <div class="topbar-title">🚚 Compras de Mercadorias</div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="abrirNovaCompra()">+ Nova Compra</button>
       </div>
@@ -24,8 +24,8 @@
       <div class="card" style="padding:14px 18px; margin-bottom:20px">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
           <div class="search-input-wrap" style="flex:1; min-width:200px">
-            <span class="search-icon">ðŸ”</span>
-            <input type="text" id="busca" class="form-control" placeholder="Buscar por nÂº ou fornecedor..." oninput="filtrar()" />
+            <span class="search-icon">🔍</span>
+            <input type="text" id="busca" class="form-control" placeholder="Buscar por nº ou fornecedor..." oninput="filtrar()" />
           </div>
           <input type="date" id="data-inicio" class="form-control" style="max-width:150px" onchange="filtrar()" />
           <input type="date" id="data-fim" class="form-control" style="max-width:150px" onchange="filtrar()" />
@@ -38,7 +38,7 @@
       <!-- Tabela -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">ðŸ“‹ Lista de Compras</div>
+          <div class="card-title">📋 Lista de Compras</div>
           <span id="count-label" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -53,8 +53,8 @@
 <div class="modal-overlay" id="modal-compra">
   <div class="modal modal-xl">
     <div class="modal-header">
-      <div class="modal-title">ðŸšš Nova Compra</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-compra')">âœ•</button>
+      <div class="modal-title">🚚 Nova Compra</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-compra')">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-row cols-3">
@@ -95,13 +95,13 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes</label>
-        <textarea id="comp-obs" class="form-control" rows="2" placeholder="NF, prazo, condiÃ§Ãµes..."></textarea>
+        <label class="form-label">Observações</label>
+        <textarea id="comp-obs" class="form-control" rows="2" placeholder="NF, prazo, condições..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-compra')">Cancelar</button>
-      <button class="btn btn-primary" onclick="finalizarCompra()">âœ… Registrar Compra</button>
+      <button class="btn btn-primary" onclick="finalizarCompra()">✅ Registrar Compra</button>
     </div>
   </div>
 </div>
@@ -111,7 +111,7 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="det-titulo">Detalhes da Compra</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">✕</button>
     </div>
     <div class="modal-body" id="det-body"></div>
     <div class="modal-footer">
@@ -125,7 +125,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirPermissao('compras')) throw '';
   Tenant.inicializarTenant();
@@ -186,26 +186,26 @@
     const qtdFornecedores = new Set(lista.map(c => c.fornecedor)).size;
 
     document.getElementById('stats-compras').innerHTML = `
-      <div class="stat-card"><div class="stat-icon blue">ðŸ’¸</div>
-        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalGasto)}</div><div class="stat-label">Total gasto no perÃ­odo</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">ðŸ“¦</div>
-        <div class="stat-info"><div class="stat-value">${totalItens}</div><div class="stat-label">PeÃ§as compradas</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">ðŸ­</div>
+      <div class="stat-card"><div class="stat-icon blue">💸</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalGasto)}</div><div class="stat-label">Total gasto no período</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">📦</div>
+        <div class="stat-info"><div class="stat-value">${totalItens}</div><div class="stat-label">Peças compradas</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">🏭</div>
         <div class="stat-info"><div class="stat-value">${qtdFornecedores}</div><div class="stat-label">Fornecedores</div></div></div>`;
   }
 
   function renderTabela(lista) {
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸšš</div>
+        `<div class="empty-state"><div class="empty-icon">🚚</div>
         <div class="empty-title">Nenhuma compra registrada</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirNovaCompra()">+ Registrar compra</button></div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>NÂº</th><th>Data</th><th>Fornecedor</th><th>Itens</th>
-      <th>Qtd Total</th><th>Total</th><th>Pagamento</th><th>AÃ§Ãµes</th>
+      <th>Nº</th><th>Data</th><th>Fornecedor</th><th>Itens</th>
+      <th>Qtd Total</th><th>Total</th><th>Pagamento</th><th>Ações</th>
     </tr></thead><tbody>`;
 
     lista.forEach(c => {
@@ -216,11 +216,11 @@
         <td>${Fmt.data(c.data)}</td>
         <td>${c.fornecedor}</td>
         <td>${itens.length} item(s)</td>
-        <td>${totalQtd} peÃ§as</td>
+        <td>${totalQtd} peças</td>
         <td><strong>${Fmt.moeda(c.total)}</strong></td>
         <td>${labelFormaPgto(c.forma_pagamento)}</td>
         <td>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})" title="Detalhes">ðŸ‘ï¸</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})" title="Detalhes">👁️</button>
         </td>
       </tr>`;
     });
@@ -274,7 +274,7 @@
       </div>
       <div>
         <label class="form-label" style="font-size:11px">&nbsp;</label>
-        <button class="btn btn-sm btn-danger btn-icon" onclick="removerItem('${id}')">ðŸ—‘ï¸</button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="removerItem('${id}')">🗑️</button>
       </div>`;
 
     document.getElementById('itens-compra').appendChild(div);
@@ -347,7 +347,7 @@
       usuario_id: Auth.usuario().id
     });
 
-    mostrarToast('Compra registrada! Estoque atualizado. ðŸ“¦', 'success');
+    mostrarToast('Compra registrada! Estoque atualizado. 📦', 'success');
     Modal.fechar('modal-compra');
     await carregar();
   }
@@ -374,7 +374,7 @@
         <div><label class="form-label">Fornecedor</label><p>${c.fornecedor}</p></div>
         <div><label class="form-label">Data</label><p>${Fmt.dataHora(c.data)}</p></div>
         <div><label class="form-label">Forma de Pgto</label><p>${labelFormaPgto(c.forma_pagamento)}</p></div>
-        <div><label class="form-label">NÂº</label><p>${c.numero}</p></div>
+        <div><label class="form-label">Nº</label><p>${c.numero}</p></div>
       </div>
       <div class="table-wrapper">
         <table>
@@ -395,4 +395,3 @@
 </script>
 </body>
 </html>
-

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CobranÃ§as â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Cobranças — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -13,9 +13,9 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ’° Controle de CobranÃ§as</div>
+      <div class="topbar-title">💰 Controle de Cobranças</div>
       <div class="topbar-actions">
-        <button class="btn btn-primary" onclick="abrirNovaCobranca()">+ CobranÃ§a Avulsa</button>
+        <button class="btn btn-primary" onclick="abrirNovaCobranca()">+ Cobrança Avulsa</button>
       </div>
     </div>
     <div class="page-content">
@@ -25,26 +25,26 @@
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-btn active" onclick="mudarTab('pendentes', this)">â³ Pendentes</button>
-        <button class="tab-btn" onclick="mudarTab('vencidas', this)">ðŸ”´ Vencidas</button>
-        <button class="tab-btn" onclick="mudarTab('pagas', this)">âœ… Pagas</button>
-        <button class="tab-btn" onclick="mudarTab('todas', this)">ðŸ“‹ Todas</button>
+        <button class="tab-btn active" onclick="mudarTab('pendentes', this)">⏳ Pendentes</button>
+        <button class="tab-btn" onclick="mudarTab('vencidas', this)">🔴 Vencidas</button>
+        <button class="tab-btn" onclick="mudarTab('pagas', this)">✅ Pagas</button>
+        <button class="tab-btn" onclick="mudarTab('todas', this)">📋 Todas</button>
       </div>
 
       <!-- Filtros -->
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px">
         <div class="search-input-wrap" style="flex:1; min-width:200px">
-          <span class="search-icon">ðŸ”</span>
-          <input type="text" id="busca" class="form-control" placeholder="Buscar por cliente ou nÂº venda..." oninput="filtrar()" />
+          <span class="search-icon">🔍</span>
+          <input type="text" id="busca" class="form-control" placeholder="Buscar por cliente ou nº venda..." oninput="filtrar()" />
         </div>
         <input type="date" id="venc-inicio" class="form-control" style="max-width:150px" onchange="filtrar()" placeholder="Venc. de" />
-        <input type="date" id="venc-fim" class="form-control" style="max-width:150px" onchange="filtrar()" placeholder="Venc. atÃ©" />
+        <input type="date" id="venc-fim" class="form-control" style="max-width:150px" onchange="filtrar()" placeholder="Venc. até" />
       </div>
 
       <!-- Tabela -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title" id="tab-titulo">â³ CobranÃ§as Pendentes</div>
+          <div class="card-title" id="tab-titulo">⏳ Cobranças Pendentes</div>
           <span id="count-label" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -59,8 +59,8 @@
 <div class="modal-overlay" id="modal-pagamento">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
-      <div class="modal-title">ðŸ’µ Registrar Pagamento</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-pagamento')">âœ•</button>
+      <div class="modal-title">💵 Registrar Pagamento</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-pagamento')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="pgto-id" />
@@ -76,23 +76,23 @@
         <select id="pgto-forma" class="form-control form-select"></select>
       </div>
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes</label>
+        <label class="form-label">Observações</label>
         <input type="text" id="pgto-obs" class="form-control" placeholder="Opcional..." />
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-pagamento')">Cancelar</button>
-      <button class="btn btn-success" onclick="confirmarPagamento()">âœ… Confirmar Pagamento</button>
+      <button class="btn btn-success" onclick="confirmarPagamento()">✅ Confirmar Pagamento</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Nova CobranÃ§a Avulsa -->
+<!-- Modal Nova Cobrança Avulsa -->
 <div class="modal-overlay" id="modal-nova-cob">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">ðŸ’° Nova CobranÃ§a Avulsa</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-nova-cob')">âœ•</button>
+      <div class="modal-title">💰 Nova Cobrança Avulsa</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-nova-cob')">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -100,8 +100,8 @@
         <input type="text" id="nc-cliente" class="form-control" placeholder="Nome do cliente" />
       </div>
       <div class="form-group">
-        <label class="form-label">DescriÃ§Ã£o *</label>
-        <input type="text" id="nc-descricao" class="form-control" placeholder="Motivo da cobranÃ§a" />
+        <label class="form-label">Descrição *</label>
+        <input type="text" id="nc-descricao" class="form-control" placeholder="Motivo da cobrança" />
       </div>
       <div class="form-row cols-2">
         <div class="form-group">
@@ -116,7 +116,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-nova-cob')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarNovaCobranca()">ðŸ’¾ Salvar CobranÃ§a</button>
+      <button class="btn btn-primary" onclick="salvarNovaCobranca()">💾 Salvar Cobrança</button>
     </div>
   </div>
 </div>
@@ -126,7 +126,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
   Tenant.inicializarTenant();
@@ -144,8 +144,8 @@
     try {
       const [cobr, carnes] = await Promise.all([DB.Cobrancas.todas(), DB.Carnes.ativos()]);
 
-      // Vendas que jÃ¡ tÃªm um carnÃª vinculado (PDV #XXXXX na descriÃ§Ã£o do carnÃª)
-      // â†’ suas cobranÃ§as na tabela cobrancas sÃ£o duplicatas das parcelas do carnÃª
+      // Vendas que já têm um carnê vinculado (PDV #XXXXX na descrição do carnê)
+      // → suas cobranças na tabela cobrancas são duplicatas das parcelas do carnê
       const vendaNumsComCarne = new Set();
       carnes.forEach(c => {
         const match = (c.descricao || '').match(/PDV #(\w+)/i);
@@ -153,7 +153,7 @@
       });
       _todasCobrancas = cobr.filter(c => !c.numero_venda || !vendaNumsComCarne.has(c.numero_venda));
 
-      // Transformar parcelas de carnÃª em pseudo-cobranÃ§as
+      // Transformar parcelas de carnê em pseudo-cobranças
       _parcelasCarne = [];
       carnes.forEach(c => {
         (c.parcelas || []).forEach(p => {
@@ -162,7 +162,7 @@
             _carneId: c.id,
             _carneNumero: c.numero,
             cliente: c.cliente_nome || c.cliente,
-            descricao: `${c.numero} Â· ${c.descricao}`,
+            descricao: `${c.numero} · ${c.descricao}`,
             parcela_num: p.numero,
             _num_parcelas: c.num_parcelas,
             valor: p.valor,
@@ -177,7 +177,7 @@
       renderStats();
       filtrar();
     } catch(e) {
-      mostrarToast('Erro ao carregar cobranÃ§as', 'danger');
+      mostrarToast('Erro ao carregar cobranças', 'danger');
     } finally {
       ocultarLoader();
     }
@@ -193,21 +193,21 @@
     const totalPago = pagas.reduce((s, c) => s + (c.valor || 0), 0);
 
     document.getElementById('stats-cob').innerHTML = `
-      <div class="stat-card"><div class="stat-icon orange">â³</div>
+      <div class="stat-card"><div class="stat-icon orange">⏳</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalPendente)}</div><div class="stat-label">A receber (${pendentes.length})</div></div></div>
-      <div class="stat-card"><div class="stat-icon red">ðŸ”´</div>
+      <div class="stat-card"><div class="stat-icon red">🔴</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalVencido)}</div><div class="stat-label">Vencido (${vencidas.length})</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">âœ…</div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalPago)}</div><div class="stat-label">Recebido (${pagas.length})</div></div></div>
-      <div class="stat-card"><div class="stat-icon blue">ðŸ“‹</div>
-        <div class="stat-info"><div class="stat-value">${_todasCobrancas.length}</div><div class="stat-label">Total de cobranÃ§as</div></div></div>`;
+      <div class="stat-card"><div class="stat-icon blue">📋</div>
+        <div class="stat-info"><div class="stat-value">${_todasCobrancas.length}</div><div class="stat-label">Total de cobranças</div></div></div>`;
   }
 
   function mudarTab(tab, btn) {
     tabAtual = tab;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const titulos = { pendentes: 'â³ CobranÃ§as Pendentes', vencidas: 'ðŸ”´ CobranÃ§as Vencidas', pagas: 'âœ… CobranÃ§as Pagas', todas: 'ðŸ“‹ Todas as CobranÃ§as' };
+    const titulos = { pendentes: '⏳ Cobranças Pendentes', vencidas: '🔴 Cobranças Vencidas', pagas: '✅ Cobranças Pagas', todas: '📋 Todas as Cobranças' };
     document.getElementById('tab-titulo').textContent = titulos[tab];
     filtrar();
   }
@@ -241,40 +241,40 @@
     });
 
     renderTabela(lista);
-    document.getElementById('count-label').textContent = lista.length + ' cobranÃ§as';
+    document.getElementById('count-label').textContent = lista.length + ' cobranças';
   }
 
   function renderTabela(lista) {
     const hoje_ = hoje();
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸ’°</div><div class="empty-title">Nenhuma cobranÃ§a encontrada</div></div>`;
+        `<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-title">Nenhuma cobrança encontrada</div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>Cliente</th><th>DescriÃ§Ã£o</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>AÃ§Ãµes</th>
+      <th>Cliente</th><th>Descrição</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th>
     </tr></thead><tbody>`;
 
     lista.forEach(c => {
       const vencida = !c.pago && c.vencimento < hoje_;
       const vencStatus = c.pago
-        ? `<span class="badge badge-success">âœ… Pago em ${Fmt.data(c.data_pagamento + 'T00:00:00')}</span>`
-        : vencida ? '<span class="badge badge-danger">ðŸ”´ Vencida</span>'
-        : '<span class="badge badge-warning">â³ Pendente</span>';
+        ? `<span class="badge badge-success">✅ Pago em ${Fmt.data(c.data_pagamento + 'T00:00:00')}</span>`
+        : vencida ? '<span class="badge badge-danger">🔴 Vencida</span>'
+        : '<span class="badge badge-warning">⏳ Pendente</span>';
       const diasVenc = !c.pago ? Math.ceil((new Date(c.vencimento) - new Date(hoje_)) / 86400000) : null;
 
       const isCarne = c._tipo === 'carne';
       const descricaoCell = isCarne
-        ? `<span style="background:#7C3AED;color:#fff;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:700;margin-right:4px">CARNÃŠ</span>${c.descricao || '-'}`
+        ? `<span style="background:#7C3AED;color:#fff;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:700;margin-right:4px">CARNÊ</span>${c.descricao || '-'}`
         : (c.numero_venda ? `Venda #${c.numero_venda}` : (c.descricao || '-'));
       const parcelaCell = c.parcela_num
-        ? `${c.parcela_num}Âª${isCarne && c._num_parcelas ? '/'+c._num_parcelas : ''}`
+        ? `${c.parcela_num}ª${isCarne && c._num_parcelas ? '/'+c._num_parcelas : ''}`
         : '-';
       const acoesCell = isCarne
-        ? `<a class="btn btn-sm btn-outline" href="carnes.html" title="Ver carnÃª" style="font-size:11px">ðŸ“„ Ver carnÃª</a>`
-        : `${!c.pago ? `<button class="btn btn-sm btn-success" onclick="abrirPagamento(${c.id})">ðŸ’µ Receber</button>` : ''}
-           ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirCobranca(${c.id})" title="Excluir">ðŸ—‘ï¸</button>` : ''}`;
+        ? `<a class="btn btn-sm btn-outline" href="carnes.html" title="Ver carnê" style="font-size:11px">📄 Ver carnê</a>`
+        : `${!c.pago ? `<button class="btn btn-sm btn-success" onclick="abrirPagamento(${c.id})">💵 Receber</button>` : ''}
+           ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirCobranca(${c.id})" title="Excluir">🗑️</button>` : ''}`;
 
       html += `<tr style="${vencida ? 'background:var(--danger-bg)' : ''}${isCarne ? ';border-left:3px solid #7C3AED' : ''}">
         <td><strong>${c.cliente || '-'}</strong></td>
@@ -283,7 +283,7 @@
         <td><strong style="font-size:15px">${Fmt.moeda(c.valor)}</strong></td>
         <td>
           <div>${Fmt.data(c.vencimento + 'T00:00:00')}</div>
-          ${!c.pago && diasVenc !== null ? `<small class="${vencida ? 'text-danger' : 'text-muted'}">${vencida ? Math.abs(diasVenc) + ' dias atrÃ¡s' : diasVenc === 0 ? 'Hoje' : 'em ' + diasVenc + ' dias'}</small>` : ''}
+          ${!c.pago && diasVenc !== null ? `<small class="${vencida ? 'text-danger' : 'text-muted'}">${vencida ? Math.abs(diasVenc) + ' dias atrás' : diasVenc === 0 ? 'Hoje' : 'em ' + diasVenc + ' dias'}</small>` : ''}
         </td>
         <td>${vencStatus}</td>
         <td><div class="td-actions">${acoesCell}</div></td>
@@ -304,7 +304,7 @@
     document.getElementById('pgto-info').innerHTML = `
       <div style="font-size:13px; color:var(--text2); margin-bottom:4px">Cliente: <strong>${c.cliente || '-'}</strong></div>
       ${c.numero_venda ? `<div style="font-size:13px; color:var(--text2); margin-bottom:4px">Venda: <strong>#${c.numero_venda}</strong></div>` : ''}
-      ${c.parcela_num ? `<div style="font-size:13px; color:var(--text2); margin-bottom:4px">Parcela: <strong>${c.parcela_num}Âª</strong></div>` : ''}
+      ${c.parcela_num ? `<div style="font-size:13px; color:var(--text2); margin-bottom:4px">Parcela: <strong>${c.parcela_num}ª</strong></div>` : ''}
       <div style="font-size:20px; font-weight:800; color:var(--primary)">${Fmt.moeda(c.valor)}</div>
       <div style="font-size:12px; color:var(--text2)">Vencimento: ${Fmt.data(c.vencimento + 'T00:00:00')}</div>`;
     Modal.abrir('modal-pagamento');
@@ -315,15 +315,15 @@
     const data = document.getElementById('pgto-data').value;
     if (!data) return mostrarToast('Informe a data do pagamento', 'warning');
     await DB.Cobrancas.registrarPagamento(id, data);
-    mostrarToast('Pagamento registrado! âœ…', 'success');
+    mostrarToast('Pagamento registrado! ✅', 'success');
     Modal.fechar('modal-pagamento');
     await carregar();
   }
 
   function excluirCobranca(id) {
-    confirmar('Deseja excluir esta cobranÃ§a?', async () => {
+    confirmar('Deseja excluir esta cobrança?', async () => {
       await DB.Cobrancas.deletar(id);
-      mostrarToast('CobranÃ§a excluÃ­da', 'danger');
+      mostrarToast('Cobrança excluída', 'danger');
       await carregar();
     });
   }
@@ -342,11 +342,11 @@
     const valor = parseFloat(document.getElementById('nc-valor').value) || 0;
     const vencimento = document.getElementById('nc-vencimento').value;
     if (!cliente) return mostrarToast('Informe o cliente', 'warning');
-    if (!descricao) return mostrarToast('Informe a descriÃ§Ã£o', 'warning');
-    if (valor <= 0) return mostrarToast('Informe um valor vÃ¡lido', 'warning');
+    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
+    if (valor <= 0) return mostrarToast('Informe um valor válido', 'warning');
     if (!vencimento) return mostrarToast('Informe o vencimento', 'warning');
     await DB.Cobrancas.salvar({ cliente, descricao, valor, vencimento, pago: false, parcela_num: 1 });
-    mostrarToast('CobranÃ§a criada!', 'success');
+    mostrarToast('Cobrança criada!', 'success');
     Modal.fechar('modal-nova-cob');
     await carregar();
   }
@@ -355,4 +355,3 @@
 </script>
 </body>
 </html>
-

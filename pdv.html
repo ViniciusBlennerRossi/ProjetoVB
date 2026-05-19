@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDV â€” Ponto de Venda</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>PDV — Ponto de Venda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -66,7 +66,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ–¥ï¸ PDV â€” Ponto de Venda</div>
+      <div class="topbar-title">🖥️ PDV — Ponto de Venda</div>
       <div class="topbar-actions">
         <span id="pdv-hora" style="font-size:13px;color:var(--text2)"></span>
       </div>
@@ -74,12 +74,12 @@
     <div class="page-content" style="padding:16px">
       <div class="pdv-layout">
 
-        <!-- Painel Esquerdo: Produtos / ServiÃ§os -->
+        <!-- Painel Esquerdo: Produtos / Serviços -->
         <div class="pdv-produtos">
           <!-- Tabs -->
           <div class="pdv-tabs" id="pdv-tabs">
-            <button class="pdv-tab active" id="tab-produtos" onclick="mostrarTab('produtos')">ðŸ›ï¸ Produtos</button>
-            <button class="pdv-tab" id="tab-servicos" onclick="mostrarTab('servicos')">âœ‚ï¸ ServiÃ§os</button>
+            <button class="pdv-tab active" id="tab-produtos" onclick="mostrarTab('produtos')">🛍️ Produtos</button>
+            <button class="pdv-tab" id="tab-servicos" onclick="mostrarTab('servicos')">✂️ Serviços</button>
           </div>
 
           <!-- Busca + Filtro (Produtos) -->
@@ -87,8 +87,8 @@
             <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;padding:12px">
               <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
                 <div class="search-input-wrap" style="flex:1">
-                  <span class="search-icon">ðŸ”</span>
-                  <input type="text" id="busca-prod" class="form-control" placeholder="Buscar produto por nome ou cÃ³digo..." oninput="filtrarProdutos()" />
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="busca-prod" class="form-control" placeholder="Buscar produto por nome ou código..." oninput="filtrarProdutos()" />
                 </div>
                 <select id="filtro-cat" class="form-control form-select" style="max-width:160px" onchange="filtrarProdutos()">
                   <option value="">Todas</option>
@@ -98,18 +98,18 @@
             <div class="prod-grid" id="prod-grid"></div>
           </div>
 
-          <!-- Busca (ServiÃ§os) -->
+          <!-- Busca (Serviços) -->
           <div id="painel-servicos" style="display:none">
             <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;padding:12px">
               <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
                 <div class="search-input-wrap" style="flex:1">
-                  <span class="search-icon">ðŸ”</span>
-                  <input type="text" id="busca-serv" class="form-control" placeholder="Buscar serviÃ§o..." oninput="filtrarServicos()" />
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="busca-serv" class="form-control" placeholder="Buscar serviço..." oninput="filtrarServicos()" />
                 </div>
                 <select id="filtro-cat-serv" class="form-control form-select" style="max-width:160px" onchange="filtrarServicos()">
                   <option value="">Todas categorias</option>
                   <option>Sobrancelha</option><option>Manicure</option><option>Pedicure</option>
-                  <option>Cabelo</option><option>DepilaÃ§Ã£o</option><option>Outro</option>
+                  <option>Cabelo</option><option>Depilação</option><option>Outro</option>
                 </select>
               </div>
             </div>
@@ -121,8 +121,8 @@
         <div class="pdv-carrinho">
           <div class="carr-header">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <strong style="font-size:15px">ðŸ›’ Carrinho</strong>
-              <button class="btn btn-sm btn-ghost" onclick="limparCarrinho()">ðŸ—‘ï¸ Limpar</button>
+              <strong style="font-size:15px">🛒 Carrinho</strong>
+              <button class="btn btn-sm btn-ghost" onclick="limparCarrinho()">🗑️ Limpar</button>
             </div>
             <div style="position:relative">
               <input type="text" id="pdv-cliente-input" class="form-control" placeholder="Cliente (opcional)" style="font-size:13px" />
@@ -132,9 +132,9 @@
 
           <div class="carr-items" id="carr-items">
             <div class="carr-vazio">
-              <div class="empty-icon">ðŸ›’</div>
+              <div class="empty-icon">🛒</div>
               <div style="font-size:13px;margin-top:8px">Carrinho vazio</div>
-              <div style="font-size:12px;color:var(--text2);margin-top:4px">Clique nos produtos ou serviÃ§os para adicionar</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:4px">Clique nos produtos ou serviços para adicionar</div>
             </div>
           </div>
 
@@ -177,13 +177,13 @@
             </div>
 
             <button id="btn-carne-pdv" class="btn btn-outline btn-full" style="margin-bottom:8px;font-size:13px" onclick="selecionarForma('carne')">
-              ðŸ“‹ CarnÃª (parcelado)
+              📋 Carnê (parcelado)
             </button>
 
             <div id="carne-options" class="d-none" style="margin-bottom:10px;background:var(--bg);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--border)">
               <div class="form-row cols-2">
                 <div class="form-group" style="margin:0">
-                  <label class="form-label" style="font-size:12px">NÂº de Parcelas</label>
+                  <label class="form-label" style="font-size:12px">Nº de Parcelas</label>
                   <input type="number" id="pdv-carne-parcelas" class="form-control" value="3" min="1" max="24" />
                 </div>
                 <div class="form-group" style="margin:0">
@@ -192,14 +192,14 @@
                 </div>
               </div>
               <div class="form-group" style="margin-top:8px;margin-bottom:0">
-                <label class="form-label" style="font-size:12px">Entrada (R$) â€” opcional</label>
+                <label class="form-label" style="font-size:12px">Entrada (R$) — opcional</label>
                 <input type="number" id="pdv-carne-entrada" class="form-control" step="0.01" min="0" placeholder="0,00" />
               </div>
-              <div style="font-size:11px;color:var(--text2);margin-top:6px">âš ï¸ Exige cliente selecionado</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:6px">⚠️ Exige cliente selecionado</div>
             </div>
 
             <button class="btn btn-primary btn-full btn-lg" onclick="finalizarVendaPDV()" id="btn-finalizar" disabled>
-              âœ… Finalizar Venda
+              ✅ Finalizar Venda
             </button>
           </div>
         </div>
@@ -212,12 +212,12 @@
 <div class="modal-overlay" id="modal-recibo">
   <div class="modal" style="max-width:420px">
     <div class="modal-header">
-      <div class="modal-title">ðŸ§¾ Venda Finalizada!</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-recibo')">âœ•</button>
+      <div class="modal-title">🧾 Venda Finalizada!</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-recibo')">✕</button>
     </div>
     <div class="modal-body" id="recibo-body"></div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="imprimirRecibo()">ðŸ–¨ï¸ Imprimir</button>
+      <button class="btn btn-outline" onclick="imprimirRecibo()">🖨️ Imprimir</button>
       <button class="btn btn-primary" onclick="Modal.fechar('modal-recibo'); novaVenda()">+ Nova Venda</button>
     </div>
   </div>
@@ -228,7 +228,7 @@
 <script src="js/tenant.js"></script>
 <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
   Tenant.inicializarTenant();
@@ -302,13 +302,13 @@
       filtrarProdutos();
       filtrarServicos();
 
-      // Esconder aba de serviÃ§os se nÃ£o houver serviÃ§os cadastrados
+      // Esconder aba de serviços se não houver serviços cadastrados
       document.getElementById('pdv-tabs').style.display = servs.length ? '' : 'none';
     } catch(e) {
       console.error('Erro ao carregar PDV:', e);
       document.getElementById('prod-grid').innerHTML =
         `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--danger)">
-          <div style="font-size:36px">âš ï¸</div>
+          <div style="font-size:36px">⚠️</div>
           <div style="margin-top:8px;font-weight:700">Erro ao carregar produtos</div>
           <button class="btn btn-sm btn-primary" style="margin-top:12px" onclick="carregar()">Tentar novamente</button>
         </div>`;
@@ -339,7 +339,7 @@
     if (!prods.length) {
       document.getElementById('prod-grid').innerHTML =
         `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">
-          <div style="font-size:36px">ðŸ‘—</div><div style="margin-top:8px">Nenhum produto encontrado</div>
+          <div style="font-size:36px">👗</div><div style="margin-top:8px">Nenhum produto encontrado</div>
           <div style="font-size:12px;margin-top:4px"><a href="produtos.html">Cadastrar produtos</a></div>
         </div>`;
       return;
@@ -350,7 +350,7 @@
       return `<button class="prod-btn ${semEst ? 'sem-estoque' : ''}" onclick="${semEst ? '' : `addProdutoAoCarrinho(${p.id})`}">
         <span class="prod-btn-est badge ${estBadgeClass}">${p.estoque||0}</span>
         <div class="prod-btn-nome">${p.nome}</div>
-        <div class="prod-btn-info">${p.tamanho||''} ${p.cor ? 'Â· '+p.cor : ''}</div>
+        <div class="prod-btn-info">${p.tamanho||''} ${p.cor ? '· '+p.cor : ''}</div>
         <div class="prod-btn-preco">${Fmt.moeda(p.preco)}</div>
       </button>`;
     }).join('');
@@ -358,7 +358,7 @@
 
   function addProdutoAoCarrinho(prodId) {
     const prod = _prodMap[prodId];
-    if (!prod || (prod.estoque || 0) <= 0) return mostrarToast('Sem estoque disponÃ­vel', 'warning');
+    if (!prod || (prod.estoque || 0) <= 0) return mostrarToast('Sem estoque disponível', 'warning');
     const key = 'p_' + prodId;
     const item = carrinho.find(i => i._key === key);
     if (item) {
@@ -371,7 +371,7 @@
     calcularTotal();
   }
 
-  // ===== SERVIÃ‡OS =====
+  // ===== SERVIÇOS =====
   function filtrarServicos() {
     const busca = document.getElementById('busca-serv').value.toLowerCase();
     const cat = document.getElementById('filtro-cat-serv').value;
@@ -387,19 +387,19 @@
     if (!servs.length) {
       document.getElementById('serv-grid').innerHTML =
         `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">
-          <div style="font-size:36px">âœ‚ï¸</div><div style="margin-top:8px">Nenhum serviÃ§o encontrado</div>
-          <div style="font-size:12px;margin-top:4px"><a href="servicos.html">Cadastrar serviÃ§os</a></div>
+          <div style="font-size:36px">✂️</div><div style="margin-top:8px">Nenhum serviço encontrado</div>
+          <div style="font-size:12px;margin-top:4px"><a href="servicos.html">Cadastrar serviços</a></div>
         </div>`;
       return;
     }
-    const icones = { Sobrancelha:'ðŸª®', Manicure:'ðŸ’…', Pedicure:'ðŸ¦¶', Cabelo:'ðŸ’‡', DepilaÃ§Ã£o:'ðŸª’', Outro:'âœ‚ï¸' };
+    const icones = { Sobrancelha:'🪮', Manicure:'💅', Pedicure:'🦶', Cabelo:'💇', Depilação:'🪒', Outro:'✂️' };
     document.getElementById('serv-grid').innerHTML = servs.map(s => `
       <button class="serv-btn" onclick="addServicoAoCarrinho(${s.id})">
-        <div class="serv-btn-icon">${icones[s.categoria] || 'âœ‚ï¸'}</div>
+        <div class="serv-btn-icon">${icones[s.categoria] || '✂️'}</div>
         <div class="serv-btn-nome">${s.nome}</div>
         <div class="serv-btn-cat">${s.categoria || ''}</div>
         <div class="serv-btn-preco">${Fmt.moeda(s.preco)}</div>
-        <div class="serv-btn-dur">â± ${s.duracao_min || 30} min</div>
+        <div class="serv-btn-dur">⏱ ${s.duracao_min || 30} min</div>
       </button>`).join('');
   }
 
@@ -415,7 +415,7 @@
     }
     renderCarrinho();
     calcularTotal();
-    mostrarToast(`âœ‚ï¸ ${serv.nome} adicionado`, 'success');
+    mostrarToast(`✂️ ${serv.nome} adicionado`, 'success');
   }
 
   // ===== CARRINHO =====
@@ -444,13 +444,13 @@
     const el = document.getElementById('carr-items');
     const btn = document.getElementById('btn-finalizar');
     if (!carrinho.length) {
-      el.innerHTML = `<div class="carr-vazio"><div class="empty-icon">ðŸ›’</div><div style="font-size:13px;margin-top:8px">Carrinho vazio</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Clique nos produtos ou serviÃ§os para adicionar</div></div>`;
+      el.innerHTML = `<div class="carr-vazio"><div class="empty-icon">🛒</div><div style="font-size:13px;margin-top:8px">Carrinho vazio</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Clique nos produtos ou serviços para adicionar</div></div>`;
       btn.disabled = true;
       return;
     }
     btn.disabled = false;
     el.innerHTML = carrinho.map(item => {
-      const icon = item.tipo === 'servico' ? 'âœ‚ï¸' : 'ðŸ“¦';
+      const icon = item.tipo === 'servico' ? '✂️' : '📦';
       const key = item._key;
       return `
         <div class="carr-item ${item.tipo === 'servico' ? 'servico' : ''}">
@@ -459,12 +459,12 @@
             <div style="font-size:11px;color:var(--text2)">${Fmt.moeda(item.preco_unitario)} / un.</div>
           </div>
           <div class="carr-item-qtd">
-            <button class="qtd-btn" onclick="alterarQtd('${key}', -1)">âˆ’</button>
+            <button class="qtd-btn" onclick="alterarQtd('${key}', -1)">−</button>
             <span class="qtd-num">${item.quantidade}</span>
             <button class="qtd-btn" onclick="alterarQtd('${key}', +1)">+</button>
           </div>
           <div class="carr-item-total">${Fmt.moeda(item.quantidade * item.preco_unitario)}</div>
-          <button onclick="removerDoCarrinho('${key}')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:16px;padding:4px" title="Remover">âœ•</button>
+          <button onclick="removerDoCarrinho('${key}')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:16px;padding:4px" title="Remover">✕</button>
         </div>`;
     }).join('');
   }
@@ -537,7 +537,7 @@
 
   function renderItensRecibo(itens) {
     return itens.map(i => {
-      const icon = i.tipo === 'servico' ? 'âœ‚ï¸' : '';
+      const icon = i.tipo === 'servico' ? '✂️' : '';
       const nome = i.tipo === 'servico' ? i.servico_nome || i.nome : (i.produto?.nome || i.nome || '');
       return `<tr><td>${icon} ${nome}</td><td style="text-align:center">${i.quantidade}</td><td style="text-align:right">${Fmt.moeda(i.quantidade*i.preco_unitario)}</td></tr>`;
     }).join('');
@@ -545,7 +545,7 @@
 
   async function finalizarVendaPDV() {
     if (_salvando) return;
-    if (!carrinho.length) return mostrarToast('Adicione produtos ou serviÃ§os ao carrinho', 'warning');
+    if (!carrinho.length) return mostrarToast('Adicione produtos ou serviços ao carrinho', 'warning');
     _salvando = true;
     document.getElementById('btn-finalizar').disabled = true;
 
@@ -559,13 +559,13 @@
     const itensRecibo = [...carrinho];
     const itens = montarItens();
 
-    // --- Fluxo CarnÃª ---
+    // --- Fluxo Carnê ---
     if (formaPgto === 'carne') {
-      if (!clienteNome) { _salvando = false; document.getElementById('btn-finalizar').disabled = false; return mostrarToast('Selecione um cliente para criar o carnÃª', 'warning'); }
+      if (!clienteNome) { _salvando = false; document.getElementById('btn-finalizar').disabled = false; return mostrarToast('Selecione um cliente para criar o carnê', 'warning'); }
       const numParcelas = Math.max(1, parseInt(document.getElementById('pdv-carne-parcelas').value) || 3);
       const diaVenc = Math.min(28, Math.max(1, parseInt(document.getElementById('pdv-carne-dia').value) || 10));
       const entrada = Math.max(0, parseFloat(document.getElementById('pdv-carne-entrada').value) || 0);
-      if (entrada >= total) { _salvando = false; document.getElementById('btn-finalizar').disabled = false; return mostrarToast('Entrada nÃ£o pode ser maior ou igual ao total', 'warning'); }
+      if (entrada >= total) { _salvando = false; document.getElementById('btn-finalizar').disabled = false; return mostrarToast('Entrada não pode ser maior ou igual ao total', 'warning'); }
       const parcelas = calcularParcelasCarne(total, numParcelas, entrada, diaVenc);
 
       const venda = await DB.Vendas.salvar({
@@ -580,15 +580,15 @@
       try {
         await DB.Carnes.salvar({
           cliente: clienteNome, cliente_nome: clienteNome, cliente_id: clienteId,
-          descricao: `PDV #${venda.numero} â€” ${itensDesc}`,
+          descricao: `PDV #${venda.numero} — ${itensDesc}`,
           valor_total: total, num_parcelas: numParcelas, parcelas,
           observacoes: entrada > 0 ? `Entrada: ${Fmt.moeda(entrada)}` : ''
         });
-      } catch(e) { console.error('Erro ao criar carnÃª:', e); }
+      } catch(e) { console.error('Erro ao criar carnê:', e); }
 
       document.getElementById('recibo-body').innerHTML = `
         <div style="text-align:center;margin-bottom:16px">
-          <div style="font-size:32px">ðŸ“‹</div>
+          <div style="font-size:32px">📋</div>
           <div style="font-size:22px;font-weight:800;color:var(--primary)">Venda #${venda.numero}</div>
           <div style="font-size:13px;color:var(--text2)">${new Date().toLocaleString('pt-BR')}</div>
         </div>
@@ -599,11 +599,11 @@
         <div style="background:var(--bg);padding:12px;border-radius:8px">
           ${desconto>0 ? `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Desconto</span><span class="text-danger">-${Fmt.moeda(desconto)}</span></div>` : ''}
           <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--primary)"><span>Total</span><span>${Fmt.moeda(total)}</span></div>
-          <div style="font-size:13px;margin-top:6px;color:var(--text2)">ðŸ“‹ CarnÃª em ${numParcelas}x de ${Fmt.moeda((total-entrada)/numParcelas)} Â· venc. dia ${diaVenc}</div>
+          <div style="font-size:13px;margin-top:6px;color:var(--text2)">📋 Carnê em ${numParcelas}x de ${Fmt.moeda((total-entrada)/numParcelas)} · venc. dia ${diaVenc}</div>
         </div>
-        <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2)">Cliente: ${clienteNome} Â· Vendedor: ${Auth.usuario().nome}</div>`;
+        <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2)">Cliente: ${clienteNome} · Vendedor: ${Auth.usuario().nome}</div>`;
 
-      mostrarToast('CarnÃª criado com sucesso!', 'success');
+      mostrarToast('Carnê criado com sucesso!', 'success');
       Modal.abrir('modal-recibo');
       await carregar();
       _salvando = false;
@@ -625,7 +625,7 @@
 
     document.getElementById('recibo-body').innerHTML = `
       <div style="text-align:center;margin-bottom:16px">
-        <div style="font-size:32px">ðŸŽ‰</div>
+        <div style="font-size:32px">🎉</div>
         <div style="font-size:22px;font-weight:800;color:var(--primary)">Venda #${venda.numero}</div>
         <div style="font-size:13px;color:var(--text2)">${new Date().toLocaleString('pt-BR')}</div>
       </div>
@@ -640,7 +640,7 @@
         ${formaPgto==='dinheiro' && recibido > 0 ? `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--success);margin-top:4px"><span>Troco</span><span>${Fmt.moeda(troco)}</span></div>` : ''}
       </div>
       <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2)">
-        ${clienteNome ? `Cliente: ${clienteNome}` : ''} Â· Vendedor: ${Auth.usuario().nome}
+        ${clienteNome ? `Cliente: ${clienteNome}` : ''} · Vendedor: ${Auth.usuario().nome}
       </div>`;
 
     Modal.abrir('modal-recibo');
@@ -663,4 +663,3 @@
 </script>
 </body>
 </html>
-

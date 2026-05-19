@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Encomendas â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Encomendas — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -23,7 +23,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ“‹ Encomendas</div>
+      <div class="topbar-title">📋 Encomendas</div>
       <div class="topbar-actions">
         <select id="view-sel" class="form-control form-select" style="max-width:140px;font-size:13px" onchange="renderView()">
           <option value="kanban">Kanban</option>
@@ -37,7 +37,7 @@
       <!-- Stats -->
       <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="stats-area"></div>
 
-      <!-- ConteÃºdo -->
+      <!-- Conteúdo -->
       <div id="conteudo-wrap"></div>
 
     </div>
@@ -49,7 +49,7 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="modal-titulo">Nova Encomenda</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-enc')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-enc')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="enc-id" />
@@ -67,8 +67,8 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">DescriÃ§Ã£o / Produto Encomendado *</label>
-        <textarea id="enc-descricao" class="form-control" rows="3" placeholder="Descreva o produto, tamanho, cor, referÃªncia..."></textarea>
+        <label class="form-label">Descrição / Produto Encomendado *</label>
+        <textarea id="enc-descricao" class="form-control" rows="3" placeholder="Descreva o produto, tamanho, cor, referência..."></textarea>
       </div>
       <div class="form-row cols-3">
         <div class="form-group">
@@ -86,7 +86,7 @@
       </div>
       <div class="form-row cols-2">
         <div class="form-group">
-          <label class="form-label">PrevisÃ£o de Entrega</label>
+          <label class="form-label">Previsão de Entrega</label>
           <input type="date" id="enc-previsao" class="form-control" />
         </div>
         <div class="form-group">
@@ -94,7 +94,7 @@
           <select id="enc-status" class="form-control form-select">
             <option value="aguardando">Aguardando</option>
             <option value="confirmada">Confirmada</option>
-            <option value="em_producao">Em ProduÃ§Ã£o</option>
+            <option value="em_producao">Em Produção</option>
             <option value="pronta">Pronta p/ Retirada</option>
             <option value="entregue">Entregue</option>
             <option value="cancelada">Cancelada</option>
@@ -102,13 +102,13 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes</label>
-        <textarea id="enc-obs" class="form-control" rows="2" placeholder="InformaÃ§Ãµes adicionais..."></textarea>
+        <label class="form-label">Observações</label>
+        <textarea id="enc-obs" class="form-control" rows="2" placeholder="Informações adicionais..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-enc')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvar()">ðŸ’¾ Salvar</button>
+      <button class="btn btn-primary" onclick="salvar()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -118,7 +118,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="det-titulo">Encomenda</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-det')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-det')">✕</button>
     </div>
     <div class="modal-body" id="det-body"></div>
     <div class="modal-footer" id="det-footer"></div>
@@ -130,7 +130,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
   Tenant.inicializarTenant();
@@ -139,7 +139,7 @@
   const STATUS_KANBAN = [
     { id: 'aguardando', label: 'Aguardando', cor: '#E65100' },
     { id: 'confirmada',  label: 'Confirmada', cor: '#01579B' },
-    { id: 'em_producao',label: 'Em ProduÃ§Ã£o', cor: '#6A1B9A' },
+    { id: 'em_producao',label: 'Em Produção', cor: '#6A1B9A' },
     { id: 'pronta',     label: 'Pronta',      cor: '#2E7D32' },
     { id: 'entregue',   label: 'Entregue',    cor: '#546E7A' },
   ];
@@ -166,13 +166,13 @@
     const sinalTotal = abertas.reduce((s, e) => s + (e.sinal || 0), 0);
 
     document.getElementById('stats-area').innerHTML = `
-      <div class="stat-card"><div class="stat-icon orange">ðŸ“‹</div>
+      <div class="stat-card"><div class="stat-icon orange">📋</div>
         <div class="stat-info"><div class="stat-value">${abertas.length}</div><div class="stat-label">Encomendas Abertas</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">âœ…</div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
         <div class="stat-info"><div class="stat-value">${prontas.length}</div><div class="stat-label">Prontas p/ Retirada</div></div></div>
-      <div class="stat-card"><div class="stat-icon pink">ðŸ’°</div>
+      <div class="stat-card"><div class="stat-icon pink">💰</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalValor)}</div><div class="stat-label">Valor Total Aberto</div></div></div>
-      <div class="stat-card"><div class="stat-icon blue">ðŸ’µ</div>
+      <div class="stat-card"><div class="stat-icon blue">💵</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(sinalTotal)}</div><div class="stat-label">Sinais Recebidos</div></div></div>`;
   }
 
@@ -204,7 +204,7 @@
               <span class="badge badge-primary">${e.numero}</span>
               ${saldo > 0 ? `<span style="font-size:12px;font-weight:700;color:var(--danger)">Saldo: ${Fmt.moeda(saldo)}</span>` : '<span class="badge badge-success">Quitado</span>'}
             </div>
-            ${e.previsao ? `<div style="font-size:11px;color:var(--text2);margin-top:6px">ðŸ“… ${Fmt.data(e.previsao+'T00:00:00')}</div>` : ''}
+            ${e.previsao ? `<div style="font-size:11px;color:var(--text2);margin-top:6px">📅 ${Fmt.data(e.previsao+'T00:00:00')}</div>` : ''}
           </div>`;
         });
       }
@@ -217,26 +217,26 @@
       html += `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;color:var(--text2)">Canceladas (${canceladas.length})</summary>`;
       canceladas.forEach(e => {
         html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-top:6px;font-size:13px">
-          <span>${e.numero} Â· ${e.cliente_nome||e.cliente}</span>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${e.id})">ðŸ‘ï¸</button>
+          <span>${e.numero} · ${e.cliente_nome||e.cliente}</span>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${e.id})">👁️</button>
         </div>`;
       });
       html += '</details>';
     }
 
-    document.getElementById('conteudo-wrap').innerHTML = html || '<div class="empty-state card" style="padding:60px"><div class="empty-icon">ðŸ“‹</div><div class="empty-title">Nenhuma encomenda</div></div>';
+    document.getElementById('conteudo-wrap').innerHTML = html || '<div class="empty-state card" style="padding:60px"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma encomenda</div></div>';
   }
 
   function renderLista() {
     const todas = [..._encCache].sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
     if (!todas.length) {
       document.getElementById('conteudo-wrap').innerHTML =
-        `<div class="empty-state card" style="padding:60px"><div class="empty-icon">ðŸ“‹</div><div class="empty-title">Nenhuma encomenda</div></div>`;
+        `<div class="empty-state card" style="padding:60px"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma encomenda</div></div>`;
       return;
     }
 
     let html = `<div class="card"><div class="table-wrapper"><table><thead><tr>
-      <th>NÂº</th><th>Cliente</th><th>DescriÃ§Ã£o</th><th>Valor</th><th>Sinal</th><th>Saldo</th><th>PrevisÃ£o</th><th>Status</th><th>AÃ§Ãµes</th>
+      <th>Nº</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Sinal</th><th>Saldo</th><th>Previsão</th><th>Status</th><th>Ações</th>
     </tr></thead><tbody>`;
 
     todas.forEach(e => {
@@ -247,12 +247,12 @@
         <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.descricao}</td>
         <td>${Fmt.moeda(e.valor)}</td>
         <td>${Fmt.moeda(e.sinal)}</td>
-        <td class="${saldo>0?'text-danger font-bold':''}">${saldo>0?Fmt.moeda(saldo):'âœ…'}</td>
+        <td class="${saldo>0?'text-danger font-bold':''}">${saldo>0?Fmt.moeda(saldo):'✅'}</td>
         <td>${e.previsao ? Fmt.data(e.previsao+'T00:00:00') : '-'}</td>
         <td>${badgeStatus(e.status)}</td>
         <td><div class="td-actions">
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${e.id})">ðŸ‘ï¸</button>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${e.id})">âœï¸</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${e.id})">👁️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${e.id})">✏️</button>
         </div></td>
       </tr>`;
     });
@@ -293,7 +293,7 @@
     const clienteId = Number(document.getElementById('enc-cliente-id').value) || null;
     const descricao = document.getElementById('enc-descricao').value.trim();
     if (!clienteNome) return mostrarToast('Informe o cliente', 'warning');
-    if (!descricao) return mostrarToast('Informe a descriÃ§Ã£o', 'warning');
+    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
 
     await DB.Encomendas.salvar({
       id: id ? Number(id) : undefined,
@@ -325,10 +325,10 @@
           ${e.telefone ? `<p style="font-size:13px;color:var(--text2)">${Fmt.telefone(e.telefone)}</p>` : ''}
         </div>
         <div><label class="form-label">Status</label><p>${badgeStatus(e.status)}</p></div>
-        <div><label class="form-label">PrevisÃ£o</label><p>${e.previsao ? Fmt.data(e.previsao+'T00:00:00') : '-'}</p></div>
+        <div><label class="form-label">Previsão</label><p>${e.previsao ? Fmt.data(e.previsao+'T00:00:00') : '-'}</p></div>
       </div>
       <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);margin-bottom:14px">
-        <label class="form-label">DescriÃ§Ã£o</label>
+        <label class="form-label">Descrição</label>
         <p style="white-space:pre-line;font-size:13px">${e.descricao}</p>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
@@ -341,7 +341,7 @@
           <div style="font-size:12px;color:var(--text2)">Sinal recebido</div>
         </div>
         <div style="text-align:center;background:${saldo>0?'var(--danger-bg)':'var(--success-bg)'};padding:12px;border-radius:var(--radius-sm)">
-          <div style="font-size:16px;font-weight:800;color:${saldo>0?'var(--danger)':'var(--success)'}">${saldo>0?Fmt.moeda(saldo):'Quitado âœ…'}</div>
+          <div style="font-size:16px;font-weight:800;color:${saldo>0?'var(--danger)':'var(--success)'}">${saldo>0?Fmt.moeda(saldo):'Quitado ✅'}</div>
           <div style="font-size:12px;color:var(--text2)">Saldo a pagar</div>
         </div>
       </div>
@@ -349,7 +349,7 @@
       <div style="font-size:12px;color:var(--text2);margin-top:10px">Criada em: ${Fmt.dataHora(e.criado_em)}</div>`;
 
     document.getElementById('det-footer').innerHTML = `
-      <button class="btn btn-outline" onclick="Modal.fechar('modal-det');editar(${e.id})">âœï¸ Editar</button>
+      <button class="btn btn-outline" onclick="Modal.fechar('modal-det');editar(${e.id})">✏️ Editar</button>
       ${e.status !== 'cancelada' ? `<button class="btn btn-danger btn-sm" onclick="cancelar(${e.id})">Cancelar Encomenda</button>` : ''}
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-det')">Fechar</button>`;
 
@@ -372,4 +372,3 @@
 </script>
 </body>
 </html>
-

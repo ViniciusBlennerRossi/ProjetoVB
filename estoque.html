@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Estoque â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Estoque — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -13,10 +13,10 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ“¦ Controle de Estoque</div>
+      <div class="topbar-title">📦 Controle de Estoque</div>
       <div class="topbar-actions">
-        <button class="btn btn-success" onclick="abrirModalMov('entrada')">â¬†ï¸ Entrada</button>
-        <button class="btn btn-danger" onclick="abrirModalMov('saida')">â¬‡ï¸ SaÃ­da</button>
+        <button class="btn btn-success" onclick="abrirModalMov('entrada')">⬆️ Entrada</button>
+        <button class="btn btn-danger" onclick="abrirModalMov('saida')">⬇️ Saída</button>
       </div>
     </div>
     <div class="page-content">
@@ -27,7 +27,7 @@
       <!-- Estoque atual dos produtos -->
       <div class="card" style="margin-bottom:24px">
         <div class="card-header">
-          <div class="card-title">ðŸ“‹ PosiÃ§Ã£o Atual do Estoque</div>
+          <div class="card-title">📋 Posição Atual do Estoque</div>
           <div style="display:flex; gap:8px; align-items:center">
             <input type="text" id="busca-est" class="form-control" placeholder="Buscar produto..." style="max-width:200px" oninput="filtrarEstoque()" />
             <select id="filtro-est" class="form-control form-select" style="max-width:160px" onchange="filtrarEstoque()">
@@ -42,18 +42,18 @@
         </div>
       </div>
 
-      <!-- Tabs: HistÃ³rico -->
+      <!-- Tabs: Histórico -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">ðŸ“œ HistÃ³rico de MovimentaÃ§Ãµes</div>
+          <div class="card-title">📜 Histórico de Movimentações</div>
           <div style="display:flex; gap:8px; align-items:center">
             <input type="date" id="data-inicio" class="form-control" style="max-width:150px" onchange="filtrarHistorico()" />
-            <span style="color:var(--text2); font-size:13px">atÃ©</span>
+            <span style="color:var(--text2); font-size:13px">até</span>
             <input type="date" id="data-fim" class="form-control" style="max-width:150px" onchange="filtrarHistorico()" />
             <select id="filtro-tipo" class="form-control form-select" style="max-width:130px" onchange="filtrarHistorico()">
               <option value="">Todos tipos</option>
               <option value="entrada">Entradas</option>
-              <option value="saida">SaÃ­das</option>
+              <option value="saida">Saídas</option>
             </select>
           </div>
         </div>
@@ -66,12 +66,12 @@
   </div>
 </div>
 
-<!-- Modal MovimentaÃ§Ã£o -->
+<!-- Modal Movimentação -->
 <div class="modal-overlay" id="modal-mov">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modal-mov-titulo">Nova MovimentaÃ§Ã£o</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-mov')">âœ•</button>
+      <div class="modal-title" id="modal-mov-titulo">Nova Movimentação</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-mov')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="mov-tipo" />
@@ -96,17 +96,17 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Motivo / ObservaÃ§Ã£o</label>
-        <input type="text" id="mov-motivo" class="form-control" placeholder="Ex: Ajuste de inventÃ¡rio, devoluÃ§Ã£o..." />
+        <label class="form-label">Motivo / Observação</label>
+        <input type="text" id="mov-motivo" class="form-control" placeholder="Ex: Ajuste de inventário, devolução..." />
       </div>
 
       <div id="mov-alerta-saldo" class="alert alert-danger d-none">
-        âš ï¸ Quantidade maior que o estoque disponÃ­vel!
+        ⚠️ Quantidade maior que o estoque disponível!
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-mov')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-salvar-mov" onclick="salvarMovimentacao()">ðŸ’¾ Registrar</button>
+      <button class="btn btn-primary" id="btn-salvar-mov" onclick="salvarMovimentacao()">💾 Registrar</button>
     </div>
   </div>
 </div>
@@ -116,7 +116,7 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
   Tenant.inicializarTenant();
@@ -158,13 +158,13 @@
     const semEstoque = _prodsCache.filter(p => (p.estoque || 0) <= 0).length;
     const total = _prodsCache.length;
     document.getElementById('stats-estoque').innerHTML = `
-      <div class="stat-card"><div class="stat-icon blue">ðŸ“¦</div>
+      <div class="stat-card"><div class="stat-icon blue">📦</div>
         <div class="stat-info"><div class="stat-value">${qtdTotal.toLocaleString('pt-BR')} un.</div><div class="stat-label">Qtd. total em estoque</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">ðŸ’°</div>
+      <div class="stat-card"><div class="stat-icon green">💰</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(valorCusto)}</div><div class="stat-label">Valor em estoque (custo)</div></div></div>
-      <div class="stat-card"><div class="stat-icon pink">ðŸ·ï¸</div>
+      <div class="stat-card"><div class="stat-icon pink">🏷️</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(valorVenda)}</div><div class="stat-label">Valor em estoque (venda)</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">âš ï¸</div>
+      <div class="stat-card"><div class="stat-icon orange">⚠️</div>
         <div class="stat-info"><div class="stat-value">${semEstoque} / ${total}</div><div class="stat-label">Produtos sem estoque</div></div></div>`;
   }
 
@@ -193,13 +193,13 @@
     prods = prods || _prodsCache;
     if (!prods.length) {
       document.getElementById('tabela-estoque-atual').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸ“¦</div><div class="empty-title">Nenhum produto cadastrado</div>
+        `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Nenhum produto cadastrado</div>
         <div class="empty-desc"><a href="produtos.html">Cadastrar produtos</a></div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>CÃ³digo</th><th>Produto</th><th>Categoria</th><th>Tamanho</th><th>Cor</th>
+      <th>Código</th><th>Produto</th><th>Categoria</th><th>Tamanho</th><th>Cor</th>
       <th>Estoque</th><th>Custo Unit.</th><th>Valor Total</th>
     </tr></thead><tbody>`;
 
@@ -209,7 +209,7 @@
       const valorTotal = est * (p.custo || 0);
       const estBadge = est <= 0
         ? `<span class="badge badge-danger">${est}</span>`
-        : est <= 5 ? `<span class="badge badge-warning">${est} âš ï¸</span>`
+        : est <= 5 ? `<span class="badge badge-warning">${est} ⚠️</span>`
         : `<span class="badge badge-success">${est}</span>`;
       html += `<tr>
         <td><code>${p.codigo || '-'}</code></td>
@@ -244,7 +244,7 @@
     const prodMap = Object.fromEntries(_prodsCache.map(p => [p.id, p]));
     if (!movs.length) {
       document.getElementById('tabela-historico').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸ“œ</div><div class="empty-title">Nenhuma movimentaÃ§Ã£o no perÃ­odo</div></div>`;
+        `<div class="empty-state"><div class="empty-icon">📜</div><div class="empty-title">Nenhuma movimentação no período</div></div>`;
       return;
     }
 
@@ -275,11 +275,11 @@
     document.getElementById('mov-motivo').value = '';
     document.getElementById('mov-estoque-atual').textContent = '';
     document.getElementById('mov-alerta-saldo').classList.add('d-none');
-    const titleMap = { entrada: 'â¬†ï¸ Entrada de Estoque', saida: 'â¬‡ï¸ SaÃ­da de Estoque' };
+    const titleMap = { entrada: '⬆️ Entrada de Estoque', saida: '⬇️ Saída de Estoque' };
     document.getElementById('modal-mov-titulo').textContent = titleMap[tipo];
     const btn = document.getElementById('btn-salvar-mov');
     btn.className = tipo === 'entrada' ? 'btn btn-success' : 'btn btn-danger';
-    btn.textContent = tipo === 'entrada' ? 'â¬†ï¸ Registrar Entrada' : 'â¬‡ï¸ Registrar SaÃ­da';
+    btn.textContent = tipo === 'entrada' ? '⬆️ Registrar Entrada' : '⬇️ Registrar Saída';
     Modal.abrir('modal-mov');
   }
 
@@ -300,7 +300,7 @@
     const motivo = document.getElementById('mov-motivo').value.trim();
 
     if (!prodId) return mostrarToast('Selecione o produto', 'warning');
-    if (qtd <= 0) return mostrarToast('Informe uma quantidade vÃ¡lida', 'warning');
+    if (qtd <= 0) return mostrarToast('Informe uma quantidade válida', 'warning');
 
     const prod = _prodsCache.find(p => p.id === prodId);
     if (tipo === 'saida' && (prod.estoque || 0) < qtd) {
@@ -311,12 +311,12 @@
 
     await DB.Movimentacoes.salvar({
       produto_id: prodId, tipo, quantidade: qtd,
-      motivo: motivo || (tipo === 'entrada' ? 'Entrada manual' : 'SaÃ­da manual'),
+      motivo: motivo || (tipo === 'entrada' ? 'Entrada manual' : 'Saída manual'),
       usuario_id: Auth.usuario().id,
       data: data + 'T' + new Date().toTimeString().slice(0, 8)
     });
 
-    mostrarToast(`${tipo === 'entrada' ? 'Entrada' : 'SaÃ­da'} registrada com sucesso!`, 'success');
+    mostrarToast(`${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`, 'success');
     Modal.fechar('modal-mov');
     await carregar();
   }
@@ -325,4 +325,3 @@
 </script>
 </body>
 </html>
-

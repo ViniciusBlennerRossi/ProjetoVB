@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendas â€” Fiore Pijamas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Vendas — Fiore Pijamas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
@@ -13,7 +13,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">ðŸ›ï¸ Vendas</div>
+      <div class="topbar-title">🛍️ Vendas</div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="abrirNovaVenda()">+ Nova Venda</button>
       </div>
@@ -24,8 +24,8 @@
       <div class="card" style="padding:14px 18px; margin-bottom:20px">
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
           <div class="search-input-wrap" style="flex:1; min-width:200px">
-            <span class="search-icon">ðŸ”</span>
-            <input type="text" id="busca" class="form-control" placeholder="Buscar por nÂº venda ou cliente..." oninput="filtrar()" />
+            <span class="search-icon">🔍</span>
+            <input type="text" id="busca" class="form-control" placeholder="Buscar por nº venda ou cliente..." oninput="filtrar()" />
           </div>
           <input type="date" id="data-inicio" class="form-control" style="max-width:150px" onchange="filtrar()" />
           <input type="date" id="data-fim" class="form-control" style="max-width:150px" onchange="filtrar()" />
@@ -45,7 +45,7 @@
       <!-- Tabela -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">ðŸ“‹ Lista de Vendas</div>
+          <div class="card-title">📋 Lista de Vendas</div>
           <span id="count-label" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -60,8 +60,8 @@
 <div class="modal-overlay" id="modal-venda">
   <div class="modal modal-xl">
     <div class="modal-header">
-      <div class="modal-title">ðŸ›ï¸ Nova Venda</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-venda')">âœ•</button>
+      <div class="modal-title">🛍️ Nova Venda</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-venda')">✕</button>
     </div>
     <div class="modal-body">
       <div class="form-row cols-2" style="margin-bottom:0">
@@ -100,9 +100,9 @@
           <select id="venda-forma-pgto" class="form-control form-select" onchange="onFormaPgtoChange()"></select>
         </div>
         <div class="form-group">
-          <label class="form-label">NÂº de Parcelas</label>
+          <label class="form-label">Nº de Parcelas</label>
           <select id="venda-parcelas" class="form-control form-select" onchange="onParcelasChange()">
-            <option value="1">Ã€ vista</option>
+            <option value="1">À vista</option>
             <option value="2">2x</option>
             <option value="3">3x</option>
             <option value="4">4x</option>
@@ -128,11 +128,11 @@
 
       <!-- Parcelas geradas -->
       <div id="parcelas-wrap" class="d-none">
-        <label class="form-label" style="margin-bottom:8px">ðŸ“… Parcelas</label>
+        <label class="form-label" style="margin-bottom:8px">📅 Parcelas</label>
         <div id="parcelas-lista"></div>
       </div>
 
-      <!-- Status pagamento (para Ã  vista) -->
+      <!-- Status pagamento (para à vista) -->
       <div id="status-pgto-wrap">
         <div class="form-group">
           <label class="form-label">Status do Pagamento</label>
@@ -144,13 +144,13 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">ObservaÃ§Ãµes</label>
-        <textarea id="venda-obs" class="form-control" rows="2" placeholder="ObservaÃ§Ãµes da venda..."></textarea>
+        <label class="form-label">Observações</label>
+        <textarea id="venda-obs" class="form-control" rows="2" placeholder="Observações da venda..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-venda')">Cancelar</button>
-      <button class="btn btn-primary" onclick="finalizarVenda()">âœ… Finalizar Venda</button>
+      <button class="btn btn-primary" onclick="finalizarVenda()">✅ Finalizar Venda</button>
     </div>
   </div>
 </div>
@@ -160,7 +160,7 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="detalhe-titulo">Detalhes da Venda</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">âœ•</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">✕</button>
     </div>
     <div class="modal-body" id="detalhe-body"></div>
     <div class="modal-footer" id="detalhe-footer"></div>
@@ -171,8 +171,8 @@
 <div class="modal-overlay" id="modal-troca">
   <div class="modal modal-xl">
     <div class="modal-header">
-      <div class="modal-title">ðŸ”„ Troca de Produtos</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-troca')">âœ•</button>
+      <div class="modal-title">🔄 Troca de Produtos</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-troca')">✕</button>
     </div>
     <div class="modal-body">
       <div id="troca-venda-info" style="background:var(--bg);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:13px;color:var(--text2)"></div>
@@ -181,14 +181,14 @@
 
         <!-- Coluna Esquerda: Devolver -->
         <div>
-          <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">ðŸ“¦ Itens a Devolver</h4>
+          <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">📦 Itens a Devolver</h4>
           <input type="text" id="troca-filter-dev" class="form-control" placeholder="Filtrar produto..." oninput="_renderListaDev()" autocomplete="off" style="margin-bottom:6px;font-size:13px" />
           <div id="troca-lista-dev" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
         </div>
 
         <!-- Coluna Direita: Novos Produtos -->
         <div>
-          <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">ðŸ›ï¸ Novos Produtos</h4>
+          <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">🛍️ Novos Produtos</h4>
           <input type="text" id="troca-filter-levar" class="form-control" placeholder="Filtrar produto..." oninput="_renderListaLevar()" autocomplete="off" style="margin-bottom:6px;font-size:13px" />
           <div id="troca-lista-levar" style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
           <div id="troca-levar" style="margin-top:8px"></div>
@@ -197,8 +197,8 @@
       </div>
 
       <div class="form-group" style="margin-top:14px">
-        <label class="form-label">ObservaÃ§Ãµes</label>
-        <textarea id="troca-obs" class="form-control" rows="2" placeholder="Motivo ou observaÃ§Ãµes da troca..."></textarea>
+        <label class="form-label">Observações</label>
+        <textarea id="troca-obs" class="form-control" rows="2" placeholder="Motivo ou observações da troca..."></textarea>
       </div>
 
       <div class="total-box" style="margin-top:10px">
@@ -207,14 +207,14 @@
           <div class="total-label">Novos itens: <span id="troca-total-novo" style="font-weight:600">R$ 0,00</span></div>
         </div>
         <div>
-          <div class="total-label" style="text-align:right">DiferenÃ§a</div>
+          <div class="total-label" style="text-align:right">Diferença</div>
           <div class="total-value" id="troca-diferenca">R$ 0,00</div>
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-troca')">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarTroca()">ðŸ”„ Confirmar Troca</button>
+      <button class="btn btn-primary" onclick="confirmarTroca()">🔄 Confirmar Troca</button>
     </div>
   </div>
 </div>
@@ -224,14 +224,14 @@
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
 <script src="js/icons.js"></script>
-<script src="js/app.js"></script>
+<<script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
   Tenant.inicializarTenant();
   document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('vendas'));
   setupClienteAutocomplete('venda-cliente', 'venda-cliente-id');
 
-  // Datas padrÃ£o: este mÃªs
+  // Datas padrão: este mês
   const hoje_ = hoje();
   const inicioMes = hoje_.slice(0, 8) + '01';
   document.getElementById('data-inicio').value = inicioMes;
@@ -263,7 +263,7 @@
       const [todas, todosCarnes] = await Promise.all([DB.Vendas.todas(), DB.Carnes.todos()]);
 
       let lista = todas.filter(v => {
-        // Oculta vendas que sÃ£o apenas o registro auxiliar de um carnÃª (jÃ¡ exibido como CRN)
+        // Oculta vendas que são apenas o registro auxiliar de um carnê (já exibido como CRN)
         if (v.forma_pagamento === 'carne') return false;
         const vData = v.data ? v.data.split('T')[0] : '';
         const matchBusca = !busca ||
@@ -274,7 +274,7 @@
         return matchBusca && matchData && matchStatus;
       }).map(v => ({ ...v, _tipo: 'venda', _sortDate: new Date(v.data) }));
 
-      // CarnÃªs como linhas consolidadas
+      // Carnês como linhas consolidadas
       const statusMap = { aberto: 'pendente', quitado: 'pago', cancelado: 'cancelada' };
       const carnesLista = todosCarnes.filter(c => {
         const cData = c.criado_em ? c.criado_em.split('T')[0] : '';
@@ -304,7 +304,7 @@
     const pendente = ativas.filter(v => v.status_pgto !== 'pago').reduce((s, v) => s + (v.total || 0), 0);
     let canceladas = lista.filter(v => v.status === 'cancelada').length;
 
-    // CarnÃªs
+    // Carnês
     const carnesAtivos = carnesLista.filter(c => c.status !== 'cancelado');
     const totalCarne = carnesAtivos.reduce((s, c) => s + (c.valor_total || 0), 0);
     const pagosCarne = carnesAtivos.filter(c => c.status === 'quitado').reduce((s, c) => s + (c.valor_total || 0), 0);
@@ -312,28 +312,28 @@
     canceladas += carnesLista.filter(c => c.status === 'cancelado').length;
 
     document.getElementById('stats-vendas').innerHTML = `
-      <div class="stat-card"><div class="stat-icon pink">ðŸ’°</div>
-        <div class="stat-info"><div class="stat-value">${Fmt.moeda(total + totalCarne)}</div><div class="stat-label">Total no perÃ­odo</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">âœ…</div>
+      <div class="stat-card"><div class="stat-icon pink">💰</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(total + totalCarne)}</div><div class="stat-label">Total no período</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(pagas + pagosCarne)}</div><div class="stat-label">Valor pago</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">â³</div>
+      <div class="stat-card"><div class="stat-icon orange">⏳</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(pendente + pendenteCarne)}</div><div class="stat-label">Pendente/Parcelado</div></div></div>
-      <div class="stat-card"><div class="stat-icon red">âŒ</div>
+      <div class="stat-card"><div class="stat-icon red">❌</div>
         <div class="stat-info"><div class="stat-value">${canceladas}</div><div class="stat-label">Canceladas</div></div></div>`;
   }
 
   function renderTabela(lista) {
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">ðŸ›ï¸</div>
-        <div class="empty-title">Nenhuma venda no perÃ­odo</div>
+        `<div class="empty-state"><div class="empty-icon">🛍️</div>
+        <div class="empty-title">Nenhuma venda no período</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirNovaVenda()">+ Registrar venda</button></div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>NÂº Venda</th><th>Data</th><th>Cliente</th><th>Itens</th>
-      <th>Total</th><th>Pagamento</th><th>Status</th><th>AÃ§Ãµes</th>
+      <th>Nº Venda</th><th>Data</th><th>Cliente</th><th>Itens</th>
+      <th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th>
     </tr></thead><tbody>`;
 
     lista.forEach(v => {
@@ -342,16 +342,16 @@
         const totalParc = (v.parcelas || []).length;
         const statusCarne = v.status === 'quitado' ? 'pago' : v.status === 'cancelado' ? 'cancelada' : 'pendente';
         html += `<tr style="${v.status === 'cancelado' ? 'opacity:.6' : ''}">
-          <td><strong>${v.numero}</strong> <span style="background:#7C3AED;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:4px">CARNÃŠ</span></td>
+          <td><strong>${v.numero}</strong> <span style="background:#7C3AED;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:4px">CARNÊ</span></td>
           <td>${Fmt.data(v.criado_em)}</td>
-          <td>${v.cliente_nome || v.cliente || '<em class="text-muted">â€”</em>'}</td>
+          <td>${v.cliente_nome || v.cliente || '<em class="text-muted">—</em>'}</td>
           <td>${totalParc}x parcelas (${parcPagas} pagas)</td>
           <td><strong>${Fmt.moeda(v.valor_total)}</strong></td>
           <td>Parcelado</td>
           <td>${badgeStatus(statusCarne)}</td>
           <td><div class="td-actions">
-            <a class="btn btn-sm btn-ghost btn-icon" href="carnes.html" title="Ver carnÃªs">ðŸ‘ï¸</a>
-            ${v.status !== 'cancelado' && Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="abrirTrocaCarne('${v.id}')" title="Trocar produto">ðŸ”„</button>` : ''}
+            <a class="btn btn-sm btn-ghost btn-icon" href="carnes.html" title="Ver carnês">👁️</a>
+            ${v.status !== 'cancelado' && Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="abrirTrocaCarne('${v.id}')" title="Trocar produto">🔄</button>` : ''}
           </div></td>
         </tr>`;
       } else {
@@ -365,8 +365,8 @@
           <td>${badgeStatus(v.status === 'cancelada' ? 'cancelada' : (v.status_pgto || 'pago'))}</td>
           <td>
             <div class="td-actions">
-              <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${v.id})" title="Ver detalhes">ðŸ‘ï¸</button>
-              ${v.status !== 'cancelada' && Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="abrirTroca(${v.id})" title="Trocar produto">ðŸ”„</button><button class="btn btn-sm btn-ghost btn-icon" onclick="cancelarVenda(${v.id})" title="Cancelar">âŒ</button>` : ''}
+              <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${v.id})" title="Ver detalhes">👁️</button>
+              ${v.status !== 'cancelada' && Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="abrirTroca(${v.id})" title="Trocar produto">🔄</button><button class="btn btn-sm btn-ghost btn-icon" onclick="cancelarVenda(${v.id})" title="Cancelar">❌</button>` : ''}
             </div>
           </td>
         </tr>`;
@@ -426,7 +426,7 @@
         <input type="number" class="form-control item-qtd" value="1" min="1" onchange="calcularItem('${id}')" oninput="calcularItem('${id}')" />
       </div>
       <div class="form-group" style="margin:0; width:100px">
-        <label class="form-label" style="font-size:11px">PreÃ§o (R$)</label>
+        <label class="form-label" style="font-size:11px">Preço (R$)</label>
         <input type="number" class="form-control item-preco" value="" step="0.01" min="0" onchange="calcularItem('${id}')" oninput="calcularItem('${id}')" />
       </div>
       <div class="item-subtotal">
@@ -435,7 +435,7 @@
       </div>
       <div>
         <label class="form-label" style="font-size:11px">&nbsp;</label>
-        <button class="btn btn-sm btn-danger btn-icon" onclick="removerItem('${id}')" title="Remover">ðŸ—‘ï¸</button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="removerItem('${id}')" title="Remover">🗑️</button>
       </div>`;
 
     document.getElementById('itens-venda').appendChild(div);
@@ -550,7 +550,7 @@
       if (!prodId || qtd <= 0) return;
       const prod = _prodMap[prodId];
       if (prod && (prod.estoque || 0) < qtd) {
-        mostrarToast(`Estoque insuficiente para "${prod.nome}" (disponÃ­vel: ${prod.estoque || 0})`, 'danger');
+        mostrarToast(`Estoque insuficiente para "${prod.nome}" (disponível: ${prod.estoque || 0})`, 'danger');
         erroEstoque = true;
         return;
       }
@@ -559,7 +559,7 @@
     });
 
     if (erroEstoque) return;
-    if (!itens.length) return mostrarToast('Adicione pelo menos um item Ã  venda', 'warning');
+    if (!itens.length) return mostrarToast('Adicione pelo menos um item à venda', 'warning');
 
     const total = Math.max(0, subtotal - desconto);
     let parcelas = [];
@@ -590,7 +590,7 @@
       vendedor_id: Auth.usuario().id, vendedor_nome: Auth.usuario().nome
     });
 
-    mostrarToast('Venda registrada com sucesso! ðŸŽ‰', 'success');
+    mostrarToast('Venda registrada com sucesso! 🎉', 'success');
     Modal.fechar('modal-venda');
     await carregar();
   }
@@ -615,14 +615,14 @@
 
     let parcelasHtml = '';
     if ((v.parcelas || []).length > 1) {
-      parcelasHtml = `<h4 style="font-size:14px; font-weight:700; margin-top:20px; margin-bottom:10px">ðŸ“… Parcelas</h4>`;
+      parcelasHtml = `<h4 style="font-size:14px; font-weight:700; margin-top:20px; margin-bottom:10px">📅 Parcelas</h4>`;
       (v.parcelas || []).forEach(p => {
         const cls = p.pago ? 'paga' : (p.vencimento < hoje() ? 'vencida' : '');
         parcelasHtml += `<div class="parcela-row ${cls}">
           <span class="badge badge-info">${p.numero}/${v.num_parcelas}</span>
           <strong>${Fmt.moeda(p.valor)}</strong>
           <span>Venc: ${Fmt.data(p.vencimento + 'T00:00:00')}</span>
-          ${p.pago ? '<span class="badge badge-success">âœ… Pago</span>' : '<span class="badge badge-warning">Pendente</span>'}
+          ${p.pago ? '<span class="badge badge-success">✅ Pago</span>' : '<span class="badge badge-warning">Pendente</span>'}
         </div>`;
       });
     }
@@ -635,7 +635,7 @@
         <div><label class="form-label">Forma de Pgto</label><p>${labelFormaPgto(v.forma_pagamento)}</p></div>
       </div>
       <div class="table-wrapper" style="margin-bottom:12px">
-        <table><thead><tr><th>Produto</th><th>Qtd</th><th>PreÃ§o</th><th>Subtotal</th></tr></thead>
+        <table><thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead>
         <tbody>${itensHtml}</tbody></table>
       </div>
       <div style="text-align:right; background:var(--bg); padding:12px 16px; border-radius:var(--radius-sm)">
@@ -652,7 +652,7 @@
     footer.innerHTML = '';
     if (v.status !== 'cancelada' && Auth.isAdmin()) {
       footer.innerHTML = `<button class="btn btn-danger" onclick="cancelarVenda(${v.id}); Modal.fechar('modal-detalhe')">Cancelar Venda</button>
-        <button class="btn btn-warning" onclick="abrirTroca(${v.id})">ðŸ”„ Trocar Produto</button>`;
+        <button class="btn btn-warning" onclick="abrirTroca(${v.id})">🔄 Trocar Produto</button>`;
     }
     footer.innerHTML += `<button class="btn btn-ghost" onclick="Modal.fechar('modal-detalhe')">Fechar</button>`;
     Modal.abrir('modal-detalhe');
@@ -660,7 +660,7 @@
 
   async function cancelarVenda(id) {
     const v = await DB.Vendas.porId(id);
-    confirmar(`Cancelar a venda #${v.numero}? Os itens serÃ£o devolvidos ao estoque.`, async () => {
+    confirmar(`Cancelar a venda #${v.numero}? Os itens serão devolvidos ao estoque.`, async () => {
       await DB.Vendas.cancelar(id);
       mostrarToast('Venda cancelada', 'danger');
       await carregar();
@@ -668,9 +668,9 @@
   }
 
   // ===== TROCA DE PRODUTOS =====
-  let _trocaVendaId = null;        // null = modo carnÃª, id = modo venda normal
+  let _trocaVendaId = null;        // null = modo carnê, id = modo venda normal
   let _trocaItensLevar = [];       // produtos que o cliente vai levar
-  let _trocaVendaItens = [];       // itens prÃ©-carregados (modo venda normal)
+  let _trocaVendaItens = [];       // itens pré-carregados (modo venda normal)
 
   // --- Abre troca a partir de uma venda normal ---
   async function abrirTroca(vendaId) {
@@ -681,7 +681,7 @@
     _trocaVendaItens = (v.venda_itens || v.itens || []).filter(i => !i.tipo || i.tipo === 'produto');
 
     document.getElementById('troca-venda-info').innerHTML =
-      `Venda <strong>#${v.numero}</strong> &nbsp;Â·&nbsp; ${v.cliente_nome || v.cliente || 'Consumidor'} &nbsp;Â·&nbsp; ${Fmt.moeda(v.total)}`;
+      `Venda <strong>#${v.numero}</strong> &nbsp;·&nbsp; ${v.cliente_nome || v.cliente || 'Consumidor'} &nbsp;·&nbsp; ${Fmt.moeda(v.total)}`;
 
     document.getElementById('troca-filter-dev').value = '';
     document.getElementById('troca-filter-levar').value = '';
@@ -693,11 +693,11 @@
     Modal.abrir('modal-troca');
   }
 
-  // --- Abre troca a partir de um carnÃª ---
+  // --- Abre troca a partir de um carnê ---
   async function abrirTrocaCarne(carneId) {
     const c = await DB.Carnes.porId(carneId);
     if (!c) return;
-    _trocaVendaId = null; // modo carnÃª
+    _trocaVendaId = null; // modo carnê
     _trocaItensLevar = [];
     _trocaVendaItens = [];
 
@@ -706,14 +706,14 @@
     if (match) {
       const numero = match[1];
 
-      // EstratÃ©gia 1: busca via venda_itens
+      // Estratégia 1: busca via venda_itens
       const vendaOriginal = await DB.Vendas.porNumero(numero);
       if (vendaOriginal) {
         const itensRaw = vendaOriginal.venda_itens || vendaOriginal.itens || [];
         _trocaVendaItens = itensRaw.filter(i => !i.tipo || i.tipo === 'produto');
       }
 
-      // EstratÃ©gia 2: se venda_itens vazio, busca nas movimentaÃ§Ãµes de estoque
+      // Estratégia 2: se venda_itens vazio, busca nas movimentações de estoque
       if (!_trocaVendaItens.length) {
         const movs = await DB.Movimentacoes.porVendaNumero(numero);
         _trocaVendaItens = movs
@@ -726,18 +726,18 @@
       }
     }
 
-    // EstratÃ©gia 3: parse da descriÃ§Ã£o do carnÃª contra o catÃ¡logo de produtos
-    // Funciona para carnÃªs antigos cujo nome do produto aparece na descriÃ§Ã£o
+    // Estratégia 3: parse da descrição do carnê contra o catálogo de produtos
+    // Funciona para carnês antigos cujo nome do produto aparece na descrição
     if (!_trocaVendaItens.length && c.descricao) {
-      const desc = c.descricao.replace(/PDV #\w+\s*[â€”-]?\s*/i, '').toLowerCase();
+      const desc = c.descricao.replace(/PDV #\w+\s*[—-]?\s*/i, '').toLowerCase();
       const encontrados = [];
       Object.values(_prodMap)
         .filter(p => p.ativo !== false)
-        .sort((a, b) => b.nome.length - a.nome.length) // mais especÃ­fico primeiro
+        .sort((a, b) => b.nome.length - a.nome.length) // mais específico primeiro
         .forEach(p => {
           const nome = p.nome.toLowerCase();
           if (desc.includes(nome)) {
-            // conta quantas vezes o nome aparece na descriÃ§Ã£o
+            // conta quantas vezes o nome aparece na descrição
             const regex = new RegExp(nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
             const qtd = (c.descricao.match(regex) || []).length;
             if (!encontrados.find(e => e.produto_id === p.id)) {
@@ -749,7 +749,7 @@
     }
 
     document.getElementById('troca-venda-info').innerHTML =
-      `CarnÃª <strong>${c.numero}</strong> &nbsp;Â·&nbsp; ${c.cliente_nome || c.cliente || 'Consumidor'} &nbsp;Â·&nbsp; ${c.descricao || ''}`;
+      `Carnê <strong>${c.numero}</strong> &nbsp;·&nbsp; ${c.cliente_nome || c.cliente || 'Consumidor'} &nbsp;·&nbsp; ${c.descricao || ''}`;
 
     document.getElementById('troca-filter-dev').value = '';
     document.getElementById('troca-filter-levar').value = '';
@@ -761,15 +761,15 @@
   }
 
   // --- Lista esquerda: Itens a Devolver ---
-  // Usa itens da venda quando disponÃ­veis (_trocaVendaItens.length > 0)
-  // Caso contrÃ¡rio (carnÃª sem venda vinculada): mostra todos os produtos
+  // Usa itens da venda quando disponíveis (_trocaVendaItens.length > 0)
+  // Caso contrário (carnê sem venda vinculada): mostra todos os produtos
   function _renderListaDev() {
     const busca = (document.getElementById('troca-filter-dev')?.value || '').toLowerCase();
     const el = document.getElementById('troca-lista-dev');
     const temItensVenda = _trocaVendaItens.length > 0;
 
     if (temItensVenda) {
-      // Mostra apenas os itens da venda/carnÃª vinculado com checkbox
+      // Mostra apenas os itens da venda/carnê vinculado com checkbox
       const itens = _trocaVendaItens.filter(i => {
         const p = _prodMap[i.produto_id];
         return !busca || (p?.nome || '').toLowerCase().includes(busca);
@@ -778,7 +778,7 @@
       el.innerHTML = itens.map((item, idx) => {
         const p = _prodMap[item.produto_id];
         const nome = p?.nome || ('#' + item.produto_id);
-        const info = [p?.tamanho, p?.cor].filter(Boolean).join(' Â· ');
+        const info = [p?.tamanho, p?.cor].filter(Boolean).join(' · ');
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border)">
           <input type="checkbox" id="dev-cb-v-${idx}" checked onchange="calcularTroca()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0" />
           <div style="flex:1;min-width:0">
@@ -794,13 +794,13 @@
         </div>`;
       }).join('');
     } else {
-      // Fallback: carnÃª sem venda vinculada â€” mostra todos os produtos
+      // Fallback: carnê sem venda vinculada — mostra todos os produtos
       const prods = Object.values(_prodMap)
         .filter(p => p.ativo !== false && (!busca || p.nome.toLowerCase().includes(busca) || (p.tamanho || '').toLowerCase().includes(busca) || (p.cor || '').toLowerCase().includes(busca)))
         .sort((a, b) => a.nome.localeCompare(b.nome));
       if (!prods.length) { el.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--text2)">Nenhum produto encontrado.</p>'; return; }
       el.innerHTML = prods.map(p => {
-        const info = [p.tamanho, p.cor].filter(Boolean).join(' Â· ');
+        const info = [p.tamanho, p.cor].filter(Boolean).join(' · ');
         const estqColor = p.estoque <= 0 ? 'var(--danger)' : p.estoque <= 3 ? '#f59e0b' : '#16a34a';
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border)">
           <input type="checkbox" id="dev-cb-${p.id}" onchange="calcularTroca()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0" />
@@ -827,7 +827,7 @@
       .sort((a, b) => a.nome.localeCompare(b.nome));
     if (!prods.length) { el.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--text2)">Nenhum produto encontrado.</p>'; return; }
     el.innerHTML = prods.map(p => {
-      const info = [p.tamanho, p.cor].filter(Boolean).join(' Â· ');
+      const info = [p.tamanho, p.cor].filter(Boolean).join(' · ');
       const semEstoque = (p.estoque || 0) <= 0;
       const estqColor = semEstoque ? 'var(--danger)' : p.estoque <= 3 ? '#f59e0b' : '#16a34a';
       return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);${semEstoque ? 'opacity:.5' : ''}">
@@ -853,9 +853,9 @@
     el.innerHTML = _trocaItensLevar.map((item, idx) =>
       `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg);border-radius:var(--radius-sm);margin-top:4px">
         <div style="flex:1;font-size:13px;font-weight:600">${item.nome}</div>
-        <div style="font-size:12px;color:var(--text2)">${Fmt.moeda(item.preco_unitario)} Ã—${item.quantidade}</div>
+        <div style="font-size:12px;color:var(--text2)">${Fmt.moeda(item.preco_unitario)} ×${item.quantidade}</div>
         <div style="font-size:13px;font-weight:700">${Fmt.moeda(item.preco_unitario * item.quantidade)}</div>
-        <button class="btn btn-sm btn-ghost btn-icon" onclick="removerItemLevar(${idx})">ðŸ—‘ï¸</button>
+        <button class="btn btn-sm btn-ghost btn-icon" onclick="removerItemLevar(${idx})">🗑️</button>
       </div>`
     ).join('');
     calcularTroca();
@@ -875,11 +875,11 @@
     _renderCarrinhoLevar();
   }
 
-  // --- LÃª itens marcados para devolver ---
+  // --- Lê itens marcados para devolver ---
   function _getItensDevolver() {
     const result = [];
     if (_trocaVendaItens.length > 0) {
-      // Itens da venda conhecidos (venda normal ou carnÃª com venda vinculada)
+      // Itens da venda conhecidos (venda normal ou carnê com venda vinculada)
       _trocaVendaItens.forEach((item, idx) => {
         const cb = document.getElementById(`dev-cb-v-${idx}`);
         if (cb?.checked) {
@@ -890,7 +890,7 @@
         }
       });
     } else {
-      // Fallback: carnÃª sem venda vinculada â€” lÃª checkboxes da lista completa
+      // Fallback: carnê sem venda vinculada — lê checkboxes da lista completa
       Object.values(_prodMap).forEach(p => {
         const cb = document.getElementById(`dev-cb-${p.id}`);
         if (cb?.checked) {
@@ -923,7 +923,7 @@
       const r = await DB.Vendas.registrarTroca(_trocaVendaId, _getItensDevolver(), _trocaItensLevar, obs);
       let msg = `Troca registrada! Nova venda #${r.novaVenda.numero}.`;
       if (r.diferenca > 0) msg += ` Cliente deve pagar ${Fmt.moeda(r.diferenca)}.`;
-      else if (r.diferenca < 0) msg += ` CrÃ©dito de ${Fmt.moeda(-r.diferenca)} para o cliente.`;
+      else if (r.diferenca < 0) msg += ` Crédito de ${Fmt.moeda(-r.diferenca)} para o cliente.`;
       mostrarToast(msg, 'success');
       Modal.fechar('modal-troca');
       await carregar();
@@ -936,4 +936,3 @@
 </script>
 </body>
 </html>
-
