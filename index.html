@@ -9,47 +9,66 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* Login com painel artístico à esquerda */
     .login-page { min-height: 100vh; display: flex; background: #fff; }
     .login-page::before { display: none; }
+
+    /* ── Painel esquerdo ── */
     .login-art {
-      flex: 1; position: relative; overflow: hidden;
-      background: repeating-linear-gradient(90deg, #F5C7D3 0 14px, #FCEAEF 14px 28px);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 32px;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 64px 48px;
+      /* Fiore: gradiente rosa + listras sutis */
+      background:
+        repeating-linear-gradient(90deg, rgba(210,80,120,0.07) 0 10px, transparent 10px 20px),
+        linear-gradient(160deg, #6B0230 0%, #B5124A 45%, #E0407B 80%, #F2A0BB 100%);
     }
-    /* Logo como marca d'água — Fiore (padrão) */
+    .login-art-top {
+      width: 100%; display: flex; align-items: center; gap: 14px;
+    }
+    .login-art-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
+      text-transform: uppercase; color: rgba(255,255,255,0.55);
+    }
     .login-art-logo {
-      width: 72%; max-width: 420px; min-width: 220px;
-      position: relative; z-index: 1;
+      width: 68%; max-width: 380px;
       display: block;
-      opacity: 0.18;
-      filter: saturate(0.6) contrast(1.1);
-      border-radius: 0; background: transparent; box-shadow: none;
+      position: relative;
+      mix-blend-mode: soft-light;
+      opacity: 0.55;
+      filter: brightness(1.4) saturate(0.3);
+      margin: 0 auto;
     }
+    .login-art-bottom { width: 100%; }
     .login-art-quote {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 34px; line-height: 1.22;
+      font-size: 36px; line-height: 1.2;
       font-style: italic; font-weight: 600;
-      max-width: 380px;
-      text-align: center;
-      color: #5C0D2B;
-      position: relative; z-index: 1;
+      color: #fff;
+      margin-bottom: 16px;
     }
-    .login-art-foot { display: none; }
-
-    /* Prateada — gradiente roxo */
+    .login-art-foot {
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45); font-weight: 600;
+    }
+    /* Prateada */
     .login-art.tenant-prateada {
-      background: linear-gradient(155deg, #2D0045 0%, #6E3B7A 55%, #9B5BB5 100%);
+      background:
+        linear-gradient(155deg, #1E0035 0%, #5B2575 50%, #9B5BB5 100%);
     }
     .login-art.tenant-prateada .login-art-logo {
-      opacity: 0.22;
-      filter: brightness(2) saturate(0) contrast(1.2);
+      mix-blend-mode: screen;
+      opacity: 0.5;
+      filter: brightness(2) saturate(0.15);
     }
-    .login-art.tenant-prateada .login-art-quote { color: rgba(255,255,255,0.88); }
 
     @media (max-width: 900px) { .login-art { display: none; } }
 
+    /* ── Painel direito (formulário) ── */
     .login-side {
       width: 460px; max-width: 100%;
       background: #fff;
@@ -57,27 +76,21 @@
       display: flex; flex-direction: column;
       justify-content: center;
     }
-    .login-side-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
-    .login-side-brand img {
-      width: 56px; height: 56px; border-radius: 12px;
-      object-fit: cover;
-      box-shadow: 0 6px 18px -8px rgba(140,40,80,0.3);
-    }
+    .login-side-brand { margin-bottom: 40px; }
     .login-side-brand .name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 22px; font-weight: 500; font-style: italic;
-      letter-spacing: -0.015em; line-height: 1;
+      font-size: 26px; font-weight: 500; font-style: italic;
+      letter-spacing: -0.015em; line-height: 1; color: var(--text);
     }
     .login-side-brand .sub {
-      font-size: 10px; letter-spacing: 0.2em;
+      font-size: 10px; letter-spacing: 0.22em;
       color: var(--text3); text-transform: uppercase;
-      font-weight: 600; margin-top: 4px;
+      font-weight: 600; margin-top: 5px;
     }
     .login-side h1 {
       font-family: var(--font-serif);
       font-size: 32px; font-weight: 500;
-      letter-spacing: -0.015em;
-      color: var(--text);
+      letter-spacing: -0.015em; color: var(--text);
       margin-bottom: 6px;
     }
     .login-side .lead { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
@@ -112,13 +125,15 @@
 
 <div class="login-page">
 
-  <!-- Painel artístico -->
+  <!-- Painel esquerdo -->
   <div class="login-art">
-    <img src="Imagens/logo.png" alt="Fiore Pijamas" class="login-art-logo" id="art-logo" />
-    <div class="login-art-quote" id="art-quote">
-      "Conforto que veste como uma carícia."
+    <div class="login-art-top">
+      <span class="login-art-tag" id="art-foot">Fiore · Pijamas</span>
     </div>
-    <div class="login-art-foot" id="art-foot">Fiore · Desde 2019</div>
+    <img src="Imagens/logo.png" alt="Fiore" class="login-art-logo" id="art-logo" />
+    <div class="login-art-bottom">
+      <div class="login-art-quote" id="art-quote">"Conforto que veste como uma carícia."</div>
+    </div>
   </div>
 
   <!-- Formulário -->
@@ -187,15 +202,17 @@
     _lojaAtual = loja;
     const artPanel = document.querySelector('.login-art');
     if (loja?.slug === 'fiore') {
-      document.getElementById('art-logo').src  = 'Imagens/logo.png';
+      document.getElementById('art-logo').src           = 'Imagens/logo.png';
       document.getElementById('brand-name').textContent = 'Fiore';
       document.getElementById('brand-sub').textContent  = 'Pijamas · Gestão';
       document.getElementById('art-quote').textContent  = '"Conforto que veste como uma carícia."';
+      document.getElementById('art-foot').textContent   = 'Fiore · Pijamas';
     } else if (loja?.slug === 'prateada') {
-      document.getElementById('art-logo').src  = 'Imagens/logo2.png';
+      document.getElementById('art-logo').src           = 'Imagens/logo2.png';
       document.getElementById('brand-name').textContent = 'Prateada';
       document.getElementById('brand-sub').textContent  = 'Salão · Gestão';
       document.getElementById('art-quote').textContent  = '"Beleza que se traduz em confiança."';
+      document.getElementById('art-foot').textContent   = 'Prateada · Salão';
       artPanel?.classList.add('tenant-prateada');
     } else if (loja?.nome) {
       document.getElementById('brand-name').textContent = loja.nome;
