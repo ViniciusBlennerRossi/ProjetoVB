@@ -84,7 +84,7 @@ const Tenant = (() => {
     r.style.setProperty('--sidebar2',      clarear(sidebar, 12));
 
     // Adapta cores do texto da sidebar conforme luminosidade do fundo
-    const sidebarEscura = _luminosidade(sidebar) < 0.4;
+    const sidebarEscura = _luminosidade(sidebar) < 0.6;
     if (sidebarEscura) {
       r.style.setProperty('--nav-text',          'rgba(255,255,255,0.72)');
       r.style.setProperty('--nav-text-active',   '#ffffff');

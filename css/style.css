@@ -217,11 +217,11 @@ input, select, textarea { font-family: inherit; font-size: 14px; color: var(--te
 
 .user-info { flex: 1; min-width: 0; }
 .user-name {
-  font-size: 12px; font-weight: 600; color: var(--text);
+  font-size: 12px; font-weight: 600; color: var(--nav-text-active, var(--text));
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .user-role {
-  font-size: 10.5px; color: var(--text2); text-transform: capitalize;
+  font-size: 10.5px; color: var(--nav-text, var(--text2)); text-transform: capitalize;
   font-weight: 500;
 }
 
