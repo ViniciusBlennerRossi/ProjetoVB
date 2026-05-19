@@ -1,16 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Produtos — Fiore Pijamas</title>
+  <title>Produtos â€” Fiore Pijamas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">👗 Produtos</div>
+      <div class="topbar-title">ðŸ‘— Produtos</div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="abrirModal()">+ Novo Produto</button>
       </div>
@@ -20,8 +23,8 @@
       <!-- Filtros -->
       <div class="search-bar card" style="padding:14px 18px; margin-bottom:20px">
         <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="busca" class="form-control" placeholder="Buscar por nome, código..." oninput="filtrar()" />
+          <span class="search-icon">ðŸ”</span>
+          <input type="text" id="busca" class="form-control" placeholder="Buscar por nome, cÃ³digo..." oninput="filtrar()" />
         </div>
         <select id="filtro-categoria" class="form-control form-select" style="max-width:180px" onchange="filtrar()">
           <option value="">Todas categorias</option>
@@ -36,7 +39,7 @@
       <!-- Tabela -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">📋 Lista de Produtos <span id="count-label" class="badge badge-secondary"></span></div>
+          <div class="card-title">ðŸ“‹ Lista de Produtos <span id="count-label" class="badge badge-secondary"></span></div>
           <span id="total-estoque-valor" style="font-size:13px; color:var(--text2)"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -52,13 +55,13 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="modal-titulo">Novo Produto</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-produto')">✕</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-produto')">âœ•</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="prod-id" />
       <div class="form-row cols-2">
         <div class="form-group">
-          <label class="form-label">Código *</label>
+          <label class="form-label">CÃ³digo *</label>
           <input type="text" id="prod-codigo" class="form-control" placeholder="Ex: VES001" />
         </div>
         <div class="form-group">
@@ -80,7 +83,7 @@
     <option>34</option><option>36</option><option>38</option>
     <option>40</option><option>42</option><option>44</option><option>46</option><option>48</option>
     <option>Tamanho 2</option><option>Tamanho 3</option><option>Tamanho 4</option><option>Tamanho 5</option><option>Tamanho 6</option>
-    <option>Único</option>
+    <option>Ãšnico</option>
 </select>
         </div>
         <div class="form-group" id="group-cor">
@@ -98,19 +101,19 @@
           <input type="number" id="prod-custo" class="form-control" placeholder="0,00" step="0.01" min="0" />
         </div>
         <div class="form-group">
-          <label class="form-label">Preço de Venda (R$) *</label>
+          <label class="form-label">PreÃ§o de Venda (R$) *</label>
           <input type="number" id="prod-preco" class="form-control" placeholder="0,00" step="0.01" min="0" />
           <div class="form-hint" id="margem-hint"></div>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Descrição</label>
+        <label class="form-label">DescriÃ§Ã£o</label>
         <textarea id="prod-descricao" class="form-control" rows="2" placeholder="Detalhes adicionais..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-produto')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarProduto()">💾 Salvar Produto</button>
+      <button class="btn btn-primary" onclick="salvarProduto()">ðŸ’¾ Salvar Produto</button>
     </div>
   </div>
 </div>
@@ -119,6 +122,7 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
@@ -134,9 +138,9 @@
 
     // Topbar icon
     const topTitle = document.querySelector('.topbar-title');
-    if (topTitle) topTitle.textContent = '🛍️ Produtos';
+    if (topTitle) topTitle.textContent = 'ðŸ›ï¸ Produtos';
 
-    // Label + campo Tamanho → Volume/Peso (text input)
+    // Label + campo Tamanho â†’ Volume/Peso (text input)
     document.getElementById('label-tamanho').textContent = 'Volume/Peso';
     const groupTamanho = document.getElementById('group-tamanho');
     const oldSelect = document.getElementById('prod-tamanho');
@@ -147,23 +151,23 @@
     newInput.placeholder = 'Ex: 200ml, 50g';
     groupTamanho.replaceChild(newInput, oldSelect);
 
-    // Label Cor → Marca
+    // Label Cor â†’ Marca
     document.getElementById('label-cor').textContent = 'Marca';
-    document.getElementById('prod-cor').placeholder = 'Ex: O Boticário, Natura';
+    document.getElementById('prod-cor').placeholder = 'Ex: O BoticÃ¡rio, Natura';
   }
 
   const _CATS_PRATEADA = [
-    'Serviços de Cabelo (Corte, Coloração, Tratamentos)',
-    'Serviços de Manicure e Pedicure',
-    'Serviços de Estética e Maquiagem',
+    'ServiÃ§os de Cabelo (Corte, ColoraÃ§Ã£o, Tratamentos)',
+    'ServiÃ§os de Manicure e Pedicure',
+    'ServiÃ§os de EstÃ©tica e Maquiagem',
     'Kits e Itens para Presente',
     'Perfumaria', 'Maquiagem', 'Cuidados com a Pele', 'Cabelos',
-    'Corpo e Banho', 'Presentes e Kits', 'Acessórios', 'Outros'
+    'Corpo e Banho', 'Presentes e Kits', 'AcessÃ³rios', 'Outros'
   ];
 
   async function garantirCategoriasPrateada(cats) {
     if (!_isPrateada) return cats;
-    // Adiciona categorias que ainda não existem (por nome)
+    // Adiciona categorias que ainda nÃ£o existem (por nome)
     const existentes = new Set(cats.map(c => c.nome));
     const faltando = _CATS_PRATEADA.filter(n => !existentes.has(n));
     if (!faltando.length) return cats;
@@ -225,7 +229,7 @@
   function renderTabela(lista) {
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">👗</div>
+        `<div class="empty-state"><div class="empty-icon">ðŸ‘—</div>
         <div class="empty-title">Nenhum produto encontrado</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Adicionar produto</button></div></div>`;
       return;
@@ -233,8 +237,8 @@
 
     const col3Label = _isPrateada ? 'Marca' : 'Tamanho';
     let html = `<table><thead><tr>
-      <th>Código</th><th>Produto</th><th>Categoria</th>
-      <th>${col3Label}</th><th>Estoque</th><th>Custo</th><th>Preço</th><th>Margem</th><th>Ações</th>
+      <th>CÃ³digo</th><th>Produto</th><th>Categoria</th>
+      <th>${col3Label}</th><th>Estoque</th><th>Custo</th><th>PreÃ§o</th><th>Margem</th><th>AÃ§Ãµes</th>
     </tr></thead><tbody>`;
 
     lista.forEach(p => {
@@ -245,7 +249,7 @@
         : p.estoque <= 5
           ? `<span class="badge badge-warning">${p.estoque}</span>`
           : `<span class="badge badge-success">${p.estoque}</span>`;
-      // Para Prateada: col3 = marca (cor), subtítulo = volume/peso (tamanho)
+      // Para Prateada: col3 = marca (cor), subtÃ­tulo = volume/peso (tamanho)
       const col3Val = _isPrateada ? (p.cor || '-') : (p.tamanho || '-');
       const subtitulo = _isPrateada
         ? (p.tamanho ? `<br><small class="text-muted">${p.tamanho}</small>` : '')
@@ -264,8 +268,8 @@
         <td class="${margem >= 50 ? 'text-success' : margem >= 20 ? 'text-warning' : 'text-danger'}">${margem.toFixed(0)}%</td>
         <td>
           <div class="td-actions">
-            <button class="btn btn-sm btn-ghost btn-icon" onclick="editarProduto(${p.id})" title="Editar">✏️</button>
-            ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirProduto(${p.id})" title="Excluir">🗑️</button>` : ''}
+            <button class="btn btn-sm btn-ghost btn-icon" onclick="editarProduto(${p.id})" title="Editar">âœï¸</button>
+            ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirProduto(${p.id})" title="Excluir">ðŸ—‘ï¸</button>` : ''}
           </div>
         </td>
       </tr>`;
@@ -300,7 +304,7 @@
     const p = todosOsProdutos.find(x => x.id === id);
     confirmar(`Deseja excluir o produto <strong>${p.nome}</strong>?`, async () => {
       await DB.Produtos.deletar(id);
-      mostrarToast('Produto excluído', 'success');
+      mostrarToast('Produto excluÃ­do', 'success');
       await carregar();
     });
   }
@@ -316,7 +320,7 @@
 
     if (!nome) return mostrarToast('Informe o nome do produto', 'warning');
     if (!custo || custo <= 0) return mostrarToast('Informe o custo do produto', 'warning');
-    if (!preco || preco <= 0) return mostrarToast('Informe o preço de venda', 'warning');
+    if (!preco || preco <= 0) return mostrarToast('Informe o preÃ§o de venda', 'warning');
 
     const dados = {
       codigo, nome, categoria_id,
@@ -366,3 +370,4 @@
 </script>
 </body>
 </html>
+

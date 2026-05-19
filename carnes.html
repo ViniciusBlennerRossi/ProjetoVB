@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carnês — Fiore Pijamas</title>
+  <title>CarnÃªs â€” Fiore Pijamas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .carne-card {
@@ -33,7 +36,7 @@
     .parcela-mini.pendente { background: var(--warning-bg); color: var(--warning); border: 1.5px solid #FFCC80; }
     .carnes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
 
-    /* ===== EXTRATO IMPRESSÃO ===== */
+    /* ===== EXTRATO IMPRESSÃƒO ===== */
     #area-extrato { display: none; }
 
     @media print {
@@ -100,10 +103,10 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">📄 Carnês</div>
+      <div class="topbar-title">ðŸ“„ CarnÃªs</div>
       <div class="topbar-actions">
-        <button class="btn btn-outline" onclick="abrirModalExtrato()">📋 Extrato do Cliente</button>
-        <button class="btn btn-primary" onclick="abrirModal()">+ Novo Carnê</button>
+        <button class="btn btn-outline" onclick="abrirModalExtrato()">ðŸ“‹ Extrato do Cliente</button>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Novo CarnÃª</button>
       </div>
     </div>
     <div class="page-content">
@@ -121,8 +124,8 @@
         <input type="date" id="filtro-inicio" class="form-control" style="max-width:145px" onchange="filtrar()" />
         <input type="date" id="filtro-fim"    class="form-control" style="max-width:145px" onchange="filtrar()" />
         <div class="search-input-wrap" style="min-width:220px">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="busca" class="form-control" placeholder="Buscar por cliente ou nº..." oninput="filtrar()" />
+          <span class="search-icon">ðŸ”</span>
+          <input type="text" id="busca" class="form-control" placeholder="Buscar por cliente ou nÂº..." oninput="filtrar()" />
         </div>
       </div>
 
@@ -131,12 +134,12 @@
   </div>
 </div>
 
-<!-- Modal Novo Carnê -->
+<!-- Modal Novo CarnÃª -->
 <div class="modal-overlay" id="modal-carne">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title" id="modal-titulo">Novo Carnê</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-carne')">✕</button>
+      <div class="modal-title" id="modal-titulo">Novo CarnÃª</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-carne')">âœ•</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="carne-id" />
@@ -149,8 +152,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Descrição *</label>
-          <input type="text" id="carne-descricao" class="form-control" placeholder="Ex: Compra de roupas, débito anterior..." />
+          <label class="form-label">DescriÃ§Ã£o *</label>
+          <input type="text" id="carne-descricao" class="form-control" placeholder="Ex: Compra de roupas, dÃ©bito anterior..." />
         </div>
       </div>
       <div class="form-row cols-3">
@@ -159,7 +162,7 @@
           <input type="number" id="carne-valor" class="form-control" step="0.01" min="0" placeholder="0,00" oninput="calcularParcelas()" />
         </div>
         <div class="form-group">
-          <label class="form-label">Nº de Parcelas *</label>
+          <label class="form-label">NÂº de Parcelas *</label>
           <select id="carne-parcelas" class="form-control form-select" onchange="calcularParcelas()">
             <option value="2">2x</option><option value="3">3x</option>
             <option value="4">4x</option><option value="5">5x</option>
@@ -187,13 +190,13 @@
       <div id="preview-parcelas"></div>
 
       <div class="form-group" style="margin-top:12px">
-        <label class="form-label">Observações</label>
-        <input type="text" id="carne-obs" class="form-control" placeholder="Referência, condições..." />
+        <label class="form-label">ObservaÃ§Ãµes</label>
+        <input type="text" id="carne-obs" class="form-control" placeholder="ReferÃªncia, condiÃ§Ãµes..." />
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-carne')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvar()">💾 Criar Carnê</button>
+      <button class="btn btn-primary" onclick="salvar()">ðŸ’¾ Criar CarnÃª</button>
     </div>
   </div>
 </div>
@@ -202,8 +205,8 @@
 <div class="modal-overlay" id="modal-pagar">
   <div class="modal" style="max-width:440px">
     <div class="modal-header">
-      <div class="modal-title">💵 Receber Parcela</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-pagar')">✕</button>
+      <div class="modal-title">ðŸ’µ Receber Parcela</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-pagar')">âœ•</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="pagar-carne-id" />
@@ -215,7 +218,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Valor Recebido (R$)</label>
-        <input type="number" id="pagar-valor-recebido" class="form-control" step="0.01" min="0" placeholder="Deixe em branco para pagar só esta parcela" oninput="previewAbatimento()" />
+        <input type="number" id="pagar-valor-recebido" class="form-control" step="0.01" min="0" placeholder="Deixe em branco para pagar sÃ³ esta parcela" oninput="previewAbatimento()" />
         <div id="pagar-preview" style="font-size:12px;color:var(--text2);margin-top:6px"></div>
       </div>
       <div class="form-group">
@@ -225,7 +228,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-pagar')">Cancelar</button>
-      <button class="btn btn-success" onclick="confirmarPagamento()">✅ Confirmar</button>
+      <button class="btn btn-success" onclick="confirmarPagamento()">âœ… Confirmar</button>
     </div>
   </div>
 </div>
@@ -234,8 +237,8 @@
 <div class="modal-overlay" id="modal-extrato">
   <div class="modal" style="max-width:460px">
     <div class="modal-header">
-      <div class="modal-title">📋 Extrato de Carnês por Cliente</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-extrato')">✕</button>
+      <div class="modal-title">ðŸ“‹ Extrato de CarnÃªs por Cliente</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-extrato')">âœ•</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -251,26 +254,27 @@
       <div class="form-group">
         <label class="form-label">Exibir</label>
         <select id="extrato-filtro-status" class="form-control form-select" onchange="onChangeExtratoFiltro()">
-          <option value="pendentes">Apenas carnês pendentes (ativos)</option>
-          <option value="todos">Todos os carnês (exceto cancelados)</option>
+          <option value="pendentes">Apenas carnÃªs pendentes (ativos)</option>
+          <option value="todos">Todos os carnÃªs (exceto cancelados)</option>
         </select>
       </div>
       <div id="extrato-preview-info" style="font-size:13px;color:var(--text2);min-height:18px"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-extrato')">Cancelar</button>
-      <button class="btn btn-primary" onclick="gerarExtrato()">📄 Gerar e Imprimir</button>
+      <button class="btn btn-primary" onclick="gerarExtrato()">ðŸ“„ Gerar e Imprimir</button>
     </div>
   </div>
 </div>
 
-<!-- Área de impressão do Extrato -->
+<!-- Ãrea de impressÃ£o do Extrato -->
 <div id="area-extrato"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/app.js"></script>
 <script>
   if (!Auth.exigirLogin()) throw '';
@@ -290,7 +294,7 @@
       renderStats();
       filtrar();
     } catch(e) {
-      mostrarToast('Erro ao carregar carnês', 'danger');
+      mostrarToast('Erro ao carregar carnÃªs', 'danger');
     } finally {
       ocultarLoader();
     }
@@ -304,13 +308,13 @@
     const vencidas = ativos.reduce((count, c) => count + (c.parcelas||[]).filter(p => !p.pago && p.vencimento < hoje_).length, 0);
 
     document.getElementById('stats-area').innerHTML = `
-      <div class="stat-card"><div class="stat-icon pink">📄</div>
-        <div class="stat-info"><div class="stat-value">${ativos.length}</div><div class="stat-label">Carnês Ativos</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">💸</div>
+      <div class="stat-card"><div class="stat-icon pink">ðŸ“„</div>
+        <div class="stat-info"><div class="stat-value">${ativos.length}</div><div class="stat-label">CarnÃªs Ativos</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">ðŸ’¸</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalAberto)}</div><div class="stat-label">A Receber</div></div></div>
-      <div class="stat-card"><div class="stat-icon green">✅</div>
+      <div class="stat-card"><div class="stat-icon green">âœ…</div>
         <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalRecebido)}</div><div class="stat-label">Total Recebido</div></div></div>
-      <div class="stat-card"><div class="stat-icon red">🔴</div>
+      <div class="stat-card"><div class="stat-icon red">ðŸ”´</div>
         <div class="stat-info"><div class="stat-value">${vencidas}</div><div class="stat-label">Parcelas Vencidas</div></div></div>`;
   }
 
@@ -340,9 +344,9 @@
   function renderCarnes(lista) {
     if (!lista.length) {
       document.getElementById('carnes-wrap').innerHTML =
-        `<div class="empty-state card" style="padding:60px;grid-column:1/-1"><div class="empty-icon">📄</div>
-        <div class="empty-title">Nenhum carnê encontrado</div>
-        <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Criar carnê</button></div></div>`;
+        `<div class="empty-state card" style="padding:60px;grid-column:1/-1"><div class="empty-icon">ðŸ“„</div>
+        <div class="empty-title">Nenhum carnÃª encontrado</div>
+        <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Criar carnÃª</button></div></div>`;
       return;
     }
 
@@ -357,7 +361,7 @@
 
       let parcelasHtml = (c.parcelas||[]).map(p => {
         const cls = p.pago ? 'paga' : p.vencimento < hoje_ ? 'vencida' : 'pendente';
-        const title = `Parcela ${p.numero}: ${Fmt.moeda(p.valor)} · ${p.pago ? 'Paga em '+Fmt.data(p.data_pagamento+'T00:00:00') : 'Venc: '+Fmt.data(p.vencimento+'T00:00:00')}`;
+        const title = `Parcela ${p.numero}: ${Fmt.moeda(p.valor)} Â· ${p.pago ? 'Paga em '+Fmt.data(p.data_pagamento+'T00:00:00') : 'Venc: '+Fmt.data(p.vencimento+'T00:00:00')}`;
         return `<div class="parcela-mini ${cls}" title="${title}" onclick="event.stopPropagation(); ${!p.pago ? `abrirPagamento(${c.id},${p.numero})` : ''}">
           ${p.numero}
         </div>`;
@@ -382,12 +386,12 @@
             <div>
               <div style="font-size:12px;color:var(--text2)">Total: <strong>${Fmt.moeda(c.valor_total)}</strong></div>
               ${proximaVenc ? `<div style="font-size:11px;color:${temVencida?'var(--danger)':'var(--text2)'}">
-                ${temVencida?'⚠️ Parcela vencida!':'📅 Próxima: '+Fmt.data(proximaVenc.vencimento+'T00:00:00')+' · '+Fmt.moeda(proximaVenc.valor)}
-              </div>` : `<div style="font-size:11px;color:var(--success)">✅ Quitado!</div>`}
+                ${temVencida?'âš ï¸ Parcela vencida!':'ðŸ“… PrÃ³xima: '+Fmt.data(proximaVenc.vencimento+'T00:00:00')+' Â· '+Fmt.moeda(proximaVenc.valor)}
+              </div>` : `<div style="font-size:11px;color:var(--success)">âœ… Quitado!</div>`}
             </div>
             <div style="display:flex;gap:6px">
-              <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})" title="Detalhes">👁️</button>
-              ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="cancelarCarne(${c.id})" title="Cancelar">🗑️</button>` : ''}
+              <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})" title="Detalhes">ðŸ‘ï¸</button>
+              ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="cancelarCarne(${c.id})" title="Cancelar">ðŸ—‘ï¸</button>` : ''}
             </div>
           </div>
         </div>
@@ -395,7 +399,7 @@
     }).join('');
   }
 
-  // Criar carnê
+  // Criar carnÃª
   function calcularParcelas() {
     const valor = parseFloat(document.getElementById('carne-valor').value) || 0;
     const num = parseInt(document.getElementById('carne-parcelas').value) || 2;
@@ -419,11 +423,11 @@
     }
 
     let html = `<div style="margin-top:12px">
-      <label class="form-label" style="margin-bottom:8px">📅 Parcelas geradas</label>
+      <label class="form-label" style="margin-bottom:8px">ðŸ“… Parcelas geradas</label>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">`;
     parcelas.forEach(p => {
       html += `<div style="background:var(--bg);padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px">
-        <strong>${p.numero}ª</strong> · ${Fmt.moeda(p.valor)} · ${Fmt.data(p.vencimento+'T00:00:00')}
+        <strong>${p.numero}Âª</strong> Â· ${Fmt.moeda(p.valor)} Â· ${Fmt.data(p.vencimento+'T00:00:00')}
       </div>`;
     });
     html += '</div></div>';
@@ -452,7 +456,7 @@
     const descricao = document.getElementById('carne-descricao').value.trim();
     const valor = parseFloat(document.getElementById('carne-valor').value) || 0;
     if (!clienteNome) return mostrarToast('Informe o cliente', 'warning');
-    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
+    if (!descricao) return mostrarToast('Informe a descriÃ§Ã£o', 'warning');
     if (valor <= 0) return mostrarToast('Informe o valor', 'warning');
     const parcelas = document.getElementById('preview-parcelas')._parcelas;
     if (!parcelas || !parcelas.length) { calcularParcelas(); return mostrarToast('Aguarde as parcelas serem geradas', 'warning'); }
@@ -463,7 +467,7 @@
       observacoes: document.getElementById('carne-obs').value.trim()
     });
 
-    mostrarToast('Carnê criado com sucesso! 📄', 'success');
+    mostrarToast('CarnÃª criado com sucesso! ðŸ“„', 'success');
     Modal.fechar('modal-carne');
     await carregar();
   }
@@ -472,7 +476,7 @@
     let saldo = valorPago;
     const abatidas = [];
     let novoValorAtual = 0;   // parcela atual com pagamento parcial (valor menor)
-    let novoValorProxima = 0; // próxima parcela reduzida (valor maior que uma parcela)
+    let novoValorProxima = 0; // prÃ³xima parcela reduzida (valor maior que uma parcela)
     const ordenadas = [...parcelas].sort((a, b) => a.numero - b.numero);
     for (const p of ordenadas) {
       if (p.numero < parcelaNumInicio || p.pago) continue;
@@ -499,11 +503,11 @@
     const { abatidas, novoValorAtual } = simularAbatimento(c.parcelas, parcelaNum, valorRecebido);
     let txt = '';
     if (abatidas.length === 0 && novoValorAtual > 0) {
-      txt = `Pagamento parcial · saldo restante desta parcela: ${Fmt.moeda(novoValorAtual)}`;
+      txt = `Pagamento parcial Â· saldo restante desta parcela: ${Fmt.moeda(novoValorAtual)}`;
     } else if (abatidas.length > 0 && novoValorAtual > 0) {
-      txt = `Quita ${abatidas.length} parcela(s) · parcela ${Math.max(...abatidas)+1} reduzida para ${Fmt.moeda(novoValorAtual)}`;
+      txt = `Quita ${abatidas.length} parcela(s) Â· parcela ${Math.max(...abatidas)+1} reduzida para ${Fmt.moeda(novoValorAtual)}`;
     } else if (abatidas.length > 0) {
-      txt = `Quita ${abatidas.length} parcela(s) · todas quitadas!`;
+      txt = `Quita ${abatidas.length} parcela(s) Â· todas quitadas!`;
     } else {
       txt = 'Informe um valor maior que zero';
     }
@@ -523,7 +527,7 @@
     document.getElementById('pagar-preview').textContent = '';
     document.getElementById('pagar-info').innerHTML = `
       <div style="font-size:13px;margin-bottom:4px">Cliente: <strong>${c.cliente_nome||c.cliente}</strong></div>
-      <div style="font-size:13px;margin-bottom:4px">Carnê: <strong>${c.numero}</strong> · ${c.descricao}</div>
+      <div style="font-size:13px;margin-bottom:4px">CarnÃª: <strong>${c.numero}</strong> Â· ${c.descricao}</div>
       <div style="font-size:13px;margin-bottom:4px">Parcela: <strong>${parcelaNum}/${c.num_parcelas}</strong></div>
       <div style="font-size:20px;font-weight:800;color:var(--primary)">${Fmt.moeda(p.valor)}</div>
       <div style="font-size:12px;color:var(--text2)">Vencimento: ${Fmt.data(p.vencimento+'T00:00:00')}</div>`;
@@ -550,19 +554,19 @@
     let novasParcelas = (c.parcelas||[]).map(p => ({ ...p }));
 
     if (abatidas.length === 0 && novoValorAtual > 0) {
-      // Pagamento parcial: reduz o valor da parcela atual sem marcá-la como paga
+      // Pagamento parcial: reduz o valor da parcela atual sem marcÃ¡-la como paga
       novasParcelas = novasParcelas.map(p =>
         p.numero === parcelaNum ? { ...p, valor: novoValorAtual } : p
       );
-      mostrarToast(`Pagamento parcial registrado · saldo restante: ${Fmt.moeda(novoValorAtual)} ✅`, 'success');
+      mostrarToast(`Pagamento parcial registrado Â· saldo restante: ${Fmt.moeda(novoValorAtual)} âœ…`, 'success');
     } else {
-      // Quita uma ou mais parcelas; se sobrar valor menor na próxima, reduz ela
+      // Quita uma ou mais parcelas; se sobrar valor menor na prÃ³xima, reduz ela
       novasParcelas = novasParcelas.map(p => {
         if (abatidas.includes(p.numero)) return { ...p, pago: true, data_pagamento: dataPgto };
         if (novoValorAtual > 0 && p.numero === Math.max(...abatidas) + 1 && !p.pago) return { ...p, valor: novoValorAtual };
         return p;
       });
-      mostrarToast(`${abatidas.length} parcela(s) quitada(s)! ✅`, 'success');
+      mostrarToast(`${abatidas.length} parcela(s) quitada(s)! âœ…`, 'success');
     }
 
     const todasPagas = novasParcelas.every(p => p.pago);
@@ -584,17 +588,17 @@
     (c.parcelas||[]).forEach(p => {
       const vencida = !p.pago && p.vencimento < hoje_;
       parcelasHtml += `<div class="parcela-row ${p.pago?'paga':vencida?'vencida':''}">
-        <span class="badge ${p.pago?'badge-success':vencida?'badge-danger':'badge-warning'}">${p.numero}ª</span>
+        <span class="badge ${p.pago?'badge-success':vencida?'badge-danger':'badge-warning'}">${p.numero}Âª</span>
         <strong>${Fmt.moeda(p.valor)}</strong>
         <span style="font-size:12px;color:var(--text2)">Venc: ${Fmt.data(p.vencimento+'T00:00:00')}</span>
         ${p.pago
           ? `<span class="badge badge-success">Pago em ${Fmt.data(p.data_pagamento+'T00:00:00')}</span>`
-          : `<button class="btn btn-sm btn-success" onclick="Modal.fecharTodos();abrirPagamento(${c.id},${p.numero})">💵 Receber</button>`}
+          : `<button class="btn btn-sm btn-success" onclick="Modal.fecharTodos();abrirPagamento(${c.id},${p.numero})">ðŸ’µ Receber</button>`}
       </div>`;
     });
 
     confirmar(`<div style="text-align:left">
-      <h3 style="margin-bottom:12px">${c.numero} · ${c.cliente_nome||c.cliente}</h3>
+      <h3 style="margin-bottom:12px">${c.numero} Â· ${c.cliente_nome||c.cliente}</h3>
       <p style="margin-bottom:8px;color:var(--text2)">${c.descricao}</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
         <div style="background:var(--bg);padding:10px;border-radius:6px;text-align:center">
@@ -620,10 +624,10 @@
   }
 
   function cancelarCarne(id) {
-    confirmar('Cancelar este carnê? As parcelas pendentes serão descartadas.', async () => {
+    confirmar('Cancelar este carnÃª? As parcelas pendentes serÃ£o descartadas.', async () => {
       const c = _todosCarnes.find(x => x.id === id);
       await DB.Carnes.salvar({ ...c, status: 'cancelado' });
-      mostrarToast('Carnê cancelado', 'danger');
+      mostrarToast('CarnÃª cancelado', 'danger');
       await carregar();
     });
   }
@@ -676,7 +680,7 @@
       return match && !['quitado','cancelado'].includes(c.status);
     });
     document.getElementById('extrato-preview-info').textContent =
-      `${carnes.length} carnê(s) encontrado(s) · ${ativos.length} ativo(s)`;
+      `${carnes.length} carnÃª(s) encontrado(s) Â· ${ativos.length} ativo(s)`;
   }
 
   function onSelectExtrato(cliente) { _contarCarnesExtrato(); }
@@ -697,7 +701,7 @@
       return match && status;
     }).sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em));
 
-    if (!carnes.length) return mostrarToast('Nenhum carnê encontrado para este cliente', 'warning');
+    if (!carnes.length) return mostrarToast('Nenhum carnÃª encontrado para este cliente', 'warning');
 
     Modal.fechar('modal-extrato');
     document.getElementById('area-extrato').innerHTML = _construirHtmlExtrato(clienteNome, carnes, filtro);
@@ -723,10 +727,10 @@
           totPago += (p.valor || 0);
         } else if (p.vencimento < hoje_) {
           label = 'Vencida'; cls = 'badge-vencido';
-          pgtoEm = '—'; totPendente += (p.valor || 0);
+          pgtoEm = 'â€”'; totPendente += (p.valor || 0);
         } else {
           label = 'Pendente'; cls = 'badge-pendente';
-          pgtoEm = '—'; totPendente += (p.valor || 0);
+          pgtoEm = 'â€”'; totPendente += (p.valor || 0);
         }
         const trCls = p.pago ? 'tr-paga' : p.vencimento < hoje_ ? 'tr-vencida' : 'tr-pendente';
         return `<tr class="${trCls}">
@@ -751,7 +755,7 @@
       return `<div class="extrato-carne-bloco">
         <div class="extrato-carne-header">
           <div>
-            <div style="font-size:13px;font-weight:800">${c.numero} · ${c.descricao}</div>
+            <div style="font-size:13px;font-weight:800">${c.numero} Â· ${c.descricao}</div>
             <div style="font-size:11px;opacity:.85">Criado em ${Fmt.data(c.criado_em)}</div>
           </div>
           <div style="text-align:right">
@@ -761,7 +765,7 @@
         </div>
         <table class="extrato-table">
           <thead><tr>
-            <th style="text-align:center">Nº</th>
+            <th style="text-align:center">NÂº</th>
             <th>Vencimento</th><th>Valor</th><th>Status</th><th>Pago em</th>
           </tr></thead>
           <tbody>${linhas}</tbody>
@@ -774,13 +778,13 @@
       </div>`;
     }).join('');
 
-    const descFiltro = filtro === 'pendentes' ? 'Carnês Pendentes' : 'Todos os Carnês';
+    const descFiltro = filtro === 'pendentes' ? 'CarnÃªs Pendentes' : 'Todos os CarnÃªs';
 
     return `
     <div class="extrato-header">
-      <div class="extrato-logo-titulo">🌙 Fiore Pijamas</div>
-      <div class="extrato-subtitulo">EXTRATO DE CARNÊS — ${descFiltro.toUpperCase()}</div>
-      <div class="extrato-data-geracao">Emitido em ${dataGeracao} às ${horaGeracao}</div>
+      <div class="extrato-logo-titulo">ðŸŒ™ Fiore Pijamas</div>
+      <div class="extrato-subtitulo">EXTRATO DE CARNÃŠS â€” ${descFiltro.toUpperCase()}</div>
+      <div class="extrato-data-geracao">Emitido em ${dataGeracao} Ã s ${horaGeracao}</div>
     </div>
     <div class="extrato-cliente-box">
       <div style="font-size:11px;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Cliente</div>
@@ -790,15 +794,15 @@
     <div class="extrato-total-geral">
       <div>
         <div style="font-size:13px;font-weight:800;color:#B5124A">SALDO DEVEDOR TOTAL</div>
-        <div style="font-size:11px;color:#666">${carnes.length} carnê(s) · Gerado em ${dataGeracao} às ${horaGeracao}</div>
+        <div style="font-size:11px;color:#666">${carnes.length} carnÃª(s) Â· Gerado em ${dataGeracao} Ã s ${horaGeracao}</div>
       </div>
       <div style="text-align:right">
         <div style="font-size:22px;font-weight:800;color:#B5124A">${Fmt.moeda(totalGeralPendente)}</div>
-        <div style="font-size:11px;color:#2E7D32">Total já pago: ${Fmt.moeda(totalGeralPago)}</div>
+        <div style="font-size:11px;color:#2E7D32">Total jÃ¡ pago: ${Fmt.moeda(totalGeralPago)}</div>
       </div>
     </div>
     <div class="extrato-rodape">
-      Fiore Pijamas · Documento gerado pelo sistema de gestão · ${dataGeracao}
+      Fiore Pijamas Â· Documento gerado pelo sistema de gestÃ£o Â· ${dataGeracao}
     </div>`;
   }
 
@@ -807,3 +811,4 @@
 </script>
 </body>
 </html>
+

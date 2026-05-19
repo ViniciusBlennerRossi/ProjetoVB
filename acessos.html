@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Acessos — Fiore Pijamas</title>
+  <title>Controle de Acessos â€” Fiore Pijamas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .acessos-layout {
@@ -13,7 +16,7 @@
       height: calc(100vh - 120px);
     }
 
-    /* Painel esquerdo — telas */
+    /* Painel esquerdo â€” telas */
     .painel-telas {
       background: var(--card);
       border: 1px solid var(--border);
@@ -89,7 +92,7 @@
       overflow: hidden;
     }
 
-    /* Lista de usuários */
+    /* Lista de usuÃ¡rios */
     .painel-usuarios {
       background: var(--card);
       border: 1px solid var(--border);
@@ -140,7 +143,7 @@
       font-size: 10px; color: var(--text-muted, #888); text-align: center;
     }
 
-    /* Painel permissões */
+    /* Painel permissÃµes */
     .painel-permissoes {
       background: var(--card);
       border: 1px solid var(--border);
@@ -224,7 +227,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">🛡️ Controle de Acessos</div>
+      <div class="topbar-title">ðŸ›¡ï¸ Controle de Acessos</div>
     </div>
     <div class="page-content">
 
@@ -232,7 +235,7 @@
 
         <!-- Painel esquerdo: telas -->
         <div class="painel-telas">
-          <div class="painel-header">📋 Telas do Sistema</div>
+          <div class="painel-header">ðŸ“‹ Telas do Sistema</div>
           <div class="painel-search">
             <input type="text" id="busca-tela" placeholder="Buscar tela..." oninput="filtrarTelas()" />
           </div>
@@ -242,23 +245,23 @@
         <!-- Painel direito -->
         <div class="painel-direito">
 
-          <!-- Usuários -->
+          <!-- UsuÃ¡rios -->
           <div class="painel-usuarios">
             <div class="painel-header" style="display:flex;justify-content:space-between;align-items:center">
-              <span>👤 Usuários</span>
+              <span>ðŸ‘¤ UsuÃ¡rios</span>
               <div class="painel-search" style="padding:0;border:none;width:200px">
-                <input type="text" id="busca-usuario" placeholder="Buscar usuário..." oninput="filtrarUsuarios()" />
+                <input type="text" id="busca-usuario" placeholder="Buscar usuÃ¡rio..." oninput="filtrarUsuarios()" />
               </div>
             </div>
             <div class="usuarios-grid" id="grid-usuarios"></div>
           </div>
 
-          <!-- Permissões -->
+          <!-- PermissÃµes -->
           <div class="painel-permissoes">
-            <div class="painel-header" id="permissoes-titulo">🔐 Permissões</div>
+            <div class="painel-header" id="permissoes-titulo">ðŸ” PermissÃµes</div>
             <div id="permissoes-conteudo" class="permissoes-empty">
-              <div class="empty-icon">🛡️</div>
-              <div>Selecione uma tela e um usuário</div>
+              <div class="empty-icon">ðŸ›¡ï¸</div>
+              <div>Selecione uma tela e um usuÃ¡rio</div>
             </div>
           </div>
 
@@ -273,6 +276,7 @@
 <script src="js/supabase-client.js"></script>
   <script src="js/tenant.js"></script>
 <script src="js/db.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/app.js"></script>
 <script>
   if (!Auth.exigirAdmin()) throw '';
@@ -281,29 +285,29 @@
 
   const TELAS = [
     { section: 'LOJA' },
-    { id: 'dashboard',    icon: '🏠', label: 'Home / Dashboard' },
-    { id: 'vendas',       icon: '🛒', label: 'Vendas' },
-    { id: 'pdv',          icon: '🖥️', label: 'PDV (Ponto de Venda)' },
-    { id: 'encomendas',   icon: '📋', label: 'Encomendas' },
-    { id: 'clientes',     icon: '👥', label: 'Clientes' },
-    { id: 'funcionarios', icon: '👤', label: 'Funcionários' },
-    { id: 'cobrancas',    icon: '💰', label: 'Cobranças' },
-    { id: 'carnes',       icon: '📄', label: 'Carnês' },
+    { id: 'dashboard',    icon: 'ðŸ ', label: 'Home / Dashboard' },
+    { id: 'vendas',       icon: 'ðŸ›’', label: 'Vendas' },
+    { id: 'pdv',          icon: 'ðŸ–¥ï¸', label: 'PDV (Ponto de Venda)' },
+    { id: 'encomendas',   icon: 'ðŸ“‹', label: 'Encomendas' },
+    { id: 'clientes',     icon: 'ðŸ‘¥', label: 'Clientes' },
+    { id: 'funcionarios', icon: 'ðŸ‘¤', label: 'FuncionÃ¡rios' },
+    { id: 'cobrancas',    icon: 'ðŸ’°', label: 'CobranÃ§as' },
+    { id: 'carnes',       icon: 'ðŸ“„', label: 'CarnÃªs' },
     { section: 'ESTOQUE' },
-    { id: 'produtos',     icon: '👗', label: 'Produtos' },
-    { id: 'estoque',      icon: '📦', label: 'Estoque' },
-    { id: 'compras',      icon: '🚚', label: 'Compras' },
-    { id: 'fornecedores', icon: '🏭', label: 'Fornecedores' },
+    { id: 'produtos',     icon: 'ðŸ‘—', label: 'Produtos' },
+    { id: 'estoque',      icon: 'ðŸ“¦', label: 'Estoque' },
+    { id: 'compras',      icon: 'ðŸšš', label: 'Compras' },
+    { id: 'fornecedores', icon: 'ðŸ­', label: 'Fornecedores' },
     { section: 'FINANCEIRO' },
-    { id: 'gastos',       icon: '💸', label: 'Gastos' },
-    { id: 'relatorios',   icon: '📈', label: 'Relatórios' },
+    { id: 'gastos',       icon: 'ðŸ’¸', label: 'Gastos' },
+    { id: 'relatorios',   icon: 'ðŸ“ˆ', label: 'RelatÃ³rios' },
   ];
 
   const ACOES = [
-    { id: 'consultar', icon: '🔍', label: 'Consultar' },
-    { id: 'incluir',   icon: '➕', label: 'Incluir' },
-    { id: 'alterar',   icon: '✏️', label: 'Alterar' },
-    { id: 'excluir',   icon: '🗑️', label: 'Excluir' },
+    { id: 'consultar', icon: 'ðŸ”', label: 'Consultar' },
+    { id: 'incluir',   icon: 'âž•', label: 'Incluir' },
+    { id: 'alterar',   icon: 'âœï¸', label: 'Alterar' },
+    { id: 'excluir',   icon: 'ðŸ—‘ï¸', label: 'Excluir' },
   ];
 
   let _usuarios = [];
@@ -332,7 +336,7 @@
 
     TELAS.forEach(t => {
       if (t.section) {
-        if (termo) return; // oculta seções ao filtrar
+        if (termo) return; // oculta seÃ§Ãµes ao filtrar
         html += `<div class="tela-section">${t.section}</div>`;
         return;
       }
@@ -358,7 +362,7 @@
     renderPermissoes();
   }
 
-  // ===== USUÁRIOS =====
+  // ===== USUÃRIOS =====
   function renderUsuarios(filtro = '') {
     const grid = document.getElementById('grid-usuarios');
     const termo = filtro.toLowerCase();
@@ -367,7 +371,7 @@
     );
 
     if (!lista.length) {
-      grid.innerHTML = '<div style="padding:16px;font-size:13px;color:#aaa">Nenhum usuário encontrado</div>';
+      grid.innerHTML = '<div style="padding:16px;font-size:13px;color:#aaa">Nenhum usuÃ¡rio encontrado</div>';
       return;
     }
 
@@ -392,28 +396,28 @@
     renderPermissoes();
   }
 
-  // ===== PERMISSÕES =====
+  // ===== PERMISSÃ•ES =====
   function renderPermissoes() {
     const conteudo = document.getElementById('permissoes-conteudo');
     const titulo = document.getElementById('permissoes-titulo');
 
     if (!_telaSelecionada || !_usuarioSelecionado) {
-      titulo.textContent = '🔐 Permissões';
+      titulo.textContent = 'ðŸ” PermissÃµes';
       conteudo.className = 'permissoes-empty';
-      conteudo.innerHTML = `<div class="empty-icon">🛡️</div>
-        <div>${!_telaSelecionada ? 'Selecione uma tela' : 'Selecione um usuário'}</div>`;
+      conteudo.innerHTML = `<div class="empty-icon">ðŸ›¡ï¸</div>
+        <div>${!_telaSelecionada ? 'Selecione uma tela' : 'Selecione um usuÃ¡rio'}</div>`;
       return;
     }
 
     const tela = TELAS.find(t => t.id === _telaSelecionada);
     const usr = _usuarioSelecionado;
-    titulo.innerHTML = `🔐 Acessos de <strong>${usr.nome}</strong> — ${tela.icon} ${tela.label}`;
+    titulo.innerHTML = `ðŸ” Acessos de <strong>${usr.nome}</strong> â€” ${tela.icon} ${tela.label}`;
 
     if (usr.papel === 'admin') {
       conteudo.className = 'permissoes-empty';
-      conteudo.innerHTML = `<div class="empty-icon">👑</div>
-        <div><span class="badge-admin-total">✅ Administrador — acesso total a todas as telas</span></div>
-        <div style="font-size:12px;color:#aaa;margin-top:4px">Permissões individuais não se aplicam ao administrador.</div>`;
+      conteudo.innerHTML = `<div class="empty-icon">ðŸ‘‘</div>
+        <div><span class="badge-admin-total">âœ… Administrador â€” acesso total a todas as telas</span></div>
+        <div style="font-size:12px;color:#aaa;margin-top:4px">PermissÃµes individuais nÃ£o se aplicam ao administrador.</div>`;
       return;
     }
 
@@ -424,7 +428,7 @@
       <table class="permissoes-table">
         <thead>
           <tr>
-            <th>Ação</th>
+            <th>AÃ§Ã£o</th>
             <th>Permitido</th>
           </tr>
         </thead>
@@ -453,7 +457,7 @@
         </tbody>
       </table>
       <div style="margin-top:14px;padding:10px 14px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--text-muted,#888)">
-        ℹ️ As alterações são salvas automaticamente ao marcar/desmarcar cada permissão.
+        â„¹ï¸ As alteraÃ§Ãµes sÃ£o salvas automaticamente ao marcar/desmarcar cada permissÃ£o.
       </div>`;
   }
 
@@ -472,9 +476,9 @@
     try {
       const { error } = await _sb.from('usuarios').update({ permissoes: usr.permissoes }).eq('id', usr.id);
       if (error) {
-        console.error('Supabase erro ao salvar permissão:', error);
+        console.error('Supabase erro ao salvar permissÃ£o:', error);
         if (error.message && error.message.includes('permissoes')) {
-          mostrarToast('Coluna "permissoes" não existe. Execute o SQL no Supabase: ALTER TABLE usuarios ADD COLUMN permissoes JSONB DEFAULT \'{}\'', 'danger', 8000);
+          mostrarToast('Coluna "permissoes" nÃ£o existe. Execute o SQL no Supabase: ALTER TABLE usuarios ADD COLUMN permissoes JSONB DEFAULT \'{}\'', 'danger', 8000);
         } else {
           mostrarToast('Erro ao salvar: ' + (error.message || error.code || 'verifique o console'), 'danger', 6000);
         }
@@ -482,11 +486,11 @@
         renderPermissoes();
         return;
       }
-      mostrarToast(`${valor ? '✅' : '❌'} ${acao.charAt(0).toUpperCase() + acao.slice(1)} ${valor ? 'permitido' : 'negado'} para ${usr.nome.split(' ')[0]}`, valor ? 'success' : 'warning');
+      mostrarToast(`${valor ? 'âœ…' : 'âŒ'} ${acao.charAt(0).toUpperCase() + acao.slice(1)} ${valor ? 'permitido' : 'negado'} para ${usr.nome.split(' ')[0]}`, valor ? 'success' : 'warning');
       renderPermissoes();
     } catch(e) {
-      console.error('Erro inesperado ao salvar permissão:', e);
-      mostrarToast('Erro ao salvar permissão: ' + (e.message || e), 'danger', 6000);
+      console.error('Erro inesperado ao salvar permissÃ£o:', e);
+      mostrarToast('Erro ao salvar permissÃ£o: ' + (e.message || e), 'danger', 6000);
       usr.permissoes[tela][acao] = !valor;
       renderPermissoes();
     } finally {
@@ -498,3 +502,4 @@
 </script>
 </body>
 </html>
+

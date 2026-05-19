@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gastos — Fiore Pijamas</title>
+  <title>Gastos â€” Fiore Pijamas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .chart-bar-wrap { padding: 4px 0; }
@@ -19,7 +22,7 @@
 <div class="layout" id="app">
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">💸 Controle de Gastos</div>
+      <div class="topbar-title">ðŸ’¸ Controle de Gastos</div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="abrirModal()">+ Novo Gasto</button>
       </div>
@@ -33,8 +36,8 @@
       <div class="card" style="padding:14px 18px;margin-bottom:20px">
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <div class="search-input-wrap" style="flex:1;min-width:200px">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="busca" class="form-control" placeholder="Buscar por descrição..." oninput="filtrar()" />
+            <span class="search-icon">ðŸ”</span>
+            <input type="text" id="busca" class="form-control" placeholder="Buscar por descriÃ§Ã£o..." oninput="filtrar()" />
           </div>
           <select id="filtro-cat" class="form-control form-select" style="max-width:160px" onchange="filtrar()">
             <option value="">Todas categorias</option>
@@ -45,15 +48,15 @@
       </div>
 
       <div class="grid grid-2" style="margin-bottom:20px">
-        <!-- Gráfico por categoria -->
+        <!-- GrÃ¡fico por categoria -->
         <div class="card">
-          <div class="card-header"><div class="card-title">📊 Gastos por Categoria</div></div>
+          <div class="card-header"><div class="card-title">ðŸ“Š Gastos por Categoria</div></div>
           <div class="card-body" id="chart-cats"></div>
         </div>
 
         <!-- Resumo mensal -->
         <div class="card">
-          <div class="card-header"><div class="card-title">📅 Últimos 6 Meses</div></div>
+          <div class="card-header"><div class="card-title">ðŸ“… Ãšltimos 6 Meses</div></div>
           <div class="card-body" id="chart-meses"></div>
         </div>
       </div>
@@ -61,7 +64,7 @@
       <!-- Tabela -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">💸 Lista de Gastos</div>
+          <div class="card-title">ðŸ’¸ Lista de Gastos</div>
           <span id="count-label" class="badge badge-secondary"></span>
         </div>
         <div class="card-body" style="padding:0">
@@ -77,12 +80,12 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="modal-titulo">Novo Gasto</div>
-      <button class="modal-close" onclick="Modal.fechar('modal-gasto')">✕</button>
+      <button class="modal-close" onclick="Modal.fechar('modal-gasto')">âœ•</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="gasto-id" />
       <div class="form-group">
-        <label class="form-label">Descrição *</label>
+        <label class="form-label">DescriÃ§Ã£o *</label>
         <input type="text" id="gasto-desc" class="form-control" placeholder="Ex: Aluguel de dezembro, Conta de luz..." />
       </div>
       <div class="form-row cols-2">
@@ -106,13 +109,13 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Observações</label>
-        <input type="text" id="gasto-obs" class="form-control" placeholder="NF, referência, etc." />
+        <label class="form-label">ObservaÃ§Ãµes</label>
+        <input type="text" id="gasto-obs" class="form-control" placeholder="NF, referÃªncia, etc." />
       </div>
       <div class="form-group">
         <label class="form-label">Recorrente?</label>
         <select id="gasto-recorrente" class="form-control form-select">
-          <option value="">Não</option>
+          <option value="">NÃ£o</option>
           <option value="mensal">Mensal</option>
           <option value="semanal">Semanal</option>
           <option value="anual">Anual</option>
@@ -121,7 +124,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Modal.fechar('modal-gasto')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvar()">💾 Salvar</button>
+      <button class="btn btn-primary" onclick="salvar()">ðŸ’¾ Salvar</button>
     </div>
   </div>
 </div>
@@ -130,6 +133,7 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/tenant.js"></script>
   <script src="js/db.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/app.js"></script>
 <script>
   if (!Auth.exigirPermissao('gastos')) throw '';
@@ -225,26 +229,26 @@
     const lucroEstimado = faturamentoMes - totalMes;
 
     document.getElementById('stats-area').innerHTML = `
-      <div class="stat-card"><div class="stat-icon red">💸</div>
-        <div class="stat-info"><div class="stat-value">${Fmt.moeda(total)}</div><div class="stat-label">Total no período</div></div></div>
-      <div class="stat-card"><div class="stat-icon orange">📅</div>
-        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalMes)}</div><div class="stat-label">Gastos este mês</div></div></div>
-      <div class="stat-card"><div class="stat-icon pink">💰</div>
-        <div class="stat-info"><div class="stat-value">${Fmt.moeda(faturamentoMes)}</div><div class="stat-label">Vendas este mês</div></div></div>
-      <div class="stat-card"><div class="stat-icon ${lucroEstimado>=0?'green':'red'}">📈</div>
+      <div class="stat-card"><div class="stat-icon red">ðŸ’¸</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(total)}</div><div class="stat-label">Total no perÃ­odo</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">ðŸ“…</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalMes)}</div><div class="stat-label">Gastos este mÃªs</div></div></div>
+      <div class="stat-card"><div class="stat-icon pink">ðŸ’°</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(faturamentoMes)}</div><div class="stat-label">Vendas este mÃªs</div></div></div>
+      <div class="stat-card"><div class="stat-icon ${lucroEstimado>=0?'green':'red'}">ðŸ“ˆ</div>
         <div class="stat-info"><div class="stat-value" style="color:${lucroEstimado>=0?'var(--success)':'var(--danger)'}">${Fmt.moeda(lucroEstimado)}</div><div class="stat-label">Resultado estimado</div></div></div>`;
   }
 
   function renderTabela(lista) {
     if (!lista.length) {
       document.getElementById('tabela-wrap').innerHTML =
-        `<div class="empty-state"><div class="empty-icon">💸</div><div class="empty-title">Nenhum gasto no período</div>
+        `<div class="empty-state"><div class="empty-icon">ðŸ’¸</div><div class="empty-title">Nenhum gasto no perÃ­odo</div>
         <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Registrar gasto</button></div></div>`;
       return;
     }
 
     let html = `<table><thead><tr>
-      <th>Data</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Recorrente</th><th>Ações</th>
+      <th>Data</th><th>DescriÃ§Ã£o</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Recorrente</th><th>AÃ§Ãµes</th>
     </tr></thead><tbody>`;
 
     lista.forEach(g => {
@@ -257,8 +261,8 @@
         <td><strong class="text-danger">${Fmt.moeda(g.valor)}</strong></td>
         <td>${g.recorrente ? `<span class="badge badge-info">${g.recorrente}</span>` : '-'}</td>
         <td><div class="td-actions">
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${g.id})">✏️</button>
-          <button class="btn btn-sm btn-ghost btn-icon" onclick="excluir(${g.id})">🗑️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${g.id})">âœï¸</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="excluir(${g.id})">ðŸ—‘ï¸</button>
         </div></td>
       </tr>`;
     });
@@ -292,9 +296,9 @@
     });
     catHtml += '</div>';
     document.getElementById('chart-cats').innerHTML = catSorted.length ? catHtml :
-      '<div class="empty-state" style="padding:30px"><div class="empty-icon">📊</div><div class="empty-title">Sem dados</div></div>';
+      '<div class="empty-state" style="padding:30px"><div class="empty-icon">ðŸ“Š</div><div class="empty-title">Sem dados</div></div>';
 
-    // Por mês (últimos 6)
+    // Por mÃªs (Ãºltimos 6)
     const agora = new Date();
     const meses = [];
     for (let i = 5; i >= 0; i--) {
@@ -357,7 +361,7 @@
     if (!g) return;
     confirmar(`Excluir gasto <strong>${g.descricao}</strong>?`, async () => {
       await DB.Gastos.deletar(id);
-      mostrarToast('Gasto excluído', 'danger');
+      mostrarToast('Gasto excluÃ­do', 'danger');
       await carregar();
     });
   }
@@ -368,8 +372,8 @@
     const valor = parseFloat(document.getElementById('gasto-valor').value) || 0;
     const data = document.getElementById('gasto-data').value;
 
-    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
-    if (valor <= 0) return mostrarToast('Informe um valor válido', 'warning');
+    if (!descricao) return mostrarToast('Informe a descriÃ§Ã£o', 'warning');
+    if (valor <= 0) return mostrarToast('Informe um valor vÃ¡lido', 'warning');
     if (!data) return mostrarToast('Informe a data', 'warning');
 
     await DB.Gastos.salvar({
@@ -391,3 +395,4 @@
 </script>
 </body>
 </html>
+

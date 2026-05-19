@@ -3,24 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fiore Pijamas - Login</title>
+  <title>Fiore Pijamas — Acesso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .login-form { margin-top: 8px; }
-    .pass-toggle { position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2); }
-    .input-group { position:relative; }
+    /* Login com painel artístico à esquerda */
+    .login-page { min-height: 100vh; display: flex; background: #fff; }
+    .login-art {
+      flex: 1; position: relative; overflow: hidden;
+      background:
+        repeating-linear-gradient(90deg, #F5C7D3 0 14px, #FCEAEF 14px 28px);
+      padding: 56px 48px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 40px;
+    }
+    .login-art::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(255,255,255,0.45) 75%);
+      pointer-events: none;
+    }
+    .login-art-logo {
+      width: 260px; max-width: 80%;
+      position: relative; z-index: 1;
+      border-radius: 20px;
+      box-shadow: 0 24px 48px -16px rgba(140,40,80,0.25), 0 0 0 1px rgba(255,255,255,0.5);
+      background: #fff;
+      display: block;
+    }
+    .login-art-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; line-height: 1.25;
+      font-style: italic; font-weight: 500;
+      max-width: 340px;
+      text-align: center;
+      color: #5C0D2B;
+      position: relative; z-index: 1;
+    }
+    .login-art-foot {
+      font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: #8C0D38; font-weight: 600;
+      position: relative; z-index: 1;
+    }
+    @media (max-width: 900px) { .login-art { display: none; } }
+
+    .login-side {
+      width: 460px; max-width: 100%;
+      background: #fff;
+      padding: 56px 48px;
+      display: flex; flex-direction: column;
+      justify-content: center;
+    }
+    .login-side-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+    .login-side-brand img {
+      width: 56px; height: 56px; border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 6px 18px -8px rgba(140,40,80,0.3);
+    }
+    .login-side-brand .name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 500; font-style: italic;
+      letter-spacing: -0.015em; line-height: 1;
+    }
+    .login-side-brand .sub {
+      font-size: 10px; letter-spacing: 0.2em;
+      color: var(--text3); text-transform: uppercase;
+      font-weight: 600; margin-top: 4px;
+    }
+    .login-side h1 {
+      font-family: var(--font-serif);
+      font-size: 32px; font-weight: 500;
+      letter-spacing: -0.015em;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .login-side .lead { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+
+    .input-group { position: relative; }
+    .pass-toggle {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text2); padding: 4px;
+      display: flex; align-items: center;
+    }
+    .pass-toggle:hover { color: var(--primary); }
+    .form-control.has-toggle { padding-right: 38px; }
+
+    .login-extra {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; color: var(--text2);
+      margin: -4px 0 14px;
+    }
+    .login-extra label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .login-extra a { color: var(--primary); font-weight: 600; }
+
+    .login-meta {
+      margin-top: 36px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text3);
+      text-align: center; letter-spacing: 0.04em;
+    }
   </style>
 </head>
 <body>
+
 <div class="login-page">
-  <div class="login-card">
-    <div class="login-logo">
-      <img src="Imagens/logo2.png" alt="Logo" id="login-logo-img" style="width:180px;margin-bottom:4px;" />
-      <h1 id="login-nome-loja" style="display:none"></h1>
+
+  <!-- Painel artístico -->
+  <div class="login-art">
+    <img src="Imagens/logo.png" alt="Fiore Pijamas" class="login-art-logo" id="art-logo" />
+    <div class="login-art-quote" id="art-quote">
+      "Conforto que veste como uma carícia."
+    </div>
+    <div class="login-art-foot" id="art-foot">Fiore · Desde 2019</div>
+  </div>
+
+  <!-- Formulário -->
+  <div class="login-side">
+
+    <div class="login-side-brand">
+      <img src="Imagens/logo.png" alt="Fiore Pijamas" id="brand-logo" />
+      <div>
+        <div class="name" id="brand-name">Fiore</div>
+        <div class="sub" id="brand-sub">Pijamas · Gestão</div>
+      </div>
     </div>
 
+    <h1>Bem-vinda de volta</h1>
+    <p class="lead">Acesse o painel de gestão da sua loja</p>
+
     <form class="login-form" onsubmit="fazerLogin(event)">
-      <div id="login-error" class="alert alert-danger d-none">❌ E-mail ou senha incorretos.</div>
+      <div id="login-error" class="alert alert-danger d-none">E-mail ou senha incorretos.</div>
 
       <div class="form-group">
         <label class="form-label" for="email">E-mail</label>
@@ -30,43 +144,62 @@
       <div class="form-group">
         <label class="form-label" for="senha">Senha</label>
         <div class="input-group">
-          <input type="password" id="senha" class="form-control" placeholder="••••••••" required autocomplete="current-password" />
-          <button type="button" class="pass-toggle" onclick="toggleSenha()" id="pass-icon">👁️</button>
+          <input type="password" id="senha" class="form-control has-toggle" placeholder="••••••••" required autocomplete="current-password" />
+          <button type="button" class="pass-toggle" onclick="toggleSenha()" id="pass-icon" aria-label="Mostrar senha"></button>
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-login" style="margin-top:8px">
+      <div class="login-extra">
+        <label><input type="checkbox" /> Manter conectada</label>
+        <a href="#" onclick="event.preventDefault();mostrarToast('Procure o administrador para reset de senha','info')">Esqueci a senha</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-login">
         Entrar
       </button>
     </form>
 
+    <div class="login-meta">
+      Fiore Gestão v2.0 · Suporte 24/7
+    </div>
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/tenant.js"></script>
 <script src="js/db.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/app.js"></script>
+
 <script>
+  // Já logado? Vai direto para a home
   if (Auth.isLogado()) window.location.href = 'dashboard.html';
 
-  // Inicializar tenant: detecta subdomínio, carrega loja, aplica tema
+  // Renderiza ícones SVG
+  document.getElementById('pass-icon').innerHTML = Icons.svg('eye', { size: 16 });
+
+  // Tenant: detecta subdomínio, carrega loja, aplica tema
   let _lojaAtual = null;
   Tenant.inicializarTenant().then(loja => {
     _lojaAtual = loja;
-    const imgEl  = document.getElementById('login-logo-img');
-    const nomeEl = document.getElementById('login-nome-loja');
     if (loja?.slug === 'fiore') {
-      imgEl.src = 'Imagens/logo.jpg';
-      nomeEl.textContent = 'Fiore Pijamas';
-      nomeEl.style.display = '';
+      document.getElementById('brand-logo').src = 'Imagens/logo.png';
+      document.getElementById('art-logo').src   = 'Imagens/logo.png';
+      document.getElementById('brand-name').textContent = 'Fiore';
+      document.getElementById('brand-sub').textContent  = 'Pijamas · Gestão';
+      document.getElementById('art-quote').textContent  = '"Conforto que veste como uma carícia."';
+      document.getElementById('art-foot').textContent   = 'Fiore · Desde 2019';
     } else if (loja?.slug === 'prateada') {
-      imgEl.src = 'Imagens/logo2.png';
-      // logo já contém o nome — não exibe texto
+      document.getElementById('brand-logo').src = 'Imagens/logo2.png';
+      document.getElementById('art-logo').src   = 'Imagens/logo2.png';
+      document.getElementById('brand-name').textContent = 'Prateada';
+      document.getElementById('brand-sub').textContent  = 'Salão · Gestão';
+      document.getElementById('art-quote').textContent  = '"Beleza que se traduz em confiança."';
+      document.getElementById('art-foot').textContent   = 'Prateada Salão';
     } else if (loja?.nome) {
-      nomeEl.textContent = loja.nome;
-      nomeEl.style.display = '';
+      document.getElementById('brand-name').textContent = loja.nome;
     }
   });
 
@@ -82,7 +215,6 @@
     btn.textContent = 'Entrando...';
 
     try {
-      // Passa o id_loja para filtrar usuários do tenant correto
       const user = await DB.Usuarios.autenticar(email, senha, _lojaAtual?.id_loja);
       if (user) {
         if (_lojaAtual) {
@@ -92,6 +224,7 @@
         Auth.login(user);
         window.location.href = 'dashboard.html';
       } else {
+        errEl.textContent = 'E-mail ou senha incorretos.';
         errEl.classList.remove('d-none');
         btn.disabled = false;
         btn.textContent = 'Entrar';
@@ -99,7 +232,7 @@
         document.getElementById('senha').focus();
       }
     } catch (err) {
-      errEl.textContent = '❌ Erro de conexão. Verifique sua internet.';
+      errEl.textContent = 'Erro de conexão. Verifique sua internet.';
       errEl.classList.remove('d-none');
       btn.disabled = false;
       btn.textContent = 'Entrar';
@@ -110,9 +243,9 @@
     const input = document.getElementById('senha');
     const icon  = document.getElementById('pass-icon');
     input.type  = input.type === 'password' ? 'text' : 'password';
-    icon.textContent = input.type === 'password' ? '👁️' : '🙈';
+    icon.innerHTML = Icons.svg(input.type === 'password' ? 'eye' : 'eye_off', { size: 16 });
   }
-
 </script>
+
 </body>
 </html>

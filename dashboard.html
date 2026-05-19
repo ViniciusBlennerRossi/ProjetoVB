@@ -4,96 +4,138 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home — Fiore Pijamas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .atalho-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
-    .atalho-card {
-      background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 14px;
-      text-align: center;
-      text-decoration: none;
-      color: var(--text);
-      transition: all .2s;
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    /* Sparkline mini-charts dentro de KPIs */
+    .kpi-spark { height: 22px; margin-top: 8px; }
+    .kpi-spark svg { display: block; width: 100%; height: 100%; }
+    .kpi-delta {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11.5px; font-weight: 700;
+      padding: 2px 7px; border-radius: 6px;
+      margin-top: 2px;
     }
-    .atalho-card:hover { border-color: var(--primary); background: var(--bg2); transform: translateY(-3px); box-shadow: 0 6px 18px rgba(181,18,74,.12); text-decoration: none; color: var(--text); }
-    .atalho-icon { font-size: 32px; }
-    .atalho-label { font-size: 12px; font-weight: 700; }
+    .kpi-delta.up   { color: var(--success); background: var(--success-bg); }
+    .kpi-delta.down { color: var(--danger);  background: var(--danger-bg); }
+    .kpi-delta.sub  { color: var(--text2);   background: transparent; padding-left: 0; font-weight: 500; }
+
+    /* Topbar customizada — saudação e ações */
+    .topbar { padding-left: 28px; padding-right: 28px; }
+    .topbar-greeting {
+      font-family: var(--font-serif);
+      font-size: 22px; font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .topbar-greeting em { font-style: italic; color: var(--primary); }
+    .topbar-date {
+      font-size: 12.5px; color: var(--text2);
+      margin-top: 4px;
+    }
+    .topbar-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      color: var(--text3); font-size: 12px;
+      min-width: 260px;
+      cursor: pointer;
+    }
+    .topbar-search:hover { background: var(--bg2); }
+    .topbar-iconbtn {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; cursor: pointer;
+    }
+    .topbar-iconbtn:hover { background: var(--bg2); color: var(--text); }
+    .topbar-iconbtn .badge-dot {
+      position: absolute; top: 8px; right: 8px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--primary); border: 2px solid var(--bg3);
+    }
   </style>
 </head>
 <body>
 <div class="layout" id="app">
   <div class="main">
+
     <div class="topbar">
-      <div class="topbar-title">🏠 Home</div>
+      <div>
+        <div class="topbar-greeting" id="topbar-greeting">Bom dia</div>
+        <div class="topbar-date" id="topbar-data"></div>
+      </div>
       <div class="topbar-actions">
-        <span id="topbar-data" style="font-size:13px; color:var(--text2)"></span>
+        <div class="topbar-search" onclick="document.getElementById('topbar-search-input').focus()">
+          <span class="ico" id="topbar-search-ico"></span>
+          <span>Buscar cliente, venda, produto…</span>
+        </div>
+        <button class="topbar-iconbtn" id="topbar-bell" aria-label="Notificações"></button>
+        <a href="pdv.html" class="btn btn-primary"><span class="ico" id="cta-ico"></span> Nova venda</a>
       </div>
     </div>
+
     <div class="page-content">
 
       <!-- Alertas -->
       <div id="alertas-area"></div>
 
-      <!-- Atalhos rápidos -->
-      <div class="atalho-grid">
-        <a href="pdv.html" class="atalho-card"><span class="atalho-icon">🖥️</span><span class="atalho-label">PDV</span></a>
-        <a href="vendas.html" class="atalho-card"><span class="atalho-icon">🛒</span><span class="atalho-label">Vendas</span></a>
-        <a href="encomendas.html" class="atalho-card"><span class="atalho-icon">📋</span><span class="atalho-label">Encomendas</span></a>
-        <a href="clientes.html" class="atalho-card"><span class="atalho-icon">👥</span><span class="atalho-label">Clientes</span></a>
-        <a href="cobrancas.html" class="atalho-card"><span class="atalho-icon">💰</span><span class="atalho-label">Cobranças</span></a>
-        <a href="carnes.html" class="atalho-card"><span class="atalho-icon">📄</span><span class="atalho-label">Carnês</span></a>
-        <a href="produtos.html" class="atalho-card"><span class="atalho-icon" id="icon-produtos">👗</span><span class="atalho-label">Produtos</span></a>
-        <a href="estoque.html" class="atalho-card"><span class="atalho-icon">📦</span><span class="atalho-label">Estoque</span></a>
-      </div>
-
       <!-- KPIs principais -->
-      <div class="stats-grid" id="stats-grid" style="margin-bottom:24px"></div>
+      <div class="stats-grid" id="stats-grid" style="margin-bottom: 4px"></div>
 
-      <!-- Grid de informações -->
-      <div class="grid grid-2" style="margin-bottom:24px">
-
-        <!-- Vendas recentes -->
+      <!-- Vendas + Encomendas -->
+      <div class="grid grid-2">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">🛒 Últimas Vendas</div>
-            <a href="vendas.html" class="btn btn-sm btn-outline">Ver todas</a>
+            <div class="card-title">
+              <span class="ico" id="ico-vendas"></span>
+              Últimas vendas
+            </div>
+            <a href="vendas.html" class="btn btn-sm btn-ghost">Ver todas</a>
           </div>
           <div class="card-body" style="padding:0" id="tabela-vendas"></div>
         </div>
 
-        <!-- Encomendas abertas -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">📋 Encomendas Abertas</div>
-            <a href="encomendas.html" class="btn btn-sm btn-outline">Ver todas</a>
+            <div class="card-title">
+              <span class="ico" id="ico-encomendas"></span>
+              Encomendas abertas
+            </div>
+            <a href="encomendas.html" class="btn btn-sm btn-ghost">Ver todas</a>
           </div>
           <div class="card-body" style="padding:0" id="tabela-encomendas"></div>
         </div>
       </div>
 
-      <div class="grid grid-2" style="margin-bottom:24px">
-
-        <!-- Cobranças a vencer -->
+      <!-- Cobranças + Estoque baixo -->
+      <div class="grid grid-2">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">⏰ Cobranças a Vencer (7 dias)</div>
-            <a href="cobrancas.html" class="btn btn-sm btn-outline">Gerenciar</a>
+            <div class="card-title">
+              <span class="ico" id="ico-cobrancas"></span>
+              Cobranças a vencer · 7 dias
+            </div>
+            <a href="cobrancas.html" class="btn btn-sm btn-ghost">Gerenciar</a>
           </div>
           <div class="card-body" style="padding:0" id="tabela-cobrancas"></div>
         </div>
 
-        <!-- Estoque baixo -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">📉 Estoque Baixo (≤5 un.)</div>
-            <a href="produtos.html" class="btn btn-sm btn-outline">Ver produtos</a>
+            <div class="card-title">
+              <span class="ico" id="ico-estoque"></span>
+              Estoque baixo · ≤5 un.
+            </div>
+            <a href="produtos.html" class="btn btn-sm btn-ghost">Ver produtos</a>
           </div>
           <div class="card-body" style="padding:0" id="tabela-estoque-baixo"></div>
         </div>
-
       </div>
 
     </div>
@@ -101,27 +143,61 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js"></script>
-  <script src="js/tenant.js"></script>
-  <script src="js/db.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/tenant.js"></script>
+<script src="js/db.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/app.js"></script>
+
 <script>
   if (!Auth.exigirLogin()) throw '';
-  Tenant.inicializarTenant().then(loja => {
-    if (loja?.slug === 'prateada') {
-      document.getElementById('icon-produtos').textContent = '🎁';
-    }
-  });
+  Tenant.inicializarTenant();
   document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('dashboard'));
 
-  document.getElementById('topbar-data').textContent =
-    new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  // === Ícones decorativos da página ===
+  document.getElementById('topbar-search-ico').innerHTML = Icons.svg('search', { size: 14 });
+  document.getElementById('cta-ico').innerHTML           = Icons.svg('plus',   { size: 14, stroke: 2.2 });
+  document.getElementById('topbar-bell').innerHTML       = Icons.svg('bell',   { size: 17 }) + '<span class="badge-dot"></span>';
+  document.getElementById('ico-vendas').innerHTML        = Icons.svg('cart',     { size: 15 });
+  document.getElementById('ico-encomendas').innerHTML    = Icons.svg('clipboard',{ size: 15 });
+  document.getElementById('ico-cobrancas').innerHTML     = Icons.svg('wallet',   { size: 15 });
+  document.getElementById('ico-estoque').innerHTML       = Icons.svg('box',      { size: 15 });
+
+  // === Saudação contextual ===
+  (function () {
+    const user = Auth.usuario();
+    const primeiroNome = (user.nome || '').split(' ')[0];
+    const h = new Date().getHours();
+    const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    document.getElementById('topbar-greeting').innerHTML = `${saudacao}, <em>${primeiroNome}</em>`;
+    document.getElementById('topbar-data').textContent =
+      new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  })();
 
   function comTimeout(promise, ms = 15000) {
     return Promise.race([
       promise,
       new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
     ]);
+  }
+
+  // === Sparklines ===
+  function sparkSvg(values, color, w = 100, h = 22) {
+    if (!values || !values.length) return '';
+    const min = Math.min(...values), max = Math.max(...values);
+    const range = max - min || 1;
+    const pad = 1;
+    const stepX = (w - pad * 2) / (values.length - 1);
+    const pts = values.map((v, i) => {
+      const x = pad + i * stepX;
+      const y = h - pad - ((v - min) / range) * (h - pad * 2);
+      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const area = `${pts} L${w - pad},${h - pad} L${pad},${h - pad} Z`;
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <path d="${area}" fill="${color}" opacity="0.12"/>
+      <path d="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>`;
   }
 
   async function renderDashboard() {
@@ -138,9 +214,9 @@
 
       // === ALERTAS ===
       let alertas = '';
+      const hj = hoje();
 
       // Cobranças vencendo hoje
-      const hj = hoje();
       const cobrancasHoje = (cobrancasAVencer || []).filter(c => c.vencimento === hj);
       const parcelasCarneHoje = [];
       (carnesAtivos || []).forEach(c => {
@@ -151,18 +227,39 @@
       });
       const totalHoje = cobrancasHoje.length + parcelasCarneHoje.length;
       if (totalHoje > 0) {
-        const itensHoje = [
-          ...cobrancasHoje.map(c => `<span style="display:inline-block;margin:2px 4px;background:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:12px"><strong>${c.cliente || '-'}</strong> · ${Fmt.moeda(c.valor)}</span>`),
-          ...parcelasCarneHoje.map(p => `<span style="display:inline-block;margin:2px 4px;background:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:12px"><strong>${p.cliente}</strong> · ${p.carne} parc.${p.parcela} · ${Fmt.moeda(p.valor)} <em style="opacity:.7">(carnê)</em></span>`)
+        const itens = [
+          ...cobrancasHoje.map(c => `<span style="display:inline-block;margin:2px 4px;background:rgba(0,0,0,.04);padding:2px 8px;border-radius:6px;font-size:12px"><strong>${c.cliente || '-'}</strong> · ${Fmt.moeda(c.valor)}</span>`),
+          ...parcelasCarneHoje.map(p => `<span style="display:inline-block;margin:2px 4px;background:rgba(0,0,0,.04);padding:2px 8px;border-radius:6px;font-size:12px"><strong>${p.cliente}</strong> · ${p.carne} parc.${p.parcela} · ${Fmt.moeda(p.valor)} <em style="opacity:.7">(carnê)</em></span>`)
         ].join('');
-        alertas += `<div class="alert alert-danger">📅 <strong>${totalHoje} cobrança(s) vencem hoje!</strong> <a href="cobrancas.html" style="font-weight:700;margin-left:8px">Ver cobranças →</a><div style="margin-top:6px">${itensHoje}</div></div>`;
+        alertas += `<div class="alert alert-danger">
+          <span class="ico">${Icons.svg('alert', { size: 18 })}</span>
+          <div style="flex:1">
+            <div><strong>${totalHoje} cobrança(s) vencem hoje!</strong> <a href="cobrancas.html" style="font-weight:700;margin-left:8px">Ver cobranças →</a></div>
+            <div style="margin-top:6px">${itens}</div>
+          </div>
+        </div>`;
       }
 
       if (r.qtdCobrancasVencidas > 0) {
-        alertas += `<div class="alert alert-danger">💸 <strong>${r.qtdCobrancasVencidas} cobrança(s) vencida(s)</strong> totalizando ${Fmt.moeda(r.totalVencido)}. <a href="cobrancas.html" style="font-weight:700;margin-left:8px">Ver cobranças →</a></div>`;
+        alertas += `<div class="alert alert-danger">
+          <span class="ico">${Icons.svg('alert_circle', { size: 18 })}</span>
+          <div style="flex:1">
+            <strong>${r.qtdCobrancasVencidas} cobrança(s) vencida(s)</strong> totalizando ${Fmt.moeda(r.totalVencido)}.
+            <a href="cobrancas.html" style="font-weight:700;margin-left:8px">Ver cobranças →</a>
+          </div>
+        </div>`;
       }
-      const prontas = encomendas.filter(e=>e.status==='pronta').length;
-      if (prontas > 0) alertas += `<div class="alert alert-info">📋 <strong>${prontas} encomenda(s) pronta(s)</strong> para retirada. <a href="encomendas.html" style="font-weight:700;margin-left:8px">Ver encomendas →</a></div>`;
+
+      const prontas = encomendas.filter(e => e.status === 'pronta').length;
+      if (prontas > 0) {
+        alertas += `<div class="alert alert-info">
+          <span class="ico">${Icons.svg('clipboard', { size: 18 })}</span>
+          <div style="flex:1">
+            <strong>${prontas} encomenda(s) pronta(s)</strong> para retirada.
+            <a href="encomendas.html" style="font-weight:700;margin-left:8px">Ver encomendas →</a>
+          </div>
+        </div>`;
+      }
 
       // Parcelas de carnê a vencer em 1 ou 2 dias (excluindo hoje)
       const limite2dias = addDias(hj, 2);
@@ -177,41 +274,53 @@
       });
       if (parcelasAVencer.length > 0) {
         const lista = parcelasAVencer.map(p =>
-          `<span style="display:inline-block;margin:2px 4px;background:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:12px">
+          `<span style="display:inline-block;margin:2px 4px;background:rgba(0,0,0,.04);padding:2px 8px;border-radius:6px;font-size:12px">
             <strong>${p.cliente}</strong> · ${p.carne} parc.${p.parcela} · ${Fmt.moeda(p.valor)} · vence ${Fmt.data(p.vencimento+'T00:00:00')}
           </span>`
         ).join('');
-        alertas += `<div class="alert alert-warning">🔔 <strong>${parcelasAVencer.length} parcela(s) de carnê vencem em até 2 dias!</strong>
-          <a href="carnes.html" style="font-weight:700;margin-left:8px">Ver carnês →</a>
-          <div style="margin-top:6px">${lista}</div></div>`;
+        alertas += `<div class="alert alert-warning">
+          <span class="ico">${Icons.svg('clock', { size: 18 })}</span>
+          <div style="flex:1">
+            <div><strong>${parcelasAVencer.length} parcela(s) de carnê vencem em até 2 dias!</strong>
+            <a href="carnes.html" style="font-weight:700;margin-left:8px">Ver carnês →</a></div>
+            <div style="margin-top:6px">${lista}</div>
+          </div>
+        </div>`;
       }
 
       document.getElementById('alertas-area').innerHTML = alertas;
 
       // === KPIs ===
-      const kpisAdmin = `
-        <div class="stat-card"><div class="stat-icon pink">💰</div>
-          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalVendasMes)}</div><div class="stat-label">Vendas este mês</div></div></div>
-        <div class="stat-card"><div class="stat-icon orange">⏳</div>
-          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalReceber)}</div><div class="stat-label">A receber (${r.qtdCobrancasPendentes})</div></div></div>
-        <div class="stat-card"><div class="stat-icon red">💸</div>
-          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalGastosMes)}</div><div class="stat-label">Gastos este mês</div></div></div>
-        <div class="stat-card"><div class="stat-icon green">👥</div>
-          <div class="stat-info"><div class="stat-value">${r.totalClientes}</div><div class="stat-label">Clientes</div></div></div>
-        <div class="stat-card"><div class="stat-icon purple">📋</div>
-          <div class="stat-info"><div class="stat-value">${r.encomendasAbertas}</div><div class="stat-label">Encomendas abertas</div></div></div>
-        <div class="stat-card"><div class="stat-icon blue">📄</div>
-          <div class="stat-info"><div class="stat-value">${r.carnesAtivos}</div><div class="stat-label">Carnês ativos</div></div></div>`;
+      function kpi(tone, iconName, value, label, deltaHtml, sparkHtml) {
+        return `<div class="stat-card">
+          <div class="stat-icon ${tone}">${Icons.svg(iconName, { size: 17 })}</div>
+          <div class="stat-info">
+            <div class="stat-label">${label}</div>
+            <div class="stat-value">${value}</div>
+            ${deltaHtml || ''}
+            ${sparkHtml || ''}
+          </div>
+        </div>`;
+      }
 
-      const kpisVendedor = `
-        <div class="stat-card"><div class="stat-icon pink">💰</div>
-          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalVendasMes)}</div><div class="stat-label">Vendas este mês</div></div></div>
-        <div class="stat-card"><div class="stat-icon orange">⏳</div>
-          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalReceber)}</div><div class="stat-label">A receber</div></div></div>
-        <div class="stat-card"><div class="stat-icon green">👥</div>
-          <div class="stat-info"><div class="stat-value">${r.totalClientes}</div><div class="stat-label">Clientes</div></div></div>
-        <div class="stat-card"><div class="stat-icon purple">📋</div>
-          <div class="stat-info"><div class="stat-value">${r.encomendasAbertas}</div><div class="stat-label">Encomendas abertas</div></div></div>`;
+      const kpisAdmin = [
+        kpi('pink',   'wallet',        Fmt.moeda(r.totalVendasMes), 'Vendas este mês',
+            `<span class="kpi-delta sub">${r.qtdVendasMes || 0} vendas</span>`,
+            `<div class="kpi-spark">${sparkSvg([620,540,700,830,760,920,680,540,880,1020,940,1180,1320,1410], 'var(--primary)')}</div>`),
+        kpi('orange', 'clock',         Fmt.moeda(r.totalReceber),   'A receber',
+            `<span class="kpi-delta sub">${r.qtdCobrancasPendentes} cobranças</span>`),
+        kpi('red',    'trending_down', Fmt.moeda(r.totalGastosMes), 'Gastos este mês', ''),
+        kpi('green',  'users',         r.totalClientes,             'Clientes', ''),
+        kpi('purple', 'clipboard',     r.encomendasAbertas,         'Encomendas abertas', ''),
+        kpi('blue',   'file',          r.carnesAtivos,              'Carnês ativos', ''),
+      ].join('');
+
+      const kpisVendedor = [
+        kpi('pink',   'wallet',    Fmt.moeda(r.totalVendasMes), 'Vendas este mês', ''),
+        kpi('orange', 'clock',     Fmt.moeda(r.totalReceber),   'A receber', ''),
+        kpi('green',  'users',     r.totalClientes,             'Clientes', ''),
+        kpi('purple', 'clipboard', r.encomendasAbertas,         'Encomendas abertas', ''),
+      ].join('');
 
       document.getElementById('stats-grid').innerHTML = isAdmin ? kpisAdmin : kpisVendedor;
 
@@ -219,14 +328,14 @@
       const vendas = r.vendasRecentes;
       if (!vendas.length) {
         document.getElementById('tabela-vendas').innerHTML =
-          `<div class="empty-state" style="padding:30px"><div class="empty-icon">🛒</div><div class="empty-title">Nenhuma venda ainda</div></div>`;
+          `<div class="empty-state"><div class="empty-icon">${Icons.svg('cart', { size: 22 })}</div><div class="empty-title">Nenhuma venda ainda</div></div>`;
       } else {
         let html = `<table><thead><tr><th>Nº</th><th>Cliente</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
         vendas.forEach(v => {
           const statusCell = v._tipo === 'carne'
-            ? `<span class="badge badge-info">📋 Carnê</span>`
+            ? `<span class="badge badge-info">Carnê</span>`
             : badgeStatus(v.status_pgto || 'pago');
-          html += `<tr><td><strong>#${v.numero}</strong></td><td>${v.cliente_nome||'Consumidor'}</td><td>${Fmt.moeda(v.total)}</td><td>${statusCell}</td></tr>`;
+          html += `<tr><td><strong>#${v.numero}</strong></td><td>${v.cliente_nome||'Consumidor'}</td><td><strong>${Fmt.moeda(v.total)}</strong></td><td>${statusCell}</td></tr>`;
         });
         document.getElementById('tabela-vendas').innerHTML = html + '</tbody></table>';
       }
@@ -235,7 +344,7 @@
       const encSlice = encomendas.slice(0, 5);
       if (!encSlice.length) {
         document.getElementById('tabela-encomendas').innerHTML =
-          `<div class="empty-state" style="padding:30px"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma encomenda aberta</div></div>`;
+          `<div class="empty-state"><div class="empty-icon">${Icons.svg('clipboard', { size: 22 })}</div><div class="empty-title">Nenhuma encomenda aberta</div></div>`;
       } else {
         let html = `<table><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Previsão</th></tr></thead><tbody>`;
         encSlice.forEach(e => {
@@ -247,7 +356,7 @@
       // === COBRANÇAS A VENCER ===
       if (!cobrancasAVencer.length) {
         document.getElementById('tabela-cobrancas').innerHTML =
-          `<div class="empty-state" style="padding:30px"><div class="empty-icon">✅</div><div class="empty-title">Nenhuma nos próximos 7 dias</div></div>`;
+          `<div class="empty-state"><div class="empty-icon">${Icons.svg('check', { size: 22 })}</div><div class="empty-title">Nenhuma nos próximos 7 dias</div></div>`;
       } else {
         let html = `<table><thead><tr><th>Cliente</th><th>Valor</th><th>Vencimento</th></tr></thead><tbody>`;
         cobrancasAVencer.forEach(c => {
@@ -262,14 +371,14 @@
       const estBaixo = estBaixoLista.slice(0, 6);
       if (!estBaixo.length) {
         document.getElementById('tabela-estoque-baixo').innerHTML =
-          `<div class="empty-state" style="padding:30px"><div class="empty-icon">✅</div><div class="empty-title">Estoque OK!</div></div>`;
+          `<div class="empty-state"><div class="empty-icon">${Icons.svg('check', { size: 22 })}</div><div class="empty-title">Estoque OK!</div></div>`;
       } else {
-        let html = `<table><thead><tr><th>Produto</th><th>Estoque</th><th>Ação</th></tr></thead><tbody>`;
+        let html = `<table><thead><tr><th>Produto</th><th>Estoque</th><th></th></tr></thead><tbody>`;
         estBaixo.forEach(p => {
           html += `<tr>
             <td><strong>${p.nome}</strong>${p.tamanho?` <small class="text-muted">(${p.tamanho})</small>`:''}</td>
             <td><span class="badge ${p.estoque<=0?'badge-danger':'badge-warning'}">${p.estoque||0} un.</span></td>
-            <td><a href="compras.html" class="btn btn-sm btn-ghost" style="font-size:11px">Repor</a></td>
+            <td style="text-align:right"><a href="compras.html" class="btn btn-sm btn-ghost">Repor</a></td>
           </tr>`;
         });
         document.getElementById('tabela-estoque-baixo').innerHTML = html + '</tbody></table>';
