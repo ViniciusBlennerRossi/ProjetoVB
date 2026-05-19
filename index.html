@@ -11,6 +11,7 @@
   <style>
     /* Login com painel artístico à esquerda */
     .login-page { min-height: 100vh; display: flex; background: #fff; }
+    .login-page::before { display: none; }
     .login-art {
       flex: 1; position: relative; overflow: hidden;
       background:
@@ -123,7 +124,6 @@
   <div class="login-side">
 
     <div class="login-side-brand">
-      <img src="Imagens/logo.png" alt="Fiore Pijamas" id="brand-logo" />
       <div>
         <div class="name" id="brand-name">Fiore</div>
         <div class="sub" id="brand-sub">Pijamas · Gestão</div>
@@ -185,14 +185,12 @@
   Tenant.inicializarTenant().then(loja => {
     _lojaAtual = loja;
     if (loja?.slug === 'fiore') {
-      document.getElementById('brand-logo').src = 'Imagens/logo.png';
       document.getElementById('art-logo').src   = 'Imagens/logo.png';
       document.getElementById('brand-name').textContent = 'Fiore';
       document.getElementById('brand-sub').textContent  = 'Pijamas · Gestão';
       document.getElementById('art-quote').textContent  = '"Conforto que veste como uma carícia."';
       document.getElementById('art-foot').textContent   = 'Fiore · Desde 2019';
     } else if (loja?.slug === 'prateada') {
-      document.getElementById('brand-logo').src = 'Imagens/logo2.png';
       document.getElementById('art-logo').src   = 'Imagens/logo2.png';
       document.getElementById('brand-name').textContent = 'Prateada';
       document.getElementById('brand-sub').textContent  = 'Salão · Gestão';
