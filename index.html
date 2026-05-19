@@ -17,53 +17,18 @@
       flex: 1;
       position: relative;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 64px 48px;
-      /* Fiore: gradiente rosa + listras sutis */
-      background:
-        repeating-linear-gradient(90deg, rgba(210,80,120,0.07) 0 10px, transparent 10px 20px),
-        linear-gradient(160deg, #6B0230 0%, #B5124A 45%, #E0407B 80%, #F2A0BB 100%);
+      background: url('Imagens/Fiore.jpeg') center center / cover no-repeat;
     }
-    .login-art-top {
-      width: 100%; display: flex; align-items: center; gap: 14px;
-    }
-    .login-art-tag {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
-      text-transform: uppercase; color: rgba(255,255,255,0.55);
-    }
-    .login-art-logo {
-      width: 68%; max-width: 380px;
-      display: block;
-      position: relative;
-      mix-blend-mode: soft-light;
-      opacity: 0.55;
-      filter: brightness(1.4) saturate(0.3);
-      margin: 0 auto;
-    }
-    .login-art-bottom { width: 100%; }
-    .login-art-quote {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 36px; line-height: 1.2;
-      font-style: italic; font-weight: 600;
-      color: #fff;
-      margin-bottom: 16px;
-    }
-    .login-art-foot {
-      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: rgba(255,255,255,0.45); font-weight: 600;
-    }
+    .login-art-logo,
+    .login-art-top,
+    .login-art-bottom,
+    .login-art-tag,
+    .login-art-quote,
+    .login-art-foot { display: none; }
+
     /* Prateada */
     .login-art.tenant-prateada {
-      background:
-        linear-gradient(155deg, #1E0035 0%, #5B2575 50%, #9B5BB5 100%);
-    }
-    .login-art.tenant-prateada .login-art-logo {
-      mix-blend-mode: screen;
-      opacity: 0.5;
-      filter: brightness(2) saturate(0.15);
+      background: url('Imagens/Prateada.jpeg') center center / cover no-repeat;
     }
 
     @media (max-width: 900px) { .login-art { display: none; } }
