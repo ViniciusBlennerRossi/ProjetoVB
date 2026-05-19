@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cobranças — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">💰 Controle de Cobranças</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="abrirNovaCobranca()">+ Cobrança Avulsa</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Stats resumo -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom:20px" id="stats-cob"></div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="mudarTab('pendentes', this)">⏳ Pendentes</button>
+        <button class="tab-btn" onclick="mudarTab('vencidas', this)">🔴 Vencidas</button>
+        <button class="tab-btn" onclick="mudarTab('pagas', this)">✅ Pagas</button>
+        <button class="tab-btn" onclick="mudarTab('todas', this)">📋 Todas</button>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px">
+        <div class="search-input-wrap" style="flex:1; min-width:200px">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="busca" class="form-control" placeholder="Buscar por cliente ou nº venda..." oninput="filtrar()" />
+        </div>
+        <input type="date" id="venc-inicio" class="form-control" style="max-width:150px" onchange="filtrar()" placeholder="Venc. de" />
+        <input type="date" id="venc-fim" class="form-control" style="max-width:150px" onchange="filtrar()" placeholder="Venc. até" />
+      </div>
+
+      <!-- Tabela -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" id="tab-titulo">⏳ Cobranças Pendentes</div>
+          <span id="count-label" class="badge badge-secondary"></span>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrapper" id="tabela-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Registrar Pagamento -->
+<div class="modal-overlay" id="modal-pagamento">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">💵 Registrar Pagamento</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-pagamento')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pgto-id" />
+      <div style="background:var(--bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:16px">
+        <div id="pgto-info"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data do Pagamento *</label>
+        <input type="date" id="pgto-data" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select id="pgto-forma" class="form-control form-select"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <input type="text" id="pgto-obs" class="form-control" placeholder="Opcional..." />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-pagamento')">Cancelar</button>
+      <button class="btn btn-success" onclick="confirmarPagamento()">✅ Confirmar Pagamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Cobrança Avulsa -->
+<div class="modal-overlay" id="modal-nova-cob">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Nova Cobrança Avulsa</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-nova-cob')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Cliente *</label>
+        <input type="text" id="nc-cliente" class="form-control" placeholder="Nome do cliente" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição *</label>
+        <input type="text" id="nc-descricao" class="form-control" placeholder="Motivo da cobrança" />
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Valor (R$) *</label>
+          <input type="number" id="nc-valor" class="form-control" step="0.01" min="0" placeholder="0,00" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vencimento *</label>
+          <input type="date" id="nc-vencimento" class="form-control" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-nova-cob')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarNovaCobranca()">💾 Salvar Cobrança</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('cobrancas'));
+
+  const selPgtoForma = document.getElementById('pgto-forma');
+  FORMAS_PGTO.forEach(f => { selPgtoForma.innerHTML += `<option value="${f.value}">${f.label}</option>`; });
+
+  let tabAtual = 'pendentes';
+  let _todasCobrancas = [];
+  let _parcelasCarne = [];
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      const [cobr, carnes] = await Promise.all([DB.Cobrancas.todas(), DB.Carnes.ativos()]);
+
+      // Vendas que já têm um carnê vinculado (PDV #XXXXX na descrição do carnê)
+      // → suas cobranças na tabela cobrancas são duplicatas das parcelas do carnê
+      const vendaNumsComCarne = new Set();
+      carnes.forEach(c => {
+        const match = (c.descricao || '').match(/PDV #(\w+)/i);
+        if (match) vendaNumsComCarne.add(match[1]);
+      });
+      _todasCobrancas = cobr.filter(c => !c.numero_venda || !vendaNumsComCarne.has(c.numero_venda));
+
+      // Transformar parcelas de carnê em pseudo-cobranças
+      _parcelasCarne = [];
+      carnes.forEach(c => {
+        (c.parcelas || []).forEach(p => {
+          _parcelasCarne.push({
+            _tipo: 'carne',
+            _carneId: c.id,
+            _carneNumero: c.numero,
+            cliente: c.cliente_nome || c.cliente,
+            descricao: `${c.numero} · ${c.descricao}`,
+            parcela_num: p.numero,
+            _num_parcelas: c.num_parcelas,
+            valor: p.valor,
+            vencimento: p.vencimento,
+            pago: p.pago,
+            data_pagamento: p.data_pagamento,
+            criado_em: c.criado_em
+          });
+        });
+      });
+
+      renderStats();
+      filtrar();
+    } catch(e) {
+      mostrarToast('Erro ao carregar cobranças', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats() {
+    const pendentes = _todasCobrancas.filter(c => !c.pago);
+    const hoje_ = hoje();
+    const vencidas = pendentes.filter(c => c.vencimento < hoje_);
+    const pagas = _todasCobrancas.filter(c => c.pago);
+    const totalPendente = pendentes.reduce((s, c) => s + (c.valor || 0), 0);
+    const totalVencido = vencidas.reduce((s, c) => s + (c.valor || 0), 0);
+    const totalPago = pagas.reduce((s, c) => s + (c.valor || 0), 0);
+
+    document.getElementById('stats-cob').innerHTML = `
+      <div class="stat-card"><div class="stat-icon orange">⏳</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalPendente)}</div><div class="stat-label">A receber (${pendentes.length})</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">🔴</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalVencido)}</div><div class="stat-label">Vencido (${vencidas.length})</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalPago)}</div><div class="stat-label">Recebido (${pagas.length})</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">📋</div>
+        <div class="stat-info"><div class="stat-value">${_todasCobrancas.length}</div><div class="stat-label">Total de cobranças</div></div></div>`;
+  }
+
+  function mudarTab(tab, btn) {
+    tabAtual = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const titulos = { pendentes: '⏳ Cobranças Pendentes', vencidas: '🔴 Cobranças Vencidas', pagas: '✅ Cobranças Pagas', todas: '📋 Todas as Cobranças' };
+    document.getElementById('tab-titulo').textContent = titulos[tab];
+    filtrar();
+  }
+
+  function filtrar() {
+    const busca = document.getElementById('busca').value.toLowerCase();
+    const vencInicio = document.getElementById('venc-inicio').value;
+    const vencFim = document.getElementById('venc-fim').value;
+    const hoje_ = hoje();
+
+    const aplicarFiltro = c => {
+      const matchBusca = !busca ||
+        (c.cliente || '').toLowerCase().includes(busca) ||
+        (c.numero_venda || c._carneNumero || '').toLowerCase().includes(busca) ||
+        (c.descricao || '').toLowerCase().includes(busca);
+      const matchVencInicio = !vencInicio || c.vencimento >= vencInicio;
+      const matchVencFim = !vencFim || c.vencimento <= vencFim;
+      let matchTab;
+      if (tabAtual === 'pendentes') matchTab = !c.pago;
+      else if (tabAtual === 'vencidas') matchTab = !c.pago && c.vencimento < hoje_;
+      else if (tabAtual === 'pagas') matchTab = c.pago;
+      else matchTab = true;
+      return matchBusca && matchVencInicio && matchVencFim && matchTab;
+    };
+
+    const cobr = _todasCobrancas.filter(aplicarFiltro);
+    const carne = _parcelasCarne.filter(aplicarFiltro);
+    const lista = [...cobr, ...carne].sort((a, b) => {
+      if (!a.pago && !b.pago) return a.vencimento.localeCompare(b.vencimento);
+      return new Date(b.criado_em || 0) - new Date(a.criado_em || 0);
+    });
+
+    renderTabela(lista);
+    document.getElementById('count-label').textContent = lista.length + ' cobranças';
+  }
+
+  function renderTabela(lista) {
+    const hoje_ = hoje();
+    if (!lista.length) {
+      document.getElementById('tabela-wrap').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-title">Nenhuma cobrança encontrada</div></div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Cliente</th><th>Descrição</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th>
+    </tr></thead><tbody>`;
+
+    lista.forEach(c => {
+      const vencida = !c.pago && c.vencimento < hoje_;
+      const vencStatus = c.pago
+        ? `<span class="badge badge-success">✅ Pago em ${Fmt.data(c.data_pagamento + 'T00:00:00')}</span>`
+        : vencida ? '<span class="badge badge-danger">🔴 Vencida</span>'
+        : '<span class="badge badge-warning">⏳ Pendente</span>';
+      const diasVenc = !c.pago ? Math.ceil((new Date(c.vencimento) - new Date(hoje_)) / 86400000) : null;
+
+      const isCarne = c._tipo === 'carne';
+      const descricaoCell = isCarne
+        ? `<span style="background:#7C3AED;color:#fff;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:700;margin-right:4px">CARNÊ</span>${c.descricao || '-'}`
+        : (c.numero_venda ? `Venda #${c.numero_venda}` : (c.descricao || '-'));
+      const parcelaCell = c.parcela_num
+        ? `${c.parcela_num}ª${isCarne && c._num_parcelas ? '/'+c._num_parcelas : ''}`
+        : '-';
+      const acoesCell = isCarne
+        ? `<a class="btn btn-sm btn-outline" href="carnes.html" title="Ver carnê" style="font-size:11px">📄 Ver carnê</a>`
+        : `${!c.pago ? `<button class="btn btn-sm btn-success" onclick="abrirPagamento(${c.id})">💵 Receber</button>` : ''}
+           ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirCobranca(${c.id})" title="Excluir">🗑️</button>` : ''}`;
+
+      html += `<tr style="${vencida ? 'background:var(--danger-bg)' : ''}${isCarne ? ';border-left:3px solid #7C3AED' : ''}">
+        <td><strong>${c.cliente || '-'}</strong></td>
+        <td>${descricaoCell}</td>
+        <td>${parcelaCell}</td>
+        <td><strong style="font-size:15px">${Fmt.moeda(c.valor)}</strong></td>
+        <td>
+          <div>${Fmt.data(c.vencimento + 'T00:00:00')}</div>
+          ${!c.pago && diasVenc !== null ? `<small class="${vencida ? 'text-danger' : 'text-muted'}">${vencida ? Math.abs(diasVenc) + ' dias atrás' : diasVenc === 0 ? 'Hoje' : 'em ' + diasVenc + ' dias'}</small>` : ''}
+        </td>
+        <td>${vencStatus}</td>
+        <td><div class="td-actions">${acoesCell}</div></td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('tabela-wrap').innerHTML = html;
+  }
+
+  function abrirPagamento(id) {
+    const c = _todasCobrancas.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('pgto-id').value = id;
+    document.getElementById('pgto-data').value = hoje();
+    document.getElementById('pgto-forma').value = 'dinheiro';
+    document.getElementById('pgto-obs').value = '';
+    document.getElementById('pgto-info').innerHTML = `
+      <div style="font-size:13px; color:var(--text2); margin-bottom:4px">Cliente: <strong>${c.cliente || '-'}</strong></div>
+      ${c.numero_venda ? `<div style="font-size:13px; color:var(--text2); margin-bottom:4px">Venda: <strong>#${c.numero_venda}</strong></div>` : ''}
+      ${c.parcela_num ? `<div style="font-size:13px; color:var(--text2); margin-bottom:4px">Parcela: <strong>${c.parcela_num}ª</strong></div>` : ''}
+      <div style="font-size:20px; font-weight:800; color:var(--primary)">${Fmt.moeda(c.valor)}</div>
+      <div style="font-size:12px; color:var(--text2)">Vencimento: ${Fmt.data(c.vencimento + 'T00:00:00')}</div>`;
+    Modal.abrir('modal-pagamento');
+  }
+
+  async function confirmarPagamento() {
+    const id = Number(document.getElementById('pgto-id').value);
+    const data = document.getElementById('pgto-data').value;
+    if (!data) return mostrarToast('Informe a data do pagamento', 'warning');
+    await DB.Cobrancas.registrarPagamento(id, data);
+    mostrarToast('Pagamento registrado! ✅', 'success');
+    Modal.fechar('modal-pagamento');
+    await carregar();
+  }
+
+  function excluirCobranca(id) {
+    confirmar('Deseja excluir esta cobrança?', async () => {
+      await DB.Cobrancas.deletar(id);
+      mostrarToast('Cobrança excluída', 'danger');
+      await carregar();
+    });
+  }
+
+  function abrirNovaCobranca() {
+    document.getElementById('nc-cliente').value = '';
+    document.getElementById('nc-descricao').value = '';
+    document.getElementById('nc-valor').value = '';
+    document.getElementById('nc-vencimento').value = addDias(hoje(), 7);
+    Modal.abrir('modal-nova-cob');
+  }
+
+  async function salvarNovaCobranca() {
+    const cliente = document.getElementById('nc-cliente').value.trim();
+    const descricao = document.getElementById('nc-descricao').value.trim();
+    const valor = parseFloat(document.getElementById('nc-valor').value) || 0;
+    const vencimento = document.getElementById('nc-vencimento').value;
+    if (!cliente) return mostrarToast('Informe o cliente', 'warning');
+    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
+    if (valor <= 0) return mostrarToast('Informe um valor válido', 'warning');
+    if (!vencimento) return mostrarToast('Informe o vencimento', 'warning');
+    await DB.Cobrancas.salvar({ cliente, descricao, valor, vencimento, pago: false, parcela_num: 1 });
+    mostrarToast('Cobrança criada!', 'success');
+    Modal.fechar('modal-nova-cob');
+    await carregar();
+  }
+
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

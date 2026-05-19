@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clientes — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .cliente-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      transition: box-shadow .2s, transform .2s;
+      cursor: pointer;
+    }
+    .cliente-card:hover { box-shadow: 0 6px 20px rgba(181,18,74,.13); transform: translateY(-2px); }
+    .cliente-avatar {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: var(--white);
+      flex-shrink: 0;
+    }
+    .cliente-info { flex: 1; min-width: 0; }
+    .cliente-nome { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .cliente-meta { font-size: 12px; color: var(--text2); display: flex; gap: 12px; flex-wrap: wrap; }
+    .cliente-stats { display: flex; gap: 12px; margin-top: 8px; }
+    .cliente-stat { font-size: 11px; background: var(--bg); padding: 3px 8px; border-radius: 20px; }
+    .clientes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">👥 Clientes</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="abrirModal()">+ Novo Cliente</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:20px" id="stats-area"></div>
+
+      <!-- Busca -->
+      <div class="card" style="padding:14px 18px; margin-bottom:20px">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <div class="search-input-wrap" style="flex:1; min-width:220px">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="busca" class="form-control" placeholder="Buscar por nome, telefone ou CPF..." oninput="filtrar()" />
+          </div>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="setView('grid')" id="btn-grid">⊞ Cards</button>
+            <button class="btn btn-ghost btn-sm" onclick="setView('list')" id="btn-list">☰ Lista</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo -->
+      <div id="conteudo-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cliente -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-titulo">Novo Cliente</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cli-id" />
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Nome Completo *</label>
+          <input type="text" id="cli-nome" class="form-control" placeholder="Nome do cliente" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input type="text" id="cli-cpf" class="form-control" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" />
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Telefone / WhatsApp</label>
+          <input type="text" id="cli-telefone" class="form-control" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTelefone(this)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" id="cli-email" class="form-control" placeholder="cliente@email.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data de Nascimento</label>
+        <input type="date" id="cli-nascimento" class="form-control" />
+      </div>
+      <hr style="border:none; border-top:1px solid var(--border); margin:14px 0" />
+      <div class="form-group">
+        <label class="form-label">Endereço</label>
+        <input type="text" id="cli-endereco" class="form-control" placeholder="Rua, Nº, Bairro" />
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label class="form-label">Cidade</label>
+          <input type="text" id="cli-cidade" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select id="cli-estado" class="form-control form-select">
+            <option value="">UF</option>
+            <option>AC</option><option>AL</option><option>AM</option><option>BA</option>
+            <option>CE</option><option>DF</option><option>ES</option><option>GO</option>
+            <option>MA</option><option>MG</option><option>MS</option><option>MT</option>
+            <option>PA</option><option>PB</option><option>PE</option><option>PI</option>
+            <option>PR</option><option>RJ</option><option>RN</option><option>RO</option>
+            <option>RR</option><option>RS</option><option>SC</option><option>SE</option>
+            <option>SP</option><option>TO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CEP</label>
+          <input type="text" id="cli-cep" class="form-control" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea id="cli-obs" class="form-control" rows="2" placeholder="Preferências, anotações..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCliente()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes do Cliente -->
+<div class="modal-overlay" id="modal-detalhe">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="det-titulo">Perfil do Cliente</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">✕</button>
+    </div>
+    <div class="modal-body" id="det-body"></div>
+    <div class="modal-footer" id="det-footer"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('clientes'));
+
+  let viewAtual = 'grid';
+  let listaFiltrada = [];
+  let _clientesCache = [];
+  let _cobrancasPorCliente = {};
+  let _vendasPorCliente = {};
+  let _carnesAtivosCount = 0;
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      const [clientes, cobrancas, vendas, carnes] = await Promise.all([
+        DB.Clientes.ativos(),
+        DB.Cobrancas.pendentes(),
+        DB.Vendas.todas(),
+        DB.Carnes.ativos()
+      ]);
+      _clientesCache = clientes;
+      _carnesAtivosCount = carnes.length;
+
+      _cobrancasPorCliente = {};
+      cobrancas.filter(c => c.cliente_id).forEach(c => {
+        _cobrancasPorCliente[c.cliente_id] = (_cobrancasPorCliente[c.cliente_id] || 0) + (c.valor || 0);
+      });
+
+      _vendasPorCliente = {};
+      vendas.filter(v => v.status !== 'cancelada' && v.cliente_id).forEach(v => {
+        _vendasPorCliente[v.cliente_id] = (_vendasPorCliente[v.cliente_id] || 0) + (v.total || 0);
+      });
+
+      renderStats();
+      filtrar();
+    } catch(e) {
+      mostrarToast('Erro ao carregar clientes', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats() {
+    const clientesComDebito = Object.keys(_cobrancasPorCliente).length;
+    const totalFaturado = Object.values(_vendasPorCliente).reduce((s, v) => s + v, 0);
+
+    document.getElementById('stats-area').innerHTML = `
+      <div class="stat-card"><div class="stat-icon pink">👥</div>
+        <div class="stat-info"><div class="stat-value">${_clientesCache.length}</div><div class="stat-label">Total de Clientes</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">💰</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalFaturado)}</div><div class="stat-label">Faturado com Clientes</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">⏳</div>
+        <div class="stat-info"><div class="stat-value">${clientesComDebito}</div><div class="stat-label">Com Débito Aberto</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">📋</div>
+        <div class="stat-info"><div class="stat-value">${_carnesAtivosCount}</div><div class="stat-label">Carnês Ativos</div></div></div>`;
+  }
+
+  function filtrar() {
+    const busca = document.getElementById('busca').value.toLowerCase();
+    listaFiltrada = _clientesCache.filter(c => {
+      return !busca ||
+        c.nome.toLowerCase().includes(busca) ||
+        (c.telefone || '').includes(busca) ||
+        (c.cpf || '').replace(/\D/g,'').includes(busca.replace(/\D/g,''));
+    }).sort((a, b) => a.nome.localeCompare(b.nome));
+    renderConteudo();
+  }
+
+  function setView(v) {
+    viewAtual = v;
+    document.getElementById('btn-grid').className = v === 'grid' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+    document.getElementById('btn-list').className = v === 'list' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+    renderConteudo();
+  }
+
+  function renderConteudo() {
+    if (!listaFiltrada.length) {
+      document.getElementById('conteudo-wrap').innerHTML =
+        `<div class="empty-state card" style="padding:60px"><div class="empty-icon">👥</div>
+        <div class="empty-title">Nenhum cliente encontrado</div>
+        <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Cadastrar cliente</button></div></div>`;
+      return;
+    }
+    if (viewAtual === 'grid') renderGrid();
+    else renderList();
+  }
+
+  function renderGrid() {
+    let html = '<div class="clientes-grid">';
+    listaFiltrada.forEach(c => {
+      const debito = _cobrancasPorCliente[c.id] || 0;
+      const totalCompras = _vendasPorCliente[c.id] || 0;
+      html += `<div class="cliente-card" onclick="verDetalhes(${c.id})">
+        <div class="cliente-avatar">${Fmt.inicial(c.nome)}</div>
+        <div class="cliente-info">
+          <div class="cliente-nome">${c.nome}</div>
+          <div class="cliente-meta">
+            ${c.telefone ? `<span>📱 ${Fmt.telefone(c.telefone)}</span>` : ''}
+            ${c.cidade ? `<span>📍 ${c.cidade}${c.estado ? '/'+c.estado : ''}</span>` : ''}
+          </div>
+          <div class="cliente-stats">
+            <span class="cliente-stat">💰 ${Fmt.moeda(totalCompras)}</span>
+            ${debito > 0 ? `<span class="cliente-stat" style="background:var(--danger-bg);color:var(--danger)">⚠️ ${Fmt.moeda(debito)}</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px">
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();editarCliente(${c.id})" title="Editar">✏️</button>
+          ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="event.stopPropagation();excluirCliente(${c.id})" title="Excluir">🗑️</button>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('conteudo-wrap').innerHTML = html;
+  }
+
+  function renderList() {
+    let html = `<div class="card"><div class="table-wrapper"><table><thead><tr>
+      <th>Cliente</th><th>Telefone</th><th>CPF</th><th>Cidade</th><th>Total Compras</th><th>Débito</th><th>Ações</th>
+    </tr></thead><tbody>`;
+    listaFiltrada.forEach(c => {
+      const debito = _cobrancasPorCliente[c.id] || 0;
+      const totalCompras = _vendasPorCliente[c.id] || 0;
+      html += `<tr>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div class="user-avatar" style="width:32px;height:32px;font-size:12px;background:linear-gradient(135deg,var(--primary),var(--accent))">${Fmt.inicial(c.nome)}</div>
+          <strong>${c.nome}</strong></div></td>
+        <td>${Fmt.telefone(c.telefone)}</td>
+        <td>${Fmt.cpf(c.cpf)}</td>
+        <td>${c.cidade ? c.cidade+(c.estado?'/'+c.estado:'') : '-'}</td>
+        <td>${Fmt.moeda(totalCompras)}</td>
+        <td>${debito > 0 ? `<span class="text-danger font-bold">${Fmt.moeda(debito)}</span>` : '<span class="text-muted">-</span>'}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})">👁️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editarCliente(${c.id})">✏️</button>
+          ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="excluirCliente(${c.id})">🗑️</button>` : ''}
+        </div></td>
+      </tr>`;
+    });
+    html += '</tbody></table></div></div>';
+    document.getElementById('conteudo-wrap').innerHTML = html;
+  }
+
+  function abrirModal(cli = null) {
+    document.getElementById('cli-id').value = cli ? cli.id : '';
+    document.getElementById('cli-nome').value = cli ? cli.nome : '';
+    document.getElementById('cli-cpf').value = cli ? (cli.cpf || '') : '';
+    document.getElementById('cli-telefone').value = cli ? (cli.telefone || '') : '';
+    document.getElementById('cli-email').value = cli ? (cli.email || '') : '';
+    document.getElementById('cli-nascimento').value = cli ? (cli.nascimento || '') : '';
+    document.getElementById('cli-endereco').value = cli ? (cli.endereco || '') : '';
+    document.getElementById('cli-cidade').value = cli ? (cli.cidade || '') : '';
+    document.getElementById('cli-estado').value = cli ? (cli.estado || '') : '';
+    document.getElementById('cli-cep').value = cli ? (cli.cep || '') : '';
+    document.getElementById('cli-obs').value = cli ? (cli.observacoes || '') : '';
+    document.getElementById('modal-titulo').textContent = cli ? 'Editar Cliente' : 'Novo Cliente';
+    Modal.abrir('modal-cliente');
+  }
+
+  function editarCliente(id) {
+    const c = _clientesCache.find(x => x.id === id);
+    abrirModal(c);
+  }
+
+  function excluirCliente(id) {
+    const c = _clientesCache.find(x => x.id === id);
+    confirmar(`Excluir cliente <strong>${c.nome}</strong>?`, async () => {
+      await DB.Clientes.deletar(id);
+      mostrarToast('Cliente excluído', 'danger');
+      await carregar();
+    });
+  }
+
+  async function salvarCliente() {
+    const id = document.getElementById('cli-id').value;
+    const nome = document.getElementById('cli-nome').value.trim();
+    if (!nome) return mostrarToast('Informe o nome do cliente', 'warning');
+
+    await DB.Clientes.salvar({
+      id: id ? Number(id) : undefined,
+      nome,
+      cpf: document.getElementById('cli-cpf').value.trim(),
+      telefone: document.getElementById('cli-telefone').value.trim(),
+      email: document.getElementById('cli-email').value.trim(),
+      nascimento: document.getElementById('cli-nascimento').value,
+      endereco: document.getElementById('cli-endereco').value.trim(),
+      cidade: document.getElementById('cli-cidade').value.trim(),
+      estado: document.getElementById('cli-estado').value,
+      cep: document.getElementById('cli-cep').value.trim(),
+      observacoes: document.getElementById('cli-obs').value.trim()
+    });
+
+    mostrarToast(id ? 'Cliente atualizado!' : 'Cliente cadastrado!', 'success');
+    Modal.fechar('modal-cliente');
+    await carregar();
+  }
+
+  async function verDetalhes(id) {
+    const c = _clientesCache.find(x => x.id === id);
+    if (!c) return;
+
+    const [vendas, cobrancas, carnes] = await Promise.all([
+      DB.Vendas.todas(),
+      DB.Cobrancas.todas(),
+      DB.Carnes.todos()
+    ]);
+
+    const vendasCliente = vendas.filter(v => v.status !== 'cancelada' && v.cliente_id === id);
+    const totalGasto = vendasCliente.reduce((s, v) => s + (v.total || 0), 0);
+    const cobrancasCliente = cobrancas.filter(cb => cb.cliente_id === id);
+    const debitoAberto = cobrancasCliente.filter(cb => !cb.pago).reduce((s, cb) => s + (cb.valor || 0), 0);
+    const carnesCliente = carnes.filter(k => k.cliente_id === id);
+
+    document.getElementById('det-titulo').textContent = c.nome;
+
+    let vendasHtml = '';
+    vendasCliente.slice(0, 5).forEach(v => {
+      vendasHtml += `<tr><td>#${v.numero}</td><td>${Fmt.data(v.data)}</td><td>${Fmt.moeda(v.total)}</td><td>${badgeStatus(v.status_pgto||'pago')}</td></tr>`;
+    });
+
+    let carnesHtml = '';
+    carnesCliente.forEach(k => {
+      const parcs = (k.parcelas||[]).filter(p=>!p.pago).length;
+      carnesHtml += `<tr><td>${k.numero}</td><td>${k.descricao}</td><td>${Fmt.moeda(k.valor_total)}</td><td>${parcs} parc. restantes</td><td>${badgeStatus(k.status)}</td></tr>`;
+    });
+
+    document.getElementById('det-body').innerHTML = `
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:20px">
+        <div class="user-avatar" style="width:56px;height:56px;font-size:22px;background:linear-gradient(135deg,var(--primary),var(--accent))">${Fmt.inicial(c.nome)}</div>
+        <div>
+          <div style="font-size:18px;font-weight:800">${c.nome}</div>
+          <div style="font-size:13px;color:var(--text2)">${c.telefone ? Fmt.telefone(c.telefone) : ''} ${c.email ? '· '+c.email : ''}</div>
+          ${c.cidade ? `<div style="font-size:13px;color:var(--text2)">📍 ${c.cidade}${c.estado?'/'+c.estado:''}</div>` : ''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--primary)">${Fmt.moeda(totalGasto)}</div>
+          <div style="font-size:12px;color:var(--text2)">Total gasto</div>
+        </div>
+        <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);text-align:center">
+          <div style="font-size:18px;font-weight:800;color:${debitoAberto>0?'var(--danger)':'var(--success)'}">${Fmt.moeda(debitoAberto)}</div>
+          <div style="font-size:12px;color:var(--text2)">Débito aberto</div>
+        </div>
+        <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);text-align:center">
+          <div style="font-size:18px;font-weight:800">${vendasCliente.length}</div>
+          <div style="font-size:12px;color:var(--text2)">Compras</div>
+        </div>
+      </div>
+      ${vendasCliente.length ? `
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">🛒 Últimas Compras</h4>
+        <div class="table-wrapper" style="margin-bottom:16px">
+          <table><thead><tr><th>Nº</th><th>Data</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>${vendasHtml}</tbody></table>
+        </div>` : ''}
+      ${carnesCliente.length ? `
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">📄 Carnês</h4>
+        <div class="table-wrapper">
+          <table><thead><tr><th>Nº</th><th>Descrição</th><th>Total</th><th>Parcelas</th><th>Status</th></tr></thead>
+          <tbody>${carnesHtml}</tbody></table>
+        </div>` : ''}
+      ${c.cpf ? `<div style="margin-top:12px;font-size:13px;color:var(--text2)">CPF: ${Fmt.cpf(c.cpf)}</div>` : ''}
+      ${c.observacoes ? `<div style="margin-top:8px;padding:10px;background:var(--bg);border-radius:var(--radius-sm);font-size:13px"><strong>Obs:</strong> ${c.observacoes}</div>` : ''}
+    `;
+
+    document.getElementById('det-footer').innerHTML = `
+      <button class="btn btn-outline" onclick="Modal.fechar('modal-detalhe');editarCliente(${c.id})">✏️ Editar</button>
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-detalhe')">Fechar</button>`;
+
+    Modal.abrir('modal-detalhe');
+  }
+
+  function mascaraCPF(el) {
+    let v = el.value.replace(/\D/g,'');
+    if (v.length > 3) v = v.slice(0,3)+'.'+v.slice(3);
+    if (v.length > 7) v = v.slice(0,7)+'.'+v.slice(7);
+    if (v.length > 11) v = v.slice(0,11)+'-'+v.slice(11);
+    el.value = v.slice(0,14);
+  }
+  function mascaraTelefone(el) {
+    let v = el.value.replace(/\D/g,'');
+    if (v.length > 2) v = '('+v.slice(0,2)+') '+v.slice(2);
+    if (v.length > 10) v = v.slice(0,10)+'-'+v.slice(10);
+    el.value = v.slice(0,15);
+  }
+  function mascaraCEP(el) {
+    let v = el.value.replace(/\D/g,'');
+    if (v.length > 5) v = v.slice(0,5)+'-'+v.slice(5);
+    el.value = v.slice(0,9);
+  }
+
+  setView('grid');
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Acessos — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .acessos-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 16px;
+      height: calc(100vh - 120px);
+    }
+
+    /* Painel esquerdo — telas */
+    .painel-telas {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .painel-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: .3px;
+    }
+    .painel-search {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .painel-search input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      background: var(--bg2);
+      color: var(--text);
+      box-sizing: border-box;
+    }
+    .painel-search input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .telas-lista {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+    .tela-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text);
+      border-left: 3px solid transparent;
+      transition: background .15s;
+    }
+    .tela-item:hover { background: var(--bg2); }
+    .tela-item.ativa {
+      background: rgba(229,30,99,.08);
+      border-left-color: var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .tela-icon { font-size: 16px; width: 22px; text-align: center; }
+    .tela-section {
+      padding: 10px 16px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-muted, #888);
+      text-transform: uppercase;
+    }
+
+    /* Painel direito */
+    .painel-direito {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    /* Lista de usuários */
+    .painel-usuarios {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      max-height: 230px;
+      overflow: hidden;
+    }
+    .usuarios-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .usuario-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      min-width: 90px;
+      transition: border-color .15s, background .15s;
+      background: var(--bg2);
+    }
+    .usuario-card:hover { border-color: var(--primary); background: rgba(229,30,99,.05); }
+    .usuario-card.selecionado {
+      border-color: var(--primary);
+      background: rgba(229,30,99,.1);
+    }
+    .usuario-card .uavatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; color: #fff;
+    }
+    .usuario-card .unome {
+      font-size: 12px; font-weight: 600; text-align: center;
+      color: var(--text); line-height: 1.3;
+      max-width: 90px; word-break: break-word;
+    }
+    .usuario-card .upapel {
+      font-size: 10px; color: var(--text-muted, #888); text-align: center;
+    }
+
+    /* Painel permissões */
+    .painel-permissoes {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .permissoes-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted, #aaa);
+      gap: 10px;
+      font-size: 14px;
+    }
+    .permissoes-empty .empty-icon { font-size: 40px; }
+    .permissoes-body { padding: 0 20px 20px; overflow-y: auto; flex: 1; }
+    .permissoes-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+    }
+    .permissoes-table thead th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--text-muted, #888);
+      border-bottom: 2px solid var(--border);
+    }
+    .permissoes-table tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text);
+    }
+    .permissoes-table tbody tr:last-child td { border-bottom: none; }
+    .permissoes-table tbody tr:hover td { background: var(--bg2); }
+
+    .perm-check-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .perm-checkbox {
+      width: 18px; height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .perm-checkbox:disabled { cursor: not-allowed; opacity: .5; }
+    .perm-acao-label {
+      display: flex; align-items: center; gap: 8px; font-weight: 500;
+    }
+    .perm-acao-icon { font-size: 16px; }
+    .badge-admin-total {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(229,30,99,.1);
+      color: var(--primary);
+      border: 1px solid rgba(229,30,99,.3);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .acessos-layout { grid-template-columns: 1fr; height: auto; }
+      .painel-telas { max-height: 250px; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">🛡️ Controle de Acessos</div>
+    </div>
+    <div class="page-content">
+
+      <div class="acessos-layout">
+
+        <!-- Painel esquerdo: telas -->
+        <div class="painel-telas">
+          <div class="painel-header">📋 Telas do Sistema</div>
+          <div class="painel-search">
+            <input type="text" id="busca-tela" placeholder="Buscar tela..." oninput="filtrarTelas()" />
+          </div>
+          <div class="telas-lista" id="lista-telas"></div>
+        </div>
+
+        <!-- Painel direito -->
+        <div class="painel-direito">
+
+          <!-- Usuários -->
+          <div class="painel-usuarios">
+            <div class="painel-header" style="display:flex;justify-content:space-between;align-items:center">
+              <span>👤 Usuários</span>
+              <div class="painel-search" style="padding:0;border:none;width:200px">
+                <input type="text" id="busca-usuario" placeholder="Buscar usuário..." oninput="filtrarUsuarios()" />
+              </div>
+            </div>
+            <div class="usuarios-grid" id="grid-usuarios"></div>
+          </div>
+
+          <!-- Permissões -->
+          <div class="painel-permissoes">
+            <div class="painel-header" id="permissoes-titulo">🔐 Permissões</div>
+            <div id="permissoes-conteudo" class="permissoes-empty">
+              <div class="empty-icon">🛡️</div>
+              <div>Selecione uma tela e um usuário</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirAdmin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('acessos'));
+
+  const TELAS = [
+    { section: 'LOJA' },
+    { id: 'dashboard',    icon: '🏠', label: 'Home / Dashboard' },
+    { id: 'vendas',       icon: '🛒', label: 'Vendas' },
+    { id: 'pdv',          icon: '🖥️', label: 'PDV (Ponto de Venda)' },
+    { id: 'encomendas',   icon: '📋', label: 'Encomendas' },
+    { id: 'clientes',     icon: '👥', label: 'Clientes' },
+    { id: 'funcionarios', icon: '👤', label: 'Funcionários' },
+    { id: 'cobrancas',    icon: '💰', label: 'Cobranças' },
+    { id: 'carnes',       icon: '📄', label: 'Carnês' },
+    { section: 'ESTOQUE' },
+    { id: 'produtos',     icon: '👗', label: 'Produtos' },
+    { id: 'estoque',      icon: '📦', label: 'Estoque' },
+    { id: 'compras',      icon: '🚚', label: 'Compras' },
+    { id: 'fornecedores', icon: '🏭', label: 'Fornecedores' },
+    { section: 'FINANCEIRO' },
+    { id: 'gastos',       icon: '💸', label: 'Gastos' },
+    { id: 'relatorios',   icon: '📈', label: 'Relatórios' },
+  ];
+
+  const ACOES = [
+    { id: 'consultar', icon: '🔍', label: 'Consultar' },
+    { id: 'incluir',   icon: '➕', label: 'Incluir' },
+    { id: 'alterar',   icon: '✏️', label: 'Alterar' },
+    { id: 'excluir',   icon: '🗑️', label: 'Excluir' },
+  ];
+
+  let _usuarios = [];
+  let _telaSelecionada = null;
+  let _usuarioSelecionado = null;
+  let _saving = false;
+
+  async function iniciar() {
+    mostrarLoader();
+    try {
+      _usuarios = await DB.Usuarios.todos();
+      renderTelas();
+      renderUsuarios();
+    } catch(e) {
+      mostrarToast('Erro ao carregar dados', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  // ===== TELAS =====
+  function renderTelas(filtro = '') {
+    const lista = document.getElementById('lista-telas');
+    const termo = filtro.toLowerCase();
+    let html = '';
+
+    TELAS.forEach(t => {
+      if (t.section) {
+        if (termo) return; // oculta seções ao filtrar
+        html += `<div class="tela-section">${t.section}</div>`;
+        return;
+      }
+      if (termo && !t.label.toLowerCase().includes(termo)) return;
+      const ativa = _telaSelecionada === t.id ? 'ativa' : '';
+      html += `<div class="tela-item ${ativa}" onclick="selecionarTela('${t.id}')">
+        <span class="tela-icon">${t.icon}</span>
+        <span>${t.label}</span>
+      </div>`;
+    });
+
+    if (!html) html = '<div style="padding:16px;text-align:center;font-size:13px;color:#aaa">Nenhuma tela encontrada</div>';
+    lista.innerHTML = html;
+  }
+
+  function filtrarTelas() {
+    renderTelas(document.getElementById('busca-tela').value);
+  }
+
+  function selecionarTela(id) {
+    _telaSelecionada = id;
+    renderTelas(document.getElementById('busca-tela').value);
+    renderPermissoes();
+  }
+
+  // ===== USUÁRIOS =====
+  function renderUsuarios(filtro = '') {
+    const grid = document.getElementById('grid-usuarios');
+    const termo = filtro.toLowerCase();
+    const lista = _usuarios.filter(u =>
+      !termo || u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo)
+    );
+
+    if (!lista.length) {
+      grid.innerHTML = '<div style="padding:16px;font-size:13px;color:#aaa">Nenhum usuário encontrado</div>';
+      return;
+    }
+
+    grid.innerHTML = lista.map(u => {
+      const sel = _usuarioSelecionado && _usuarioSelecionado.id === u.id ? 'selecionado' : '';
+      const cor = u.papel === 'admin' ? 'var(--primary)' : 'var(--info, #0ea5e9)';
+      return `<div class="usuario-card ${sel}" onclick="selecionarUsuario(${u.id})">
+        <div class="uavatar" style="background:${cor}">${Fmt.inicial(u.nome)}</div>
+        <div class="unome">${u.nome.split(' ')[0]}</div>
+        <div class="upapel">${u.papel === 'admin' ? 'Admin' : 'Vendedor'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function filtrarUsuarios() {
+    renderUsuarios(document.getElementById('busca-usuario').value);
+  }
+
+  function selecionarUsuario(id) {
+    _usuarioSelecionado = _usuarios.find(u => u.id === id) || null;
+    renderUsuarios(document.getElementById('busca-usuario').value);
+    renderPermissoes();
+  }
+
+  // ===== PERMISSÕES =====
+  function renderPermissoes() {
+    const conteudo = document.getElementById('permissoes-conteudo');
+    const titulo = document.getElementById('permissoes-titulo');
+
+    if (!_telaSelecionada || !_usuarioSelecionado) {
+      titulo.textContent = '🔐 Permissões';
+      conteudo.className = 'permissoes-empty';
+      conteudo.innerHTML = `<div class="empty-icon">🛡️</div>
+        <div>${!_telaSelecionada ? 'Selecione uma tela' : 'Selecione um usuário'}</div>`;
+      return;
+    }
+
+    const tela = TELAS.find(t => t.id === _telaSelecionada);
+    const usr = _usuarioSelecionado;
+    titulo.innerHTML = `🔐 Acessos de <strong>${usr.nome}</strong> — ${tela.icon} ${tela.label}`;
+
+    if (usr.papel === 'admin') {
+      conteudo.className = 'permissoes-empty';
+      conteudo.innerHTML = `<div class="empty-icon">👑</div>
+        <div><span class="badge-admin-total">✅ Administrador — acesso total a todas as telas</span></div>
+        <div style="font-size:12px;color:#aaa;margin-top:4px">Permissões individuais não se aplicam ao administrador.</div>`;
+      return;
+    }
+
+    const perms = (usr.permissoes || {})[_telaSelecionada] || {};
+
+    conteudo.className = 'permissoes-body';
+    conteudo.innerHTML = `
+      <table class="permissoes-table">
+        <thead>
+          <tr>
+            <th>Ação</th>
+            <th>Permitido</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ACOES.map(a => {
+            const checked = perms[a.id] === true ? 'checked' : '';
+            return `<tr>
+              <td>
+                <span class="perm-acao-label">
+                  <span class="perm-acao-icon">${a.icon}</span>
+                  ${a.label}
+                </span>
+              </td>
+              <td>
+                <div class="perm-check-wrap">
+                  <input type="checkbox" class="perm-checkbox" ${checked}
+                    onchange="alterarPermissao('${a.id}', this.checked)"
+                    id="perm-${a.id}" />
+                  <label for="perm-${a.id}" style="font-size:13px;cursor:pointer;color:var(--text-muted,#888)">
+                    ${checked ? '<span style="color:var(--success,#16a34a);font-weight:600">Permitido</span>' : '<span>Negado</span>'}
+                  </label>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:14px;padding:10px 14px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--text-muted,#888)">
+        ℹ️ As alterações são salvas automaticamente ao marcar/desmarcar cada permissão.
+      </div>`;
+  }
+
+  async function alterarPermissao(acao, valor) {
+    if (_saving) return;
+    _saving = true;
+
+    const usr = _usuarioSelecionado;
+    const tela = _telaSelecionada;
+
+    // Atualizar cache local
+    if (!usr.permissoes) usr.permissoes = {};
+    if (!usr.permissoes[tela]) usr.permissoes[tela] = {};
+    usr.permissoes[tela][acao] = valor;
+
+    try {
+      const { error } = await _sb.from('usuarios').update({ permissoes: usr.permissoes }).eq('id', usr.id);
+      if (error) {
+        console.error('Supabase erro ao salvar permissão:', error);
+        if (error.message && error.message.includes('permissoes')) {
+          mostrarToast('Coluna "permissoes" não existe. Execute o SQL no Supabase: ALTER TABLE usuarios ADD COLUMN permissoes JSONB DEFAULT \'{}\'', 'danger', 8000);
+        } else {
+          mostrarToast('Erro ao salvar: ' + (error.message || error.code || 'verifique o console'), 'danger', 6000);
+        }
+        usr.permissoes[tela][acao] = !valor;
+        renderPermissoes();
+        return;
+      }
+      mostrarToast(`${valor ? '✅' : '❌'} ${acao.charAt(0).toUpperCase() + acao.slice(1)} ${valor ? 'permitido' : 'negado'} para ${usr.nome.split(' ')[0]}`, valor ? 'success' : 'warning');
+      renderPermissoes();
+    } catch(e) {
+      console.error('Erro inesperado ao salvar permissão:', e);
+      mostrarToast('Erro ao salvar permissão: ' + (e.message || e), 'danger', 6000);
+      usr.permissoes[tela][acao] = !valor;
+      renderPermissoes();
+    } finally {
+      _saving = false;
+    }
+  }
+
+  (async () => { await iniciar(); })();
+</script>
+</body>
+</html>

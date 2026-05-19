@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatórios — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .chart-bar-wrap { padding: 8px 0; }
+    .chart-bar-item { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; }
+    .chart-bar-label { width:180px; text-align:right; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
+    .chart-bar-track { flex:1; background:var(--border); border-radius:4px; height:22px; position:relative; }
+    .chart-bar-fill { height:100%; border-radius:4px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); transition: width .4s; display:flex; align-items:center; padding-left:8px; }
+    .chart-bar-val { font-size:11px; font-weight:700; color:var(--white); white-space:nowrap; }
+    .chart-bar-val.outside { position:absolute; left:calc(100% + 6px); color:var(--text); font-size:12px; top:50%; transform:translateY(-50%); }
+    .periodo-ctrl { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .kpi-row { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:24px; }
+    .kpi-box { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:18px; text-align:center; box-shadow:var(--shadow); }
+    .kpi-val { font-size:26px; font-weight:800; color:var(--primary); }
+    .kpi-lbl { font-size:12px; color:var(--text2); margin-top:4px; }
+    .kpi-delta { font-size:12px; font-weight:700; margin-top:4px; }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">📈 Relatórios</div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+        <button class="btn btn-primary" onclick="gerarRelatorio()">🔄 Atualizar</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Filtro de período -->
+      <div class="card" style="padding:14px 18px; margin-bottom:20px">
+        <div class="periodo-ctrl">
+          <label class="form-label" style="margin:0; font-weight:700">Período:</label>
+          <select id="periodo-preset" class="form-control form-select" style="max-width:200px" onchange="onPresetChange()">
+            <option value="mes_atual">Este mês</option>
+            <option value="mes_anterior">Mês anterior</option>
+            <option value="trimestre">Último trimestre</option>
+            <option value="semestre">Último semestre</option>
+            <option value="ano">Este ano</option>
+            <option value="custom">Personalizado</option>
+          </select>
+          <div id="custom-datas" style="display:flex; gap:8px; align-items:center; display:none">
+            <input type="date" id="data-inicio" class="form-control" style="max-width:150px" />
+            <span>até</span>
+            <input type="date" id="data-fim" class="form-control" style="max-width:150px" />
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="gerarRelatorio()">Gerar</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row" id="kpis-area"></div>
+
+      <!-- Grid de relatórios -->
+      <div class="grid grid-2" style="margin-bottom:24px">
+
+        <!-- Vendas por forma de pagamento -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💳 Vendas por Forma de Pagamento</div>
+          </div>
+          <div class="card-body" id="chart-formas"></div>
+        </div>
+
+        <!-- Produtos mais vendidos -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🏆 Top 10 Produtos Mais Vendidos</div>
+          </div>
+          <div class="card-body" id="chart-produtos"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom:24px">
+        <!-- Vendas por categoria -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">👗 Vendas por Categoria</div>
+          </div>
+          <div class="card-body" id="chart-categorias"></div>
+        </div>
+
+        <!-- Estoque atual por categoria -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📦 Estoque por Categoria</div>
+          </div>
+          <div class="card-body" id="chart-estoque"></div>
+        </div>
+      </div>
+
+      <!-- Tabela de vendas do período -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Vendas do Período</div>
+          <span id="count-vendas" class="badge badge-secondary"></span>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrapper" id="tabela-vendas"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirPermissao('relatorios')) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('relatorios'));
+
+  let periodoInicio = '';
+  let periodoFim = '';
+  let vendasPeriodo = [];
+  let _prodMap = {};
+  let _catMap = {};
+  let _prodsCache = [];
+  let _cobrancasPendentes = [];
+
+  // Pre-carrega produtos e categorias na inicialização
+  async function init() {
+    const [prods, cats] = await Promise.all([DB.Produtos.ativos(), DB.Categorias.todas()]);
+    _prodsCache = prods;
+    _prodMap = Object.fromEntries(prods.map(p => [p.id, p]));
+    _catMap = Object.fromEntries(cats.map(c => [c.id, c]));
+  }
+
+  function onPresetChange() {
+    const preset = document.getElementById('periodo-preset').value;
+    const customDiv = document.getElementById('custom-datas');
+    customDiv.style.display = preset === 'custom' ? 'flex' : 'none';
+
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = agora.getMonth();
+
+    if (preset !== 'custom') {
+      if (preset === 'mes_atual') {
+        periodoInicio = new Date(ano, mes, 1).toISOString().split('T')[0];
+        periodoFim = hoje();
+      } else if (preset === 'mes_anterior') {
+        const mesAnt = mes === 0 ? 11 : mes - 1;
+        const anoAnt = mes === 0 ? ano - 1 : ano;
+        periodoInicio = new Date(anoAnt, mesAnt, 1).toISOString().split('T')[0];
+        periodoFim = new Date(anoAnt, mesAnt + 1, 0).toISOString().split('T')[0];
+      } else if (preset === 'trimestre') {
+        periodoInicio = new Date(ano, mes - 3, 1).toISOString().split('T')[0];
+        periodoFim = hoje();
+      } else if (preset === 'semestre') {
+        periodoInicio = new Date(ano, mes - 6, 1).toISOString().split('T')[0];
+        periodoFim = hoje();
+      } else if (preset === 'ano') {
+        periodoInicio = new Date(ano, 0, 1).toISOString().split('T')[0];
+        periodoFim = hoje();
+      }
+      gerarRelatorio();
+    }
+  }
+
+  async function gerarRelatorio() {
+    const preset = document.getElementById('periodo-preset').value;
+    if (preset === 'custom') {
+      periodoInicio = document.getElementById('data-inicio').value;
+      periodoFim = document.getElementById('data-fim').value;
+    }
+    if (!periodoInicio || !periodoFim) { onPresetChange(); return; }
+
+    mostrarLoader();
+    try {
+      const [vendas, cobrancas] = await Promise.all([
+        DB.Relatorios.vendasPorPeriodo(periodoInicio, periodoFim),
+        DB.Cobrancas.pendentes()
+      ]);
+      vendasPeriodo = vendas;
+      _cobrancasPendentes = cobrancas;
+
+      renderKPIs();
+      renderFormasPgto();
+      renderTopProdutos();
+      renderCategorias();
+      renderEstoqueCategoria();
+      renderTabelaVendas();
+    } catch(e) {
+      mostrarToast('Erro ao gerar relatório', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderKPIs() {
+    const ativas = vendasPeriodo.filter(v => v.status !== 'cancelada');
+    const totalVendas = ativas.reduce((s, v) => s + (v.total || 0), 0);
+    const qtdVendas = ativas.length;
+    const ticketMedio = qtdVendas > 0 ? totalVendas / qtdVendas : 0;
+    const totalDesconto = ativas.reduce((s, v) => s + (v.desconto || 0), 0);
+    const totalReceber = _cobrancasPendentes.reduce((s, c) => s + (c.valor || 0), 0);
+
+    document.getElementById('kpis-area').innerHTML = `
+      <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(totalVendas)}</div><div class="kpi-lbl">Total de Vendas</div></div>
+      <div class="kpi-box"><div class="kpi-val">${qtdVendas}</div><div class="kpi-lbl">Nº de Vendas</div></div>
+      <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(ticketMedio)}</div><div class="kpi-lbl">Ticket Médio</div></div>
+      <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(totalDesconto)}</div><div class="kpi-lbl">Total de Descontos</div></div>
+      <div class="kpi-box"><div class="kpi-val">${Fmt.moeda(totalReceber)}</div><div class="kpi-lbl">A Receber (total)</div></div>`;
+  }
+
+  function renderFormasPgto() {
+    const formas = {};
+    vendasPeriodo.filter(v => v.status !== 'cancelada').forEach(v => {
+      const f = v.forma_pagamento || 'dinheiro';
+      formas[f] = (formas[f] || 0) + (v.total || 0);
+    });
+    const sorted = Object.entries(formas).sort((a, b) => b[1] - a[1]);
+    const max = sorted[0] ? sorted[0][1] : 1;
+
+    if (!sorted.length) {
+      document.getElementById('chart-formas').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">💳</div><div class="empty-title">Sem dados</div></div>';
+      return;
+    }
+
+    let html = '<div class="chart-bar-wrap">';
+    sorted.forEach(([forma, val]) => {
+      const pct = (val / max * 100).toFixed(1);
+      html += `<div class="chart-bar-item">
+        <div class="chart-bar-label">${labelFormaPgto(forma)}</div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill" style="width:${pct}%">
+            ${pct > 20 ? `<span class="chart-bar-val">${Fmt.moeda(val)}</span>` : ''}
+          </div>
+          ${pct <= 20 ? `<span class="chart-bar-val outside">${Fmt.moeda(val)}</span>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('chart-formas').innerHTML = html;
+  }
+
+  function renderTopProdutos() {
+    const contagem = {};
+    vendasPeriodo.filter(v => v.status !== 'cancelada').forEach(v => {
+      (v.venda_itens || []).forEach(item => {
+        if (!contagem[item.produto_id]) contagem[item.produto_id] = { qty: 0, total: 0 };
+        contagem[item.produto_id].qty += item.quantidade;
+        contagem[item.produto_id].total += item.quantidade * item.preco_unitario;
+      });
+    });
+
+    const sorted = Object.entries(contagem)
+      .map(([id, d]) => ({ produto: _prodMap[Number(id)], ...d }))
+      .filter(x => x.produto)
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 10);
+
+    if (!sorted.length) {
+      document.getElementById('chart-produtos').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">🏆</div><div class="empty-title">Sem dados</div></div>';
+      return;
+    }
+
+    const max = sorted[0].qty;
+    let html = '<div class="chart-bar-wrap">';
+    sorted.forEach(item => {
+      const pct = (item.qty / max * 100).toFixed(1);
+      html += `<div class="chart-bar-item">
+        <div class="chart-bar-label" title="${item.produto.nome}">${item.produto.nome}</div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill" style="width:${pct}%; background:linear-gradient(90deg, #7B1FA2, #CE93D8)">
+            ${pct > 25 ? `<span class="chart-bar-val">${item.qty} un.</span>` : ''}
+          </div>
+          ${pct <= 25 ? `<span class="chart-bar-val outside">${item.qty} un. (${Fmt.moeda(item.total)})</span>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('chart-produtos').innerHTML = html;
+  }
+
+  function renderCategorias() {
+    const cats = {};
+    vendasPeriodo.filter(v => v.status !== 'cancelada').forEach(v => {
+      (v.venda_itens || []).forEach(item => {
+        const prod = _prodMap[item.produto_id];
+        if (!prod) return;
+        const cat = _catMap[prod.categoria_id];
+        const nome = cat ? cat.nome : 'Sem categoria';
+        if (!cats[nome]) cats[nome] = { qty: 0, total: 0 };
+        cats[nome].qty += item.quantidade;
+        cats[nome].total += item.quantidade * item.preco_unitario;
+      });
+    });
+
+    const sorted = Object.entries(cats).sort((a, b) => b[1].total - a[1].total);
+    if (!sorted.length) {
+      document.getElementById('chart-categorias').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">👗</div><div class="empty-title">Sem dados</div></div>';
+      return;
+    }
+
+    const max = sorted[0][1].total;
+    let html = '<div class="chart-bar-wrap">';
+    sorted.forEach(([nome, d]) => {
+      const pct = (d.total / max * 100).toFixed(1);
+      html += `<div class="chart-bar-item">
+        <div class="chart-bar-label">${nome}</div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill" style="width:${pct}%; background:linear-gradient(90deg,#C2185B,#F06292)">
+            ${pct > 20 ? `<span class="chart-bar-val">${Fmt.moeda(d.total)}</span>` : ''}
+          </div>
+          ${pct <= 20 ? `<span class="chart-bar-val outside">${Fmt.moeda(d.total)}</span>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('chart-categorias').innerHTML = html;
+  }
+
+  function renderEstoqueCategoria() {
+    const cats = {};
+    _prodsCache.forEach(p => {
+      const cat = _catMap[p.categoria_id];
+      const nome = cat ? cat.nome : 'Sem categoria';
+      if (!cats[nome]) cats[nome] = { qty: 0, valor: 0 };
+      cats[nome].qty += (p.estoque || 0);
+      cats[nome].valor += (p.estoque || 0) * (p.custo || 0);
+    });
+
+    const sorted = Object.entries(cats).sort((a, b) => b[1].qty - a[1].qty);
+    if (!sorted.length) {
+      document.getElementById('chart-estoque').innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-icon">📦</div><div class="empty-title">Sem produtos</div></div>';
+      return;
+    }
+
+    const max = sorted[0][1].qty || 1;
+    let html = '<div class="chart-bar-wrap">';
+    sorted.forEach(([nome, d]) => {
+      const pct = (d.qty / max * 100).toFixed(1);
+      html += `<div class="chart-bar-item">
+        <div class="chart-bar-label">${nome}</div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill" style="width:${pct}%; background:linear-gradient(90deg,#01579B,#4FC3F7)">
+            ${pct > 20 ? `<span class="chart-bar-val">${d.qty} un.</span>` : ''}
+          </div>
+          ${pct <= 20 ? `<span class="chart-bar-val outside">${d.qty} un.</span>` : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('chart-estoque').innerHTML = html;
+  }
+
+  function renderTabelaVendas() {
+    const lista = [...vendasPeriodo].sort((a, b) => new Date(b.data) - new Date(a.data));
+    document.getElementById('count-vendas').textContent = lista.length + ' vendas';
+
+    if (!lista.length) {
+      document.getElementById('tabela-vendas').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sem vendas no período</div></div>';
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Nº</th><th>Data</th><th>Cliente</th><th>Itens</th>
+      <th>Total</th><th>Desconto</th><th>Pagamento</th><th>Status</th>
+    </tr></thead><tbody>`;
+
+    lista.forEach(v => {
+      html += `<tr style="${v.status === 'cancelada' ? 'opacity:.55; text-decoration:line-through' : ''}">
+        <td><strong>#${v.numero}</strong></td>
+        <td>${Fmt.data(v.data)}</td>
+        <td>${v.cliente || 'Consumidor'}</td>
+        <td>${(v.venda_itens || []).length}</td>
+        <td><strong>${Fmt.moeda(v.total)}</strong></td>
+        <td>${v.desconto > 0 ? Fmt.moeda(v.desconto) : '-'}</td>
+        <td>${labelFormaPgto(v.forma_pagamento)}</td>
+        <td>${badgeStatus(v.status === 'cancelada' ? 'cancelada' : (v.status_pgto || 'pago'))}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('tabela-vendas').innerHTML = html;
+  }
+
+  function exportarCSV() {
+    if (!vendasPeriodo.length) { mostrarToast('Gere um relatório primeiro', 'warning'); return; }
+
+    const linhas = [['Nº Venda','Data','Cliente','Itens','Subtotal','Desconto','Total','Pagamento','Status']];
+    vendasPeriodo.forEach(v => {
+      linhas.push([
+        v.numero, Fmt.data(v.data), v.cliente || 'Consumidor',
+        (v.venda_itens || []).length, v.subtotal || v.total,
+        v.desconto || 0, v.total, labelFormaPgto(v.forma_pagamento),
+        v.status === 'cancelada' ? 'Cancelada' : (v.status_pgto || 'pago')
+      ]);
+    });
+
+    const csv = linhas.map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vendas_${periodoInicio}_${periodoFim}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('CSV exportado!', 'success');
+  }
+
+  (async () => { await init(); onPresetChange(); })();
+</script>
+</body>
+</html>

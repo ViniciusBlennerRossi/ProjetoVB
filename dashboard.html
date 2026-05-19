@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .atalho-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .atalho-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 14px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      transition: all .2s;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .atalho-card:hover { border-color: var(--primary); background: var(--bg2); transform: translateY(-3px); box-shadow: 0 6px 18px rgba(181,18,74,.12); text-decoration: none; color: var(--text); }
+    .atalho-icon { font-size: 32px; }
+    .atalho-label { font-size: 12px; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">🏠 Home</div>
+      <div class="topbar-actions">
+        <span id="topbar-data" style="font-size:13px; color:var(--text2)"></span>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Alertas -->
+      <div id="alertas-area"></div>
+
+      <!-- Atalhos rápidos -->
+      <div class="atalho-grid">
+        <a href="pdv.html" class="atalho-card"><span class="atalho-icon">🖥️</span><span class="atalho-label">PDV</span></a>
+        <a href="vendas.html" class="atalho-card"><span class="atalho-icon">🛒</span><span class="atalho-label">Vendas</span></a>
+        <a href="encomendas.html" class="atalho-card"><span class="atalho-icon">📋</span><span class="atalho-label">Encomendas</span></a>
+        <a href="clientes.html" class="atalho-card"><span class="atalho-icon">👥</span><span class="atalho-label">Clientes</span></a>
+        <a href="cobrancas.html" class="atalho-card"><span class="atalho-icon">💰</span><span class="atalho-label">Cobranças</span></a>
+        <a href="carnes.html" class="atalho-card"><span class="atalho-icon">📄</span><span class="atalho-label">Carnês</span></a>
+        <a href="produtos.html" class="atalho-card"><span class="atalho-icon" id="icon-produtos">👗</span><span class="atalho-label">Produtos</span></a>
+        <a href="estoque.html" class="atalho-card"><span class="atalho-icon">📦</span><span class="atalho-label">Estoque</span></a>
+      </div>
+
+      <!-- KPIs principais -->
+      <div class="stats-grid" id="stats-grid" style="margin-bottom:24px"></div>
+
+      <!-- Grid de informações -->
+      <div class="grid grid-2" style="margin-bottom:24px">
+
+        <!-- Vendas recentes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🛒 Últimas Vendas</div>
+            <a href="vendas.html" class="btn btn-sm btn-outline">Ver todas</a>
+          </div>
+          <div class="card-body" style="padding:0" id="tabela-vendas"></div>
+        </div>
+
+        <!-- Encomendas abertas -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Encomendas Abertas</div>
+            <a href="encomendas.html" class="btn btn-sm btn-outline">Ver todas</a>
+          </div>
+          <div class="card-body" style="padding:0" id="tabela-encomendas"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom:24px">
+
+        <!-- Cobranças a vencer -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⏰ Cobranças a Vencer (7 dias)</div>
+            <a href="cobrancas.html" class="btn btn-sm btn-outline">Gerenciar</a>
+          </div>
+          <div class="card-body" style="padding:0" id="tabela-cobrancas"></div>
+        </div>
+
+        <!-- Estoque baixo -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📉 Estoque Baixo (≤5 un.)</div>
+            <a href="produtos.html" class="btn btn-sm btn-outline">Ver produtos</a>
+          </div>
+          <div class="card-body" style="padding:0" id="tabela-estoque-baixo"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant().then(loja => {
+    if (loja?.slug === 'prateada') {
+      document.getElementById('icon-produtos').textContent = '🎁';
+    }
+  });
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('dashboard'));
+
+  document.getElementById('topbar-data').textContent =
+    new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+
+  function comTimeout(promise, ms = 15000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
+    ]);
+  }
+
+  async function renderDashboard() {
+    try {
+      const [r, encomendas, cobrancasAVencer, estBaixoLista, carnesAtivos] = await comTimeout(Promise.all([
+        DB.Relatorios.dashboardResumo(),
+        DB.Encomendas.abertas(),
+        DB.Cobrancas.aVencer(7),
+        DB.Produtos.comEstoqueBaixo(),
+        DB.Carnes.ativos()
+      ]));
+      const user = Auth.usuario();
+      const isAdmin = user.papel === 'admin';
+
+      // === ALERTAS ===
+      let alertas = '';
+
+      // Cobranças vencendo hoje
+      const hj = hoje();
+      const cobrancasHoje = (cobrancasAVencer || []).filter(c => c.vencimento === hj);
+      const parcelasCarneHoje = [];
+      (carnesAtivos || []).forEach(c => {
+        (c.parcelas || []).forEach(p => {
+          if (!p.pago && p.vencimento === hj)
+            parcelasCarneHoje.push({ cliente: c.cliente_nome || c.cliente, carne: c.numero, parcela: p.numero, valor: p.valor });
+        });
+      });
+      const totalHoje = cobrancasHoje.length + parcelasCarneHoje.length;
+      if (totalHoje > 0) {
+        const itensHoje = [
+          ...cobrancasHoje.map(c => `<span style="display:inline-block;margin:2px 4px;background:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:12px"><strong>${c.cliente || '-'}</strong> · ${Fmt.moeda(c.valor)}</span>`),
+          ...parcelasCarneHoje.map(p => `<span style="display:inline-block;margin:2px 4px;background:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:12px"><strong>${p.cliente}</strong> · ${p.carne} parc.${p.parcela} · ${Fmt.moeda(p.valor)} <em style="opacity:.7">(carnê)</em></span>`)
+        ].join('');
+        alertas += `<div class="alert alert-danger">📅 <strong>${totalHoje} cobrança(s) vencem hoje!</strong> <a href="cobrancas.html" style="font-weight:700;margin-left:8px">Ver cobranças →</a><div style="margin-top:6px">${itensHoje}</div></div>`;
+      }
+
+      if (r.qtdCobrancasVencidas > 0) {
+        alertas += `<div class="alert alert-danger">💸 <strong>${r.qtdCobrancasVencidas} cobrança(s) vencida(s)</strong> totalizando ${Fmt.moeda(r.totalVencido)}. <a href="cobrancas.html" style="font-weight:700;margin-left:8px">Ver cobranças →</a></div>`;
+      }
+      const prontas = encomendas.filter(e=>e.status==='pronta').length;
+      if (prontas > 0) alertas += `<div class="alert alert-info">📋 <strong>${prontas} encomenda(s) pronta(s)</strong> para retirada. <a href="encomendas.html" style="font-weight:700;margin-left:8px">Ver encomendas →</a></div>`;
+
+      // Parcelas de carnê a vencer em 1 ou 2 dias (excluindo hoje)
+      const limite2dias = addDias(hj, 2);
+      const amanha = addDias(hj, 1);
+      const parcelasAVencer = [];
+      (carnesAtivos || []).forEach(c => {
+        (c.parcelas || []).forEach(p => {
+          if (!p.pago && p.vencimento >= amanha && p.vencimento <= limite2dias) {
+            parcelasAVencer.push({ cliente: c.cliente_nome || c.cliente, carne: c.numero, parcela: p.numero, valor: p.valor, vencimento: p.vencimento });
+          }
+        });
+      });
+      if (parcelasAVencer.length > 0) {
+        const lista = parcelasAVencer.map(p =>
+          `<span style="display:inline-block;margin:2px 4px;background:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:12px">
+            <strong>${p.cliente}</strong> · ${p.carne} parc.${p.parcela} · ${Fmt.moeda(p.valor)} · vence ${Fmt.data(p.vencimento+'T00:00:00')}
+          </span>`
+        ).join('');
+        alertas += `<div class="alert alert-warning">🔔 <strong>${parcelasAVencer.length} parcela(s) de carnê vencem em até 2 dias!</strong>
+          <a href="carnes.html" style="font-weight:700;margin-left:8px">Ver carnês →</a>
+          <div style="margin-top:6px">${lista}</div></div>`;
+      }
+
+      document.getElementById('alertas-area').innerHTML = alertas;
+
+      // === KPIs ===
+      const kpisAdmin = `
+        <div class="stat-card"><div class="stat-icon pink">💰</div>
+          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalVendasMes)}</div><div class="stat-label">Vendas este mês</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏳</div>
+          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalReceber)}</div><div class="stat-label">A receber (${r.qtdCobrancasPendentes})</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">💸</div>
+          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalGastosMes)}</div><div class="stat-label">Gastos este mês</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">👥</div>
+          <div class="stat-info"><div class="stat-value">${r.totalClientes}</div><div class="stat-label">Clientes</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">📋</div>
+          <div class="stat-info"><div class="stat-value">${r.encomendasAbertas}</div><div class="stat-label">Encomendas abertas</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">📄</div>
+          <div class="stat-info"><div class="stat-value">${r.carnesAtivos}</div><div class="stat-label">Carnês ativos</div></div></div>`;
+
+      const kpisVendedor = `
+        <div class="stat-card"><div class="stat-icon pink">💰</div>
+          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalVendasMes)}</div><div class="stat-label">Vendas este mês</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏳</div>
+          <div class="stat-info"><div class="stat-value">${Fmt.moeda(r.totalReceber)}</div><div class="stat-label">A receber</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">👥</div>
+          <div class="stat-info"><div class="stat-value">${r.totalClientes}</div><div class="stat-label">Clientes</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">📋</div>
+          <div class="stat-info"><div class="stat-value">${r.encomendasAbertas}</div><div class="stat-label">Encomendas abertas</div></div></div>`;
+
+      document.getElementById('stats-grid').innerHTML = isAdmin ? kpisAdmin : kpisVendedor;
+
+      // === VENDAS RECENTES ===
+      const vendas = r.vendasRecentes;
+      if (!vendas.length) {
+        document.getElementById('tabela-vendas').innerHTML =
+          `<div class="empty-state" style="padding:30px"><div class="empty-icon">🛒</div><div class="empty-title">Nenhuma venda ainda</div></div>`;
+      } else {
+        let html = `<table><thead><tr><th>Nº</th><th>Cliente</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
+        vendas.forEach(v => {
+          const statusCell = v._tipo === 'carne'
+            ? `<span class="badge badge-info">📋 Carnê</span>`
+            : badgeStatus(v.status_pgto || 'pago');
+          html += `<tr><td><strong>#${v.numero}</strong></td><td>${v.cliente_nome||'Consumidor'}</td><td>${Fmt.moeda(v.total)}</td><td>${statusCell}</td></tr>`;
+        });
+        document.getElementById('tabela-vendas').innerHTML = html + '</tbody></table>';
+      }
+
+      // === ENCOMENDAS ABERTAS ===
+      const encSlice = encomendas.slice(0, 5);
+      if (!encSlice.length) {
+        document.getElementById('tabela-encomendas').innerHTML =
+          `<div class="empty-state" style="padding:30px"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma encomenda aberta</div></div>`;
+      } else {
+        let html = `<table><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Previsão</th></tr></thead><tbody>`;
+        encSlice.forEach(e => {
+          html += `<tr><td><strong>${e.numero}</strong></td><td>${e.cliente_nome||e.cliente}</td><td>${badgeStatus(e.status)}</td><td>${e.previsao?Fmt.data(e.previsao+'T00:00:00'):'-'}</td></tr>`;
+        });
+        document.getElementById('tabela-encomendas').innerHTML = html + '</tbody></table>';
+      }
+
+      // === COBRANÇAS A VENCER ===
+      if (!cobrancasAVencer.length) {
+        document.getElementById('tabela-cobrancas').innerHTML =
+          `<div class="empty-state" style="padding:30px"><div class="empty-icon">✅</div><div class="empty-title">Nenhuma nos próximos 7 dias</div></div>`;
+      } else {
+        let html = `<table><thead><tr><th>Cliente</th><th>Valor</th><th>Vencimento</th></tr></thead><tbody>`;
+        cobrancasAVencer.forEach(c => {
+          const hoje_ = hoje();
+          html += `<tr><td>${c.cliente||'-'}</td><td><strong>${Fmt.moeda(c.valor)}</strong></td>
+            <td><span class="badge ${c.vencimento<=hoje_?'badge-danger':'badge-warning'}">${Fmt.data(c.vencimento+'T00:00:00')}</span></td></tr>`;
+        });
+        document.getElementById('tabela-cobrancas').innerHTML = html + '</tbody></table>';
+      }
+
+      // === ESTOQUE BAIXO ===
+      const estBaixo = estBaixoLista.slice(0, 6);
+      if (!estBaixo.length) {
+        document.getElementById('tabela-estoque-baixo').innerHTML =
+          `<div class="empty-state" style="padding:30px"><div class="empty-icon">✅</div><div class="empty-title">Estoque OK!</div></div>`;
+      } else {
+        let html = `<table><thead><tr><th>Produto</th><th>Estoque</th><th>Ação</th></tr></thead><tbody>`;
+        estBaixo.forEach(p => {
+          html += `<tr>
+            <td><strong>${p.nome}</strong>${p.tamanho?` <small class="text-muted">(${p.tamanho})</small>`:''}</td>
+            <td><span class="badge ${p.estoque<=0?'badge-danger':'badge-warning'}">${p.estoque||0} un.</span></td>
+            <td><a href="compras.html" class="btn btn-sm btn-ghost" style="font-size:11px">Repor</a></td>
+          </tr>`;
+        });
+        document.getElementById('tabela-estoque-baixo').innerHTML = html + '</tbody></table>';
+      }
+    } catch(e) {
+      console.error('Erro no dashboard:', e);
+      if (e.message === 'Timeout') {
+        mostrarToast('Conexão lenta — alguns dados não carregaram', 'warning');
+      } else {
+        mostrarToast('Erro ao carregar dados do dashboard', 'danger');
+      }
+    }
+  }
+
+  (async () => { await renderDashboard(); })();
+</script>
+</body>
+</html>

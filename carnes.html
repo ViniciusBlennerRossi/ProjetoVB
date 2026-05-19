@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carnês — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .carne-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .carne-card:hover { box-shadow: 0 6px 20px rgba(181,18,74,.12); transform: translateY(-2px); }
+    .carne-header { padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: var(--white); }
+    .carne-numero { font-size: 11px; opacity: .8; }
+    .carne-cliente { font-size: 16px; font-weight: 800; margin: 4px 0; }
+    .carne-descricao { font-size: 12px; opacity: .85; }
+    .carne-body { padding: 14px; }
+    .carne-progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+    .parcelas-mini { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+    .parcela-mini {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; cursor: pointer;
+      transition: transform .15s;
+    }
+    .parcela-mini:hover { transform: scale(1.15); }
+    .parcela-mini.paga { background: var(--success-bg); color: var(--success); border: 1.5px solid #A5D6A7; }
+    .parcela-mini.vencida { background: var(--danger-bg); color: var(--danger); border: 1.5px solid #EF9A9A; }
+    .parcela-mini.pendente { background: var(--warning-bg); color: var(--warning); border: 1.5px solid #FFCC80; }
+    .carnes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+
+    /* ===== EXTRATO IMPRESSÃO ===== */
+    #area-extrato { display: none; }
+
+    @media print {
+      .sidebar, .topbar, .stats-grid, .tabs, #filtros-bar,
+      .carnes-grid, .modal-overlay, #toast-container, #global-loader { display: none !important; }
+      .main { margin-left: 0 !important; }
+      .layout { display: block !important; }
+      .page-content { padding: 0 !important; }
+      body { background: white !important; font-size: 12px; }
+      #area-extrato { display: block !important; }
+
+      .extrato-header { text-align: center; margin-bottom: 20px; }
+      .extrato-logo-titulo { font-size: 20px; font-weight: 800; color: #B5124A; }
+      .extrato-subtitulo { font-size: 12px; color: #666; margin-top: 2px; }
+      .extrato-data-geracao { font-size: 11px; color: #999; margin-top: 2px; }
+
+      .extrato-cliente-box {
+        border: 2px solid #B5124A; border-radius: 6px;
+        padding: 10px 14px; margin-bottom: 16px;
+      }
+      .extrato-carne-bloco {
+        border: 1px solid #ddd; border-radius: 6px;
+        margin-bottom: 16px; page-break-inside: avoid;
+      }
+      .extrato-carne-header {
+        background: #B5124A; color: white;
+        padding: 8px 12px; border-radius: 5px 5px 0 0;
+        display: flex; justify-content: space-between; align-items: center;
+      }
+      .extrato-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      .extrato-table th {
+        background: #f5f5f5; padding: 7px 10px; text-align: left;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .5px; color: #555; border-bottom: 1px solid #ddd;
+      }
+      .extrato-table td { padding: 6px 10px; border-bottom: 1px solid #eee; }
+      .extrato-table tr:last-child td { border-bottom: none; }
+      .extrato-table .tr-paga td { background: #E8F5E9; }
+      .extrato-table .tr-vencida td { background: #FFEBEE; }
+      .extrato-table .tr-pendente td { background: #FFF8E1; }
+
+      .extrato-resumo-carne {
+        display: flex; justify-content: flex-end; gap: 20px;
+        padding: 8px 12px; background: #fafafa;
+        border-top: 1px solid #ddd; border-radius: 0 0 5px 5px; font-size: 12px;
+      }
+      .extrato-total-geral {
+        border: 2px solid #B5124A; border-radius: 6px;
+        padding: 12px 16px; margin-top: 6px;
+        display: flex; justify-content: space-between; align-items: center;
+        background: #FDF2F7; page-break-inside: avoid;
+      }
+      .extrato-rodape {
+        text-align: center; margin-top: 20px; padding-top: 12px;
+        border-top: 1px solid #ddd; font-size: 10px; color: #999;
+      }
+      .badge-pago    { color: #2E7D32; font-weight: 700; }
+      .badge-vencido { color: #C62828; font-weight: 700; }
+      .badge-pendente{ color: #E65100; font-weight: 700; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">📄 Carnês</div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline" onclick="abrirModalExtrato()">📋 Extrato do Cliente</button>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Novo Carnê</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="stats-area"></div>
+
+      <!-- Filtros e tabs -->
+      <div id="filtros-bar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+        <div class="tabs" style="margin-bottom:0;flex:1">
+          <button class="tab-btn active" onclick="mudarTab('ativos',this)">Ativos</button>
+          <button class="tab-btn" onclick="mudarTab('quitados',this)">Quitados</button>
+          <button class="tab-btn" onclick="mudarTab('todos',this)">Todos</button>
+        </div>
+        <input type="date" id="filtro-inicio" class="form-control" style="max-width:145px" onchange="filtrar()" />
+        <input type="date" id="filtro-fim"    class="form-control" style="max-width:145px" onchange="filtrar()" />
+        <div class="search-input-wrap" style="min-width:220px">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="busca" class="form-control" placeholder="Buscar por cliente ou nº..." oninput="filtrar()" />
+        </div>
+      </div>
+
+      <div class="carnes-grid" id="carnes-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Carnê -->
+<div class="modal-overlay" id="modal-carne">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-titulo">Novo Carnê</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-carne')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="carne-id" />
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Cliente *</label>
+          <div style="position:relative">
+            <input type="text" id="carne-cliente-input" class="form-control" placeholder="Nome do cliente" />
+            <input type="hidden" id="carne-cliente-id" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição *</label>
+          <input type="text" id="carne-descricao" class="form-control" placeholder="Ex: Compra de roupas, débito anterior..." />
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label class="form-label">Valor Total (R$) *</label>
+          <input type="number" id="carne-valor" class="form-control" step="0.01" min="0" placeholder="0,00" oninput="calcularParcelas()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nº de Parcelas *</label>
+          <select id="carne-parcelas" class="form-control form-select" onchange="calcularParcelas()">
+            <option value="2">2x</option><option value="3">3x</option>
+            <option value="4">4x</option><option value="5">5x</option>
+            <option value="6">6x</option><option value="8">8x</option>
+            <option value="10">10x</option><option value="12">12x</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor da Parcela</label>
+          <div class="form-control" id="carne-valor-parc" style="background:var(--bg);border-color:transparent;font-weight:700;color:var(--primary)">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Primeira Parcela em</label>
+          <input type="date" id="carne-inicio" class="form-control" oninput="calcularParcelas()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dia de Vencimento</label>
+          <input type="number" id="carne-dia-venc" class="form-control" value="10" min="1" max="28" placeholder="10" oninput="calcularParcelas()" />
+        </div>
+      </div>
+
+      <!-- Preview parcelas -->
+      <div id="preview-parcelas"></div>
+
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Observações</label>
+        <input type="text" id="carne-obs" class="form-control" placeholder="Referência, condições..." />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-carne')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">💾 Criar Carnê</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pagar Parcela -->
+<div class="modal-overlay" id="modal-pagar">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">💵 Receber Parcela</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-pagar')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pagar-carne-id" />
+      <input type="hidden" id="pagar-parcela-num" />
+      <div id="pagar-info" style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);margin-bottom:16px"></div>
+      <div class="form-group">
+        <label class="form-label">Data do Pagamento</label>
+        <input type="date" id="pagar-data" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor Recebido (R$)</label>
+        <input type="number" id="pagar-valor-recebido" class="form-control" step="0.01" min="0" placeholder="Deixe em branco para pagar só esta parcela" oninput="previewAbatimento()" />
+        <div id="pagar-preview" style="font-size:12px;color:var(--text2);margin-top:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de Pagamento</label>
+        <select id="pagar-forma" class="form-control form-select"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-pagar')">Cancelar</button>
+      <button class="btn btn-success" onclick="confirmarPagamento()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Extrato do Cliente -->
+<div class="modal-overlay" id="modal-extrato">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">📋 Extrato de Carnês por Cliente</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-extrato')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Cliente *</label>
+        <div style="position:relative">
+          <input type="text" id="extrato-cliente-input" class="form-control"
+                 list="extrato-clientes-lista" placeholder="Selecione um cliente..."
+                 oninput="onInputExtratoCliente()" />
+          <datalist id="extrato-clientes-lista"></datalist>
+          <input type="hidden" id="extrato-cliente-id" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Exibir</label>
+        <select id="extrato-filtro-status" class="form-control form-select" onchange="onChangeExtratoFiltro()">
+          <option value="pendentes">Apenas carnês pendentes (ativos)</option>
+          <option value="todos">Todos os carnês (exceto cancelados)</option>
+        </select>
+      </div>
+      <div id="extrato-preview-info" style="font-size:13px;color:var(--text2);min-height:18px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-extrato')">Cancelar</button>
+      <button class="btn btn-primary" onclick="gerarExtrato()">📄 Gerar e Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Área de impressão do Extrato -->
+<div id="area-extrato"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('carnes'));
+
+  const selPagarForma = document.getElementById('pagar-forma');
+  FORMAS_PGTO.forEach(f => selPagarForma.innerHTML += `<option value="${f.value}">${f.label}</option>`);
+
+  let tabAtual = 'ativos';
+  let _todosCarnes = [];
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      _todosCarnes = await DB.Carnes.todos();
+      renderStats();
+      filtrar();
+    } catch(e) {
+      mostrarToast('Erro ao carregar carnês', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats() {
+    const ativos = _todosCarnes.filter(c => !['quitado','cancelado'].includes(c.status));
+    const totalAberto = ativos.reduce((s, c) => s + (c.parcelas||[]).filter(p=>!p.pago).reduce((sp, p) => sp + (p.valor||0), 0), 0);
+    const totalRecebido = _todosCarnes.reduce((s, c) => s + (c.parcelas||[]).filter(p=>p.pago).reduce((sp, p) => sp + (p.valor||0), 0), 0);
+    const hoje_ = hoje();
+    const vencidas = ativos.reduce((count, c) => count + (c.parcelas||[]).filter(p => !p.pago && p.vencimento < hoje_).length, 0);
+
+    document.getElementById('stats-area').innerHTML = `
+      <div class="stat-card"><div class="stat-icon pink">📄</div>
+        <div class="stat-info"><div class="stat-value">${ativos.length}</div><div class="stat-label">Carnês Ativos</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">💸</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalAberto)}</div><div class="stat-label">A Receber</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalRecebido)}</div><div class="stat-label">Total Recebido</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">🔴</div>
+        <div class="stat-info"><div class="stat-value">${vencidas}</div><div class="stat-label">Parcelas Vencidas</div></div></div>`;
+  }
+
+  function mudarTab(tab, btn) {
+    tabAtual = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+  }
+
+  function filtrar() {
+    const busca = document.getElementById('busca').value.toLowerCase();
+    const ini = document.getElementById('filtro-inicio').value;
+    const fim = document.getElementById('filtro-fim').value;
+    let lista = _todosCarnes.filter(c => {
+      const mb = !busca || (c.cliente_nome||c.cliente||'').toLowerCase().includes(busca) || (c.numero||'').includes(busca);
+      const mt = tabAtual === 'todos' ? true
+        : tabAtual === 'ativos' ? !['quitado','cancelado'].includes(c.status)
+        : c.status === 'quitado';
+      const data = (c.criado_em||'').slice(0,10);
+      const md = !ini || !fim || (data >= ini && data <= fim);
+      return mb && mt && md;
+    }).sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+    renderCarnes(lista);
+  }
+
+  function renderCarnes(lista) {
+    if (!lista.length) {
+      document.getElementById('carnes-wrap').innerHTML =
+        `<div class="empty-state card" style="padding:60px;grid-column:1/-1"><div class="empty-icon">📄</div>
+        <div class="empty-title">Nenhum carnê encontrado</div>
+        <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirModal()">+ Criar carnê</button></div></div>`;
+      return;
+    }
+
+    const hoje_ = hoje();
+    document.getElementById('carnes-wrap').innerHTML = lista.map(c => {
+      const pagas = (c.parcelas||[]).filter(p=>p.pago).length;
+      const total = (c.parcelas||[]).length;
+      const pct = total ? Math.round(pagas/total*100) : 0;
+      const abertas = (c.parcelas||[]).filter(p=>!p.pago);
+      const proximaVenc = abertas.sort((a,b)=>a.vencimento.localeCompare(b.vencimento))[0];
+      const temVencida = abertas.some(p => p.vencimento < hoje_);
+
+      let parcelasHtml = (c.parcelas||[]).map(p => {
+        const cls = p.pago ? 'paga' : p.vencimento < hoje_ ? 'vencida' : 'pendente';
+        const title = `Parcela ${p.numero}: ${Fmt.moeda(p.valor)} · ${p.pago ? 'Paga em '+Fmt.data(p.data_pagamento+'T00:00:00') : 'Venc: '+Fmt.data(p.vencimento+'T00:00:00')}`;
+        return `<div class="parcela-mini ${cls}" title="${title}" onclick="event.stopPropagation(); ${!p.pago ? `abrirPagamento(${c.id},${p.numero})` : ''}">
+          ${p.numero}
+        </div>`;
+      }).join('');
+
+      return `<div class="carne-card">
+        <div class="carne-header" style="${c.status==='quitado'?'background:linear-gradient(135deg,var(--success),#66BB6A)':''}">
+          <div class="carne-numero">${c.numero}</div>
+          <div class="carne-cliente">${c.cliente_nome||c.cliente}</div>
+          <div class="carne-descricao">${c.descricao}</div>
+        </div>
+        <div class="carne-body">
+          <div class="carne-progress-label">
+            <span>${pagas} de ${total} parcelas pagas</span>
+            <span style="font-weight:700;color:${pct===100?'var(--success)':'var(--primary)'}">${pct}%</span>
+          </div>
+          <div class="progress"><div class="progress-bar" style="width:${pct}%;background:${pct===100?'var(--success)':''}"></div></div>
+
+          <div class="parcelas-mini" style="margin-top:10px">${parcelasHtml}</div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+            <div>
+              <div style="font-size:12px;color:var(--text2)">Total: <strong>${Fmt.moeda(c.valor_total)}</strong></div>
+              ${proximaVenc ? `<div style="font-size:11px;color:${temVencida?'var(--danger)':'var(--text2)'}">
+                ${temVencida?'⚠️ Parcela vencida!':'📅 Próxima: '+Fmt.data(proximaVenc.vencimento+'T00:00:00')+' · '+Fmt.moeda(proximaVenc.valor)}
+              </div>` : `<div style="font-size:11px;color:var(--success)">✅ Quitado!</div>`}
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})" title="Detalhes">👁️</button>
+              ${Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="cancelarCarne(${c.id})" title="Cancelar">🗑️</button>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Criar carnê
+  function calcularParcelas() {
+    const valor = parseFloat(document.getElementById('carne-valor').value) || 0;
+    const num = parseInt(document.getElementById('carne-parcelas').value) || 2;
+    const valorParc = valor / num;
+    document.getElementById('carne-valor-parc').textContent = Fmt.moeda(valorParc);
+
+    const inicio = document.getElementById('carne-inicio').value || addDias(hoje(), 30);
+    const diaVenc = parseInt(document.getElementById('carne-dia-venc').value) || 10;
+
+    const parcelas = [];
+    for (let i = 0; i < num; i++) {
+      const d = new Date(inicio + 'T00:00:00');
+      d.setMonth(d.getMonth() + i);
+      d.setDate(Math.min(diaVenc, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate()));
+      parcelas.push({
+        numero: i+1,
+        valor: valorParc,
+        vencimento: d.toISOString().split('T')[0],
+        pago: false
+      });
+    }
+
+    let html = `<div style="margin-top:12px">
+      <label class="form-label" style="margin-bottom:8px">📅 Parcelas geradas</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">`;
+    parcelas.forEach(p => {
+      html += `<div style="background:var(--bg);padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px">
+        <strong>${p.numero}ª</strong> · ${Fmt.moeda(p.valor)} · ${Fmt.data(p.vencimento+'T00:00:00')}
+      </div>`;
+    });
+    html += '</div></div>';
+    document.getElementById('preview-parcelas').innerHTML = html;
+    document.getElementById('preview-parcelas')._parcelas = parcelas;
+  }
+
+  function abrirModal() {
+    document.getElementById('carne-id').value = '';
+    document.getElementById('carne-cliente-input').value = '';
+    document.getElementById('carne-cliente-id').value = '';
+    document.getElementById('carne-descricao').value = '';
+    document.getElementById('carne-valor').value = '';
+    document.getElementById('carne-parcelas').value = '3';
+    document.getElementById('carne-inicio').value = addDias(hoje(), 30);
+    document.getElementById('carne-dia-venc').value = '10';
+    document.getElementById('carne-obs').value = '';
+    document.getElementById('carne-valor-parc').textContent = 'R$ 0,00';
+    document.getElementById('preview-parcelas').innerHTML = '';
+    Modal.abrir('modal-carne');
+  }
+
+  async function salvar() {
+    const clienteNome = document.getElementById('carne-cliente-input').value.trim();
+    const clienteId = Number(document.getElementById('carne-cliente-id').value) || null;
+    const descricao = document.getElementById('carne-descricao').value.trim();
+    const valor = parseFloat(document.getElementById('carne-valor').value) || 0;
+    if (!clienteNome) return mostrarToast('Informe o cliente', 'warning');
+    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
+    if (valor <= 0) return mostrarToast('Informe o valor', 'warning');
+    const parcelas = document.getElementById('preview-parcelas')._parcelas;
+    if (!parcelas || !parcelas.length) { calcularParcelas(); return mostrarToast('Aguarde as parcelas serem geradas', 'warning'); }
+
+    await DB.Carnes.salvar({
+      cliente: clienteNome, cliente_nome: clienteNome, cliente_id: clienteId,
+      descricao, valor_total: valor, num_parcelas: parcelas.length, parcelas,
+      observacoes: document.getElementById('carne-obs').value.trim()
+    });
+
+    mostrarToast('Carnê criado com sucesso! 📄', 'success');
+    Modal.fechar('modal-carne');
+    await carregar();
+  }
+
+  function simularAbatimento(parcelas, parcelaNumInicio, valorPago) {
+    let saldo = valorPago;
+    const abatidas = [];
+    let novoValorAtual = 0;   // parcela atual com pagamento parcial (valor menor)
+    let novoValorProxima = 0; // próxima parcela reduzida (valor maior que uma parcela)
+    const ordenadas = [...parcelas].sort((a, b) => a.numero - b.numero);
+    for (const p of ordenadas) {
+      if (p.numero < parcelaNumInicio || p.pago) continue;
+      if (saldo >= p.valor) {
+        abatidas.push(p.numero);
+        saldo -= p.valor;
+      } else if (saldo > 0) {
+        // valor insuficiente para quitar esta parcela: reduz o valor dela
+        novoValorAtual = +(p.valor - saldo).toFixed(2);
+        saldo = 0;
+        break;
+      } else break;
+    }
+    return { abatidas, novoValorAtual, novoValorProxima, saldoRestante: +saldo.toFixed(2) };
+  }
+
+  function previewAbatimento() {
+    const valorRecebido = parseFloat(document.getElementById('pagar-valor-recebido').value) || 0;
+    const carneId = Number(document.getElementById('pagar-carne-id').value);
+    const parcelaNum = Number(document.getElementById('pagar-parcela-num').value);
+    const c = _todosCarnes.find(x => x.id === carneId);
+    const el = document.getElementById('pagar-preview');
+    if (!c || valorRecebido <= 0) { el.textContent = ''; return; }
+    const { abatidas, novoValorAtual } = simularAbatimento(c.parcelas, parcelaNum, valorRecebido);
+    let txt = '';
+    if (abatidas.length === 0 && novoValorAtual > 0) {
+      txt = `Pagamento parcial · saldo restante desta parcela: ${Fmt.moeda(novoValorAtual)}`;
+    } else if (abatidas.length > 0 && novoValorAtual > 0) {
+      txt = `Quita ${abatidas.length} parcela(s) · parcela ${Math.max(...abatidas)+1} reduzida para ${Fmt.moeda(novoValorAtual)}`;
+    } else if (abatidas.length > 0) {
+      txt = `Quita ${abatidas.length} parcela(s) · todas quitadas!`;
+    } else {
+      txt = 'Informe um valor maior que zero';
+    }
+    el.textContent = txt;
+  }
+
+  function abrirPagamento(carneId, parcelaNum) {
+    const c = _todosCarnes.find(x => x.id === carneId);
+    if (!c) return;
+    const p = (c.parcelas||[]).find(px => px.numero === parcelaNum);
+    if (!p || p.pago) return;
+    document.getElementById('pagar-carne-id').value = carneId;
+    document.getElementById('pagar-parcela-num').value = parcelaNum;
+    document.getElementById('pagar-data').value = hoje();
+    document.getElementById('pagar-forma').value = 'dinheiro';
+    document.getElementById('pagar-valor-recebido').value = '';
+    document.getElementById('pagar-preview').textContent = '';
+    document.getElementById('pagar-info').innerHTML = `
+      <div style="font-size:13px;margin-bottom:4px">Cliente: <strong>${c.cliente_nome||c.cliente}</strong></div>
+      <div style="font-size:13px;margin-bottom:4px">Carnê: <strong>${c.numero}</strong> · ${c.descricao}</div>
+      <div style="font-size:13px;margin-bottom:4px">Parcela: <strong>${parcelaNum}/${c.num_parcelas}</strong></div>
+      <div style="font-size:20px;font-weight:800;color:var(--primary)">${Fmt.moeda(p.valor)}</div>
+      <div style="font-size:12px;color:var(--text2)">Vencimento: ${Fmt.data(p.vencimento+'T00:00:00')}</div>`;
+    Modal.abrir('modal-pagar');
+  }
+
+  async function confirmarPagamento() {
+    const carneId = Number(document.getElementById('pagar-carne-id').value);
+    const parcelaNum = Number(document.getElementById('pagar-parcela-num').value);
+    const dataPgto = document.getElementById('pagar-data').value;
+    if (!dataPgto) return mostrarToast('Informe a data', 'warning');
+
+    const valorRecebido = parseFloat(document.getElementById('pagar-valor-recebido').value) || 0;
+    const c = _todosCarnes.find(x => x.id === carneId);
+    if (!c) return;
+
+    const parcelaAtual = (c.parcelas||[]).find(p => p.numero === parcelaNum);
+    const valorEfetivo = valorRecebido > 0 ? valorRecebido : (parcelaAtual ? parcelaAtual.valor : 0);
+
+    const { abatidas, novoValorAtual } = simularAbatimento(c.parcelas, parcelaNum, valorEfetivo);
+
+    if (abatidas.length === 0 && novoValorAtual === 0) return mostrarToast('Informe um valor maior que zero', 'warning');
+
+    let novasParcelas = (c.parcelas||[]).map(p => ({ ...p }));
+
+    if (abatidas.length === 0 && novoValorAtual > 0) {
+      // Pagamento parcial: reduz o valor da parcela atual sem marcá-la como paga
+      novasParcelas = novasParcelas.map(p =>
+        p.numero === parcelaNum ? { ...p, valor: novoValorAtual } : p
+      );
+      mostrarToast(`Pagamento parcial registrado · saldo restante: ${Fmt.moeda(novoValorAtual)} ✅`, 'success');
+    } else {
+      // Quita uma ou mais parcelas; se sobrar valor menor na próxima, reduz ela
+      novasParcelas = novasParcelas.map(p => {
+        if (abatidas.includes(p.numero)) return { ...p, pago: true, data_pagamento: dataPgto };
+        if (novoValorAtual > 0 && p.numero === Math.max(...abatidas) + 1 && !p.pago) return { ...p, valor: novoValorAtual };
+        return p;
+      });
+      mostrarToast(`${abatidas.length} parcela(s) quitada(s)! ✅`, 'success');
+    }
+
+    const todasPagas = novasParcelas.every(p => p.pago);
+    await DB.Carnes.salvar({ ...c, parcelas: novasParcelas, status: todasPagas ? 'quitado' : 'aberto' });
+
+    Modal.fechar('modal-pagar');
+    await carregar();
+  }
+
+  function verDetalhes(id) {
+    const c = _todosCarnes.find(x => x.id === id);
+    if (!c) return;
+    const hoje_ = hoje();
+    const pagas = (c.parcelas||[]).filter(p=>p.pago).length;
+    const valorPago = (c.parcelas||[]).filter(p=>p.pago).reduce((s,p)=>s+(p.valor||0),0);
+    const saldo = (c.valor_total||0) - valorPago;
+
+    let parcelasHtml = '';
+    (c.parcelas||[]).forEach(p => {
+      const vencida = !p.pago && p.vencimento < hoje_;
+      parcelasHtml += `<div class="parcela-row ${p.pago?'paga':vencida?'vencida':''}">
+        <span class="badge ${p.pago?'badge-success':vencida?'badge-danger':'badge-warning'}">${p.numero}ª</span>
+        <strong>${Fmt.moeda(p.valor)}</strong>
+        <span style="font-size:12px;color:var(--text2)">Venc: ${Fmt.data(p.vencimento+'T00:00:00')}</span>
+        ${p.pago
+          ? `<span class="badge badge-success">Pago em ${Fmt.data(p.data_pagamento+'T00:00:00')}</span>`
+          : `<button class="btn btn-sm btn-success" onclick="Modal.fecharTodos();abrirPagamento(${c.id},${p.numero})">💵 Receber</button>`}
+      </div>`;
+    });
+
+    confirmar(`<div style="text-align:left">
+      <h3 style="margin-bottom:12px">${c.numero} · ${c.cliente_nome||c.cliente}</h3>
+      <p style="margin-bottom:8px;color:var(--text2)">${c.descricao}</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+        <div style="background:var(--bg);padding:10px;border-radius:6px;text-align:center">
+          <div style="font-weight:800;color:var(--primary)">${Fmt.moeda(c.valor_total)}</div>
+          <div style="font-size:11px;color:var(--text2)">Total</div>
+        </div>
+        <div style="background:var(--success-bg);padding:10px;border-radius:6px;text-align:center">
+          <div style="font-weight:800;color:var(--success)">${Fmt.moeda(valorPago)}</div>
+          <div style="font-size:11px;color:var(--text2)">Pago (${pagas}/${(c.parcelas||[]).length})</div>
+        </div>
+        <div style="background:var(--danger-bg);padding:10px;border-radius:6px;text-align:center">
+          <div style="font-weight:800;color:var(--danger)">${Fmt.moeda(saldo)}</div>
+          <div style="font-size:11px;color:var(--text2)">Saldo</div>
+        </div>
+      </div>
+      ${parcelasHtml}
+    </div>`, () => {});
+
+    setTimeout(() => {
+      const okBtn = document.querySelector('[id$="-ok"]');
+      if (okBtn) { okBtn.textContent = 'Fechar'; okBtn.className = 'btn btn-ghost'; }
+    }, 50);
+  }
+
+  function cancelarCarne(id) {
+    confirmar('Cancelar este carnê? As parcelas pendentes serão descartadas.', async () => {
+      const c = _todosCarnes.find(x => x.id === id);
+      await DB.Carnes.salvar({ ...c, status: 'cancelado' });
+      mostrarToast('Carnê cancelado', 'danger');
+      await carregar();
+    });
+  }
+
+  // ===== EXTRATO POR CLIENTE =====
+  function abrirModalExtrato() {
+    document.getElementById('extrato-cliente-input').value = '';
+    document.getElementById('extrato-cliente-id').value = '';
+    document.getElementById('extrato-preview-info').textContent = '';
+    document.getElementById('extrato-filtro-status').value = 'pendentes';
+    populaDatalistExtrato();
+    Modal.abrir('modal-extrato');
+  }
+
+  function populaDatalistExtrato() {
+    const nomes = {};
+    _todosCarnes.filter(c => c.status !== 'cancelado').forEach(c => {
+      const nome = c.cliente_nome || c.cliente || '';
+      if (nome && !nomes[nome]) nomes[nome] = c.cliente_id || null;
+    });
+    const dl = document.getElementById('extrato-clientes-lista');
+    dl.innerHTML = Object.keys(nomes).sort().map(n => `<option value="${n}">`).join('');
+    dl._mapa = nomes;
+  }
+
+  function onInputExtratoCliente() {
+    const nome = document.getElementById('extrato-cliente-input').value.trim();
+    const dl = document.getElementById('extrato-clientes-lista');
+    const id = dl._mapa && dl._mapa[nome] != null ? dl._mapa[nome] : null;
+    document.getElementById('extrato-cliente-id').value = id || '';
+    _contarCarnesExtrato();
+  }
+
+  function _contarCarnesExtrato() {
+    const clienteNome = document.getElementById('extrato-cliente-input').value.trim().toLowerCase();
+    const clienteId   = Number(document.getElementById('extrato-cliente-id').value) || null;
+    const filtro      = document.getElementById('extrato-filtro-status').value;
+    if (!clienteNome) return;
+    const carnes = _todosCarnes.filter(c => {
+      const nome = (c.cliente_nome || c.cliente || '').toLowerCase();
+      const match = clienteId ? c.cliente_id === clienteId : nome === clienteNome;
+      const status = filtro === 'pendentes'
+        ? !['quitado','cancelado'].includes(c.status)
+        : c.status !== 'cancelado';
+      return match && status;
+    });
+    const ativos = _todosCarnes.filter(c => {
+      const nome = (c.cliente_nome || c.cliente || '').toLowerCase();
+      const match = clienteId ? c.cliente_id === clienteId : nome === clienteNome;
+      return match && !['quitado','cancelado'].includes(c.status);
+    });
+    document.getElementById('extrato-preview-info').textContent =
+      `${carnes.length} carnê(s) encontrado(s) · ${ativos.length} ativo(s)`;
+  }
+
+  function onSelectExtrato(cliente) { _contarCarnesExtrato(); }
+  function onChangeExtratoFiltro()  { _contarCarnesExtrato(); }
+
+  function gerarExtrato() {
+    const clienteNome = document.getElementById('extrato-cliente-input').value.trim();
+    const clienteId   = Number(document.getElementById('extrato-cliente-id').value) || null;
+    const filtro      = document.getElementById('extrato-filtro-status').value;
+    if (!clienteNome) return mostrarToast('Selecione um cliente', 'warning');
+
+    const carnes = _todosCarnes.filter(c => {
+      const nome = (c.cliente_nome || c.cliente || '').toLowerCase();
+      const match = clienteId ? c.cliente_id === clienteId : nome === clienteNome.toLowerCase();
+      const status = filtro === 'pendentes'
+        ? !['quitado','cancelado'].includes(c.status)
+        : c.status !== 'cancelado';
+      return match && status;
+    }).sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em));
+
+    if (!carnes.length) return mostrarToast('Nenhum carnê encontrado para este cliente', 'warning');
+
+    Modal.fechar('modal-extrato');
+    document.getElementById('area-extrato').innerHTML = _construirHtmlExtrato(clienteNome, carnes, filtro);
+    window.print();
+  }
+
+  function _construirHtmlExtrato(clienteNome, carnes, filtro) {
+    const hoje_       = hoje();
+    const agora       = new Date();
+    const dataGeracao = Fmt.data(agora.toISOString());
+    const horaGeracao = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    let totalGeralPago = 0, totalGeralPendente = 0;
+
+    const blocos = carnes.map(c => {
+      const parcelas = [...(c.parcelas || [])].sort((a, b) => a.numero - b.numero);
+      let totPago = 0, totPendente = 0;
+
+      const linhas = parcelas.map(p => {
+        let label, cls, pgtoEm;
+        if (p.pago) {
+          label = 'Pago'; cls = 'badge-pago';
+          pgtoEm = Fmt.data(p.data_pagamento + 'T00:00:00');
+          totPago += (p.valor || 0);
+        } else if (p.vencimento < hoje_) {
+          label = 'Vencida'; cls = 'badge-vencido';
+          pgtoEm = '—'; totPendente += (p.valor || 0);
+        } else {
+          label = 'Pendente'; cls = 'badge-pendente';
+          pgtoEm = '—'; totPendente += (p.valor || 0);
+        }
+        const trCls = p.pago ? 'tr-paga' : p.vencimento < hoje_ ? 'tr-vencida' : 'tr-pendente';
+        return `<tr class="${trCls}">
+          <td style="text-align:center;font-weight:700">${p.numero}</td>
+          <td>${Fmt.data(p.vencimento + 'T00:00:00')}</td>
+          <td style="font-weight:700">${Fmt.moeda(p.valor)}</td>
+          <td><span class="${cls}">${label}</span></td>
+          <td>${pgtoEm}</td>
+        </tr>`;
+      }).join('');
+
+      totalGeralPago      += totPago;
+      totalGeralPendente  += totPendente;
+
+      const statusBadge = c.status === 'quitado'
+        ? '<span style="color:#fff;background:#2E7D32;padding:2px 8px;border-radius:4px;font-size:10px">QUITADO</span>'
+        : '<span style="color:#fff;background:#E65100;padding:2px 8px;border-radius:4px;font-size:10px">ABERTO</span>';
+
+      const obs = c.observacoes
+        ? `<div style="padding:4px 12px 6px;font-size:11px;color:#666">Obs: ${c.observacoes}</div>` : '';
+
+      return `<div class="extrato-carne-bloco">
+        <div class="extrato-carne-header">
+          <div>
+            <div style="font-size:13px;font-weight:800">${c.numero} · ${c.descricao}</div>
+            <div style="font-size:11px;opacity:.85">Criado em ${Fmt.data(c.criado_em)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:15px;font-weight:800">${Fmt.moeda(c.valor_total)}</div>
+            <div style="margin-top:2px">${statusBadge}</div>
+          </div>
+        </div>
+        <table class="extrato-table">
+          <thead><tr>
+            <th style="text-align:center">Nº</th>
+            <th>Vencimento</th><th>Valor</th><th>Status</th><th>Pago em</th>
+          </tr></thead>
+          <tbody>${linhas}</tbody>
+        </table>
+        ${obs}
+        <div class="extrato-resumo-carne">
+          <span style="color:#2E7D32;font-weight:700">Pago: ${Fmt.moeda(totPago)}</span>
+          <span style="color:#E65100;font-weight:700">Pendente: ${Fmt.moeda(totPendente)}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    const descFiltro = filtro === 'pendentes' ? 'Carnês Pendentes' : 'Todos os Carnês';
+
+    return `
+    <div class="extrato-header">
+      <div class="extrato-logo-titulo">🌙 Fiore Pijamas</div>
+      <div class="extrato-subtitulo">EXTRATO DE CARNÊS — ${descFiltro.toUpperCase()}</div>
+      <div class="extrato-data-geracao">Emitido em ${dataGeracao} às ${horaGeracao}</div>
+    </div>
+    <div class="extrato-cliente-box">
+      <div style="font-size:11px;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Cliente</div>
+      <div style="font-size:18px;font-weight:800;color:#2d2d2d">${clienteNome}</div>
+    </div>
+    ${blocos}
+    <div class="extrato-total-geral">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#B5124A">SALDO DEVEDOR TOTAL</div>
+        <div style="font-size:11px;color:#666">${carnes.length} carnê(s) · Gerado em ${dataGeracao} às ${horaGeracao}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:22px;font-weight:800;color:#B5124A">${Fmt.moeda(totalGeralPendente)}</div>
+        <div style="font-size:11px;color:#2E7D32">Total já pago: ${Fmt.moeda(totalGeralPago)}</div>
+      </div>
+    </div>
+    <div class="extrato-rodape">
+      Fiore Pijamas · Documento gerado pelo sistema de gestão · ${dataGeracao}
+    </div>`;
+  }
+
+  setupClienteAutocomplete('carne-cliente-input', 'carne-cliente-id');
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

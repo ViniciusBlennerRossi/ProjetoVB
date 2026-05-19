@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDV — Ponto de Venda</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .pdv-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; height: calc(100vh - 80px); }
+    .pdv-produtos { overflow-y: auto; }
+    .pdv-carrinho { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .serv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .prod-btn {
+      background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 14px 12px; cursor: pointer; text-align: center; transition: all .15s; position: relative;
+    }
+    .prod-btn:hover { border-color: var(--primary); background: var(--bg2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .prod-btn.sem-estoque { opacity: .4; cursor: not-allowed; }
+    .prod-btn.sem-estoque:hover { transform: none; border-color: var(--border); }
+    .prod-btn-nome { font-size: 13px; font-weight: 700; margin-bottom: 4px; line-height: 1.2; }
+    .prod-btn-info { font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+    .prod-btn-preco { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .prod-btn-est { position: absolute; top: 8px; right: 8px; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+    .serv-btn {
+      background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 14px 12px; cursor: pointer; text-align: center; transition: all .15s;
+    }
+    .serv-btn:hover { border-color: var(--primary); background: var(--bg2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .serv-btn-icon { font-size: 24px; margin-bottom: 6px; }
+    .serv-btn-nome { font-size: 13px; font-weight: 700; margin-bottom: 2px; line-height: 1.2; }
+    .serv-btn-cat { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+    .serv-btn-preco { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .serv-btn-dur { font-size: 10px; color: var(--text2); margin-top: 2px; }
+    .carr-header { padding: 16px; border-bottom: 1px solid var(--border); }
+    .carr-items { flex: 1; overflow-y: auto; padding: 12px; }
+    .carr-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border); }
+    .carr-item.servico { border-left: 3px solid var(--primary); }
+    .carr-item-nome { flex: 1; font-size: 13px; font-weight: 600; }
+    .carr-item-qtd { display: flex; align-items: center; gap: 6px; }
+    .qtd-btn { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; transition: all .15s; }
+    .qtd-btn:hover { background: var(--primary); color: var(--white); border-color: var(--primary); }
+    .qtd-num { width: 28px; text-align: center; font-weight: 700; font-size: 14px; }
+    .carr-item-total { font-weight: 800; color: var(--primary); min-width: 70px; text-align: right; }
+    .carr-footer { padding: 16px; border-top: 1px solid var(--border); }
+    .carr-vazio { text-align: center; padding: 40px 20px; color: var(--text2); }
+    .carr-vazio .empty-icon { font-size: 40px; }
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .numpad-btn { padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); font-size: 16px; font-weight: 700; cursor: pointer; transition: all .15s; }
+    .numpad-btn:hover { background: var(--bg2); border-color: var(--primary); }
+    .pdv-busca { padding: 14px; border-bottom: 1px solid var(--border); }
+    .desconto-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .pdv-tabs { display: flex; gap: 0; margin-bottom: 12px; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); }
+    .pdv-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; background: var(--white); border: none; transition: all .15s; }
+    .pdv-tab.active { background: var(--primary); color: #fff; }
+    @media (max-width: 900px) {
+      .pdv-layout { grid-template-columns: 1fr; height: auto; }
+      .pdv-carrinho { min-height: 500px; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">🖥️ PDV — Ponto de Venda</div>
+      <div class="topbar-actions">
+        <span id="pdv-hora" style="font-size:13px;color:var(--text2)"></span>
+      </div>
+    </div>
+    <div class="page-content" style="padding:16px">
+      <div class="pdv-layout">
+
+        <!-- Painel Esquerdo: Produtos / Serviços -->
+        <div class="pdv-produtos">
+          <!-- Tabs -->
+          <div class="pdv-tabs" id="pdv-tabs">
+            <button class="pdv-tab active" id="tab-produtos" onclick="mostrarTab('produtos')">🛍️ Produtos</button>
+            <button class="pdv-tab" id="tab-servicos" onclick="mostrarTab('servicos')">✂️ Serviços</button>
+          </div>
+
+          <!-- Busca + Filtro (Produtos) -->
+          <div id="painel-produtos">
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;padding:12px">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+                <div class="search-input-wrap" style="flex:1">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="busca-prod" class="form-control" placeholder="Buscar produto por nome ou código..." oninput="filtrarProdutos()" />
+                </div>
+                <select id="filtro-cat" class="form-control form-select" style="max-width:160px" onchange="filtrarProdutos()">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+            </div>
+            <div class="prod-grid" id="prod-grid"></div>
+          </div>
+
+          <!-- Busca (Serviços) -->
+          <div id="painel-servicos" style="display:none">
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;padding:12px">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <div class="search-input-wrap" style="flex:1">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="busca-serv" class="form-control" placeholder="Buscar serviço..." oninput="filtrarServicos()" />
+                </div>
+                <select id="filtro-cat-serv" class="form-control form-select" style="max-width:160px" onchange="filtrarServicos()">
+                  <option value="">Todas categorias</option>
+                  <option>Sobrancelha</option><option>Manicure</option><option>Pedicure</option>
+                  <option>Cabelo</option><option>Depilação</option><option>Outro</option>
+                </select>
+              </div>
+            </div>
+            <div class="serv-grid" id="serv-grid"></div>
+          </div>
+        </div>
+
+        <!-- Carrinho -->
+        <div class="pdv-carrinho">
+          <div class="carr-header">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <strong style="font-size:15px">🛒 Carrinho</strong>
+              <button class="btn btn-sm btn-ghost" onclick="limparCarrinho()">🗑️ Limpar</button>
+            </div>
+            <div style="position:relative">
+              <input type="text" id="pdv-cliente-input" class="form-control" placeholder="Cliente (opcional)" style="font-size:13px" />
+              <input type="hidden" id="pdv-cliente-id" />
+            </div>
+          </div>
+
+          <div class="carr-items" id="carr-items">
+            <div class="carr-vazio">
+              <div class="empty-icon">🛒</div>
+              <div style="font-size:13px;margin-top:8px">Carrinho vazio</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:4px">Clique nos produtos ou serviços para adicionar</div>
+            </div>
+          </div>
+
+          <div class="carr-footer">
+            <div class="desconto-row">
+              <span style="font-size:13px;font-weight:600;white-space:nowrap">Desconto:</span>
+              <input type="number" id="pdv-desconto" class="form-control" value="0" min="0" step="0.01" style="max-width:100px" oninput="calcularTotal()" />
+              <select id="pdv-desc-tipo" class="form-control form-select" style="max-width:80px" onchange="calcularTotal()">
+                <option value="valor">R$</option>
+                <option value="pct">%</option>
+              </select>
+            </div>
+
+            <div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:var(--radius-sm);padding:14px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.8);font-size:12px;margin-bottom:4px">
+                <span>Subtotal: <span id="pdv-subtotal">R$ 0,00</span></span>
+                <span>Desconto: <span id="pdv-desc-txt">R$ 0,00</span></span>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:30px;font-weight:800;color:#fff" id="pdv-total">R$ 0,00</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px">
+              <label class="form-label" style="font-size:12px">Forma de Pagamento</label>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="formas-pgto-btns"></div>
+            </div>
+
+            <div id="troco-wrap" class="d-none" style="margin-bottom:10px">
+              <div style="display:flex;gap:8px;align-items:center">
+                <div class="form-group" style="margin:0;flex:1">
+                  <label class="form-label" style="font-size:12px">Valor recebido</label>
+                  <input type="number" id="pdv-recebido" class="form-control" placeholder="0,00" oninput="calcularTroco()" />
+                </div>
+                <div style="text-align:center;padding-top:20px">
+                  <div style="font-size:11px;color:var(--text2)">Troco</div>
+                  <div style="font-size:18px;font-weight:800;color:var(--success)" id="pdv-troco">R$ 0,00</div>
+                </div>
+              </div>
+            </div>
+
+            <button id="btn-carne-pdv" class="btn btn-outline btn-full" style="margin-bottom:8px;font-size:13px" onclick="selecionarForma('carne')">
+              📋 Carnê (parcelado)
+            </button>
+
+            <div id="carne-options" class="d-none" style="margin-bottom:10px;background:var(--bg);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--border)">
+              <div class="form-row cols-2">
+                <div class="form-group" style="margin:0">
+                  <label class="form-label" style="font-size:12px">Nº de Parcelas</label>
+                  <input type="number" id="pdv-carne-parcelas" class="form-control" value="3" min="1" max="24" />
+                </div>
+                <div class="form-group" style="margin:0">
+                  <label class="form-label" style="font-size:12px">Dia de Vencimento</label>
+                  <input type="number" id="pdv-carne-dia" class="form-control" value="10" min="1" max="28" />
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:8px;margin-bottom:0">
+                <label class="form-label" style="font-size:12px">Entrada (R$) — opcional</label>
+                <input type="number" id="pdv-carne-entrada" class="form-control" step="0.01" min="0" placeholder="0,00" />
+              </div>
+              <div style="font-size:11px;color:var(--text2);margin-top:6px">⚠️ Exige cliente selecionado</div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-lg" onclick="finalizarVendaPDV()" id="btn-finalizar" disabled>
+              ✅ Finalizar Venda
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Recibo -->
+<div class="modal-overlay" id="modal-recibo">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">🧾 Venda Finalizada!</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-recibo')">✕</button>
+    </div>
+    <div class="modal-body" id="recibo-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="imprimirRecibo()">🖨️ Imprimir</button>
+      <button class="btn btn-primary" onclick="Modal.fechar('modal-recibo'); novaVenda()">+ Nova Venda</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/tenant.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('pdv'));
+
+  let carrinho = [];
+  let formaPgto = 'dinheiro';
+  let _prodsCache = [];
+  let _prodMap = {};
+  let _servicosCache = [];
+  let _salvando = false;
+  let _tabAtual = 'produtos';
+
+  setInterval(() => {
+    document.getElementById('pdv-hora').textContent = new Date().toLocaleTimeString('pt-BR');
+  }, 1000);
+
+  const formasBtns = document.getElementById('formas-pgto-btns');
+  FORMAS_PGTO.slice(0, 6).forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'numpad-btn';
+    btn.style.fontSize = '12px';
+    btn.textContent = f.label;
+    btn.dataset.value = f.value;
+    btn.onclick = () => selecionarForma(f.value);
+    formasBtns.appendChild(btn);
+  });
+
+  function selecionarForma(val) {
+    formaPgto = val;
+    document.querySelectorAll('#formas-pgto-btns .numpad-btn').forEach(b => {
+      b.style.background = b.dataset.value === val ? 'var(--primary)' : '';
+      b.style.color = b.dataset.value === val ? '#fff' : '';
+      b.style.borderColor = b.dataset.value === val ? 'var(--primary)' : '';
+    });
+    document.getElementById('troco-wrap').classList.toggle('d-none', val !== 'dinheiro');
+    if (val === 'dinheiro') {
+      document.getElementById('pdv-recebido').value = '';
+      document.getElementById('pdv-troco').textContent = 'R$ 0,00';
+    }
+    const btnCarne = document.getElementById('btn-carne-pdv');
+    btnCarne.style.background = val === 'carne' ? 'var(--primary)' : '';
+    btnCarne.style.color = val === 'carne' ? '#fff' : '';
+    btnCarne.style.borderColor = val === 'carne' ? 'var(--primary)' : '';
+    document.getElementById('carne-options').classList.toggle('d-none', val !== 'carne');
+  }
+  selecionarForma('dinheiro');
+
+  // ===== TABS =====
+  function mostrarTab(tab) {
+    _tabAtual = tab;
+    document.getElementById('painel-produtos').style.display = tab === 'produtos' ? '' : 'none';
+    document.getElementById('painel-servicos').style.display = tab === 'servicos' ? '' : 'none';
+    document.getElementById('tab-produtos').classList.toggle('active', tab === 'produtos');
+    document.getElementById('tab-servicos').classList.toggle('active', tab === 'servicos');
+  }
+
+  // ===== CARREGAR =====
+  async function carregar() {
+    mostrarLoader();
+    try {
+      const [prods, cats, servs] = await Promise.all([
+        DB.Produtos.ativos(),
+        DB.Categorias.todas(),
+        DB.Servicos.ativos().catch(() => [])
+      ]);
+      _prodsCache = prods;
+      _prodMap = Object.fromEntries(prods.map(p => [p.id, p]));
+      _servicosCache = servs;
+      popularCats(cats);
+      filtrarProdutos();
+      filtrarServicos();
+
+      // Esconder aba de serviços se não houver serviços cadastrados
+      document.getElementById('pdv-tabs').style.display = servs.length ? '' : 'none';
+    } catch(e) {
+      console.error('Erro ao carregar PDV:', e);
+      document.getElementById('prod-grid').innerHTML =
+        `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--danger)">
+          <div style="font-size:36px">⚠️</div>
+          <div style="margin-top:8px;font-weight:700">Erro ao carregar produtos</div>
+          <button class="btn btn-sm btn-primary" style="margin-top:12px" onclick="carregar()">Tentar novamente</button>
+        </div>`;
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function popularCats(cats) {
+    const sel = document.getElementById('filtro-cat');
+    sel.innerHTML = '<option value="">Todas</option>';
+    cats.forEach(c => { sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`; });
+  }
+
+  // ===== PRODUTOS =====
+  function filtrarProdutos() {
+    const busca = document.getElementById('busca-prod').value.toLowerCase();
+    const catId = Number(document.getElementById('filtro-cat').value);
+    const prods = _prodsCache.filter(p => {
+      const mb = !busca || p.nome.toLowerCase().includes(busca) || (p.codigo||'').toLowerCase().includes(busca);
+      const mc = !catId || p.categoria_id === catId;
+      return mb && mc;
+    });
+    renderProdutos(prods);
+  }
+
+  function renderProdutos(prods) {
+    if (!prods.length) {
+      document.getElementById('prod-grid').innerHTML =
+        `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">
+          <div style="font-size:36px">👗</div><div style="margin-top:8px">Nenhum produto encontrado</div>
+          <div style="font-size:12px;margin-top:4px"><a href="produtos.html">Cadastrar produtos</a></div>
+        </div>`;
+      return;
+    }
+    document.getElementById('prod-grid').innerHTML = prods.map(p => {
+      const semEst = (p.estoque || 0) <= 0;
+      const estBadgeClass = semEst ? 'badge-danger' : p.estoque <= 5 ? 'badge-warning' : 'badge-success';
+      return `<button class="prod-btn ${semEst ? 'sem-estoque' : ''}" onclick="${semEst ? '' : `addProdutoAoCarrinho(${p.id})`}">
+        <span class="prod-btn-est badge ${estBadgeClass}">${p.estoque||0}</span>
+        <div class="prod-btn-nome">${p.nome}</div>
+        <div class="prod-btn-info">${p.tamanho||''} ${p.cor ? '· '+p.cor : ''}</div>
+        <div class="prod-btn-preco">${Fmt.moeda(p.preco)}</div>
+      </button>`;
+    }).join('');
+  }
+
+  function addProdutoAoCarrinho(prodId) {
+    const prod = _prodMap[prodId];
+    if (!prod || (prod.estoque || 0) <= 0) return mostrarToast('Sem estoque disponível', 'warning');
+    const key = 'p_' + prodId;
+    const item = carrinho.find(i => i._key === key);
+    if (item) {
+      if (item.quantidade >= (prod.estoque || 0)) return mostrarToast('Limite de estoque atingido', 'warning');
+      item.quantidade++;
+    } else {
+      carrinho.push({ _key: key, tipo: 'produto', produto_id: prodId, nome: prod.nome, produto: prod, quantidade: 1, preco_unitario: prod.preco });
+    }
+    renderCarrinho();
+    calcularTotal();
+  }
+
+  // ===== SERVIÇOS =====
+  function filtrarServicos() {
+    const busca = document.getElementById('busca-serv').value.toLowerCase();
+    const cat = document.getElementById('filtro-cat-serv').value;
+    const servs = _servicosCache.filter(s => {
+      if (busca && !s.nome.toLowerCase().includes(busca)) return false;
+      if (cat && s.categoria !== cat) return false;
+      return true;
+    });
+    renderServicos(servs);
+  }
+
+  function renderServicos(servs) {
+    if (!servs.length) {
+      document.getElementById('serv-grid').innerHTML =
+        `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">
+          <div style="font-size:36px">✂️</div><div style="margin-top:8px">Nenhum serviço encontrado</div>
+          <div style="font-size:12px;margin-top:4px"><a href="servicos.html">Cadastrar serviços</a></div>
+        </div>`;
+      return;
+    }
+    const icones = { Sobrancelha:'🪮', Manicure:'💅', Pedicure:'🦶', Cabelo:'💇', Depilação:'🪒', Outro:'✂️' };
+    document.getElementById('serv-grid').innerHTML = servs.map(s => `
+      <button class="serv-btn" onclick="addServicoAoCarrinho(${s.id})">
+        <div class="serv-btn-icon">${icones[s.categoria] || '✂️'}</div>
+        <div class="serv-btn-nome">${s.nome}</div>
+        <div class="serv-btn-cat">${s.categoria || ''}</div>
+        <div class="serv-btn-preco">${Fmt.moeda(s.preco)}</div>
+        <div class="serv-btn-dur">⏱ ${s.duracao_min || 30} min</div>
+      </button>`).join('');
+  }
+
+  function addServicoAoCarrinho(servId) {
+    const serv = _servicosCache.find(s => s.id === servId);
+    if (!serv) return;
+    const key = 's_' + servId;
+    const item = carrinho.find(i => i._key === key);
+    if (item) {
+      item.quantidade++;
+    } else {
+      carrinho.push({ _key: key, tipo: 'servico', servico_id: servId, nome: serv.nome, servico: serv, quantidade: 1, preco_unitario: serv.preco });
+    }
+    renderCarrinho();
+    calcularTotal();
+    mostrarToast(`✂️ ${serv.nome} adicionado`, 'success');
+  }
+
+  // ===== CARRINHO =====
+  function removerDoCarrinho(key) {
+    carrinho = carrinho.filter(i => i._key !== key);
+    renderCarrinho();
+    calcularTotal();
+  }
+
+  function alterarQtd(key, delta) {
+    const item = carrinho.find(i => i._key === key);
+    if (!item) return;
+    item.quantidade = Math.max(1, item.quantidade + delta);
+    if (item.tipo === 'produto') {
+      const prod = _prodMap[item.produto_id];
+      if (prod && item.quantidade > (prod.estoque || 0)) {
+        item.quantidade = prod.estoque;
+        mostrarToast('Limite de estoque', 'warning');
+      }
+    }
+    renderCarrinho();
+    calcularTotal();
+  }
+
+  function renderCarrinho() {
+    const el = document.getElementById('carr-items');
+    const btn = document.getElementById('btn-finalizar');
+    if (!carrinho.length) {
+      el.innerHTML = `<div class="carr-vazio"><div class="empty-icon">🛒</div><div style="font-size:13px;margin-top:8px">Carrinho vazio</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Clique nos produtos ou serviços para adicionar</div></div>`;
+      btn.disabled = true;
+      return;
+    }
+    btn.disabled = false;
+    el.innerHTML = carrinho.map(item => {
+      const icon = item.tipo === 'servico' ? '✂️' : '📦';
+      const key = item._key;
+      return `
+        <div class="carr-item ${item.tipo === 'servico' ? 'servico' : ''}">
+          <div class="carr-item-nome">
+            <div>${icon} ${item.nome}</div>
+            <div style="font-size:11px;color:var(--text2)">${Fmt.moeda(item.preco_unitario)} / un.</div>
+          </div>
+          <div class="carr-item-qtd">
+            <button class="qtd-btn" onclick="alterarQtd('${key}', -1)">−</button>
+            <span class="qtd-num">${item.quantidade}</span>
+            <button class="qtd-btn" onclick="alterarQtd('${key}', +1)">+</button>
+          </div>
+          <div class="carr-item-total">${Fmt.moeda(item.quantidade * item.preco_unitario)}</div>
+          <button onclick="removerDoCarrinho('${key}')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:16px;padding:4px" title="Remover">✕</button>
+        </div>`;
+    }).join('');
+  }
+
+  function calcularTotal() {
+    const subtotal = carrinho.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0);
+    const descRaw = parseFloat(document.getElementById('pdv-desconto').value) || 0;
+    const descTipo = document.getElementById('pdv-desc-tipo').value;
+    const desconto = descTipo === 'pct' ? subtotal * descRaw / 100 : descRaw;
+    const total = Math.max(0, subtotal - desconto);
+    document.getElementById('pdv-subtotal').textContent = Fmt.moeda(subtotal);
+    document.getElementById('pdv-desc-txt').textContent = Fmt.moeda(desconto);
+    document.getElementById('pdv-total').textContent = Fmt.moeda(total);
+    calcularTroco();
+  }
+
+  function calcularTroco() {
+    const totalTxt = document.getElementById('pdv-total').textContent;
+    const total = parseFloat(totalTxt.replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+    const recebido = parseFloat(document.getElementById('pdv-recebido').value) || 0;
+    const troco = Math.max(0, recebido - total);
+    document.getElementById('pdv-troco').textContent = Fmt.moeda(troco);
+    document.getElementById('pdv-troco').style.color = troco < 0 ? 'var(--danger)' : 'var(--success)';
+  }
+
+  function limparCarrinho() {
+    carrinho = [];
+    renderCarrinho();
+    calcularTotal();
+  }
+
+  function novaVenda() {
+    limparCarrinho();
+    document.getElementById('pdv-cliente-input').value = '';
+    document.getElementById('pdv-cliente-id').value = '';
+    document.getElementById('pdv-desconto').value = '0';
+    document.getElementById('pdv-carne-parcelas').value = '3';
+    document.getElementById('pdv-carne-dia').value = '10';
+    document.getElementById('pdv-carne-entrada').value = '';
+    selecionarForma('dinheiro');
+    filtrarProdutos();
+  }
+
+  function calcularParcelasCarne(total, numParcelas, entrada, diaVencimento) {
+    const parcelas = [];
+    let num = 1;
+    if (entrada > 0) {
+      parcelas.push({ numero: num++, valor: entrada, vencimento: hoje(), pago: true, data_pagamento: hoje() });
+    }
+    const valorRestante = total - entrada;
+    const valorParcela = valorRestante > 0 ? +(valorRestante / numParcelas).toFixed(2) : 0;
+    const agora = new Date();
+    for (let i = 0; i < numParcelas; i++) {
+      const d = new Date(agora.getFullYear(), agora.getMonth() + 1 + i, diaVencimento);
+      parcelas.push({ numero: num++, valor: valorParcela, vencimento: d.toISOString().split('T')[0], pago: false });
+    }
+    return parcelas;
+  }
+
+  function montarItens() {
+    return carrinho.map(i => ({
+      tipo: i.tipo || 'produto',
+      produto_id: i.tipo === 'servico' ? null : i.produto_id,
+      servico_id: i.tipo === 'servico' ? i.servico_id : null,
+      servico_nome: i.tipo === 'servico' ? i.nome : null,
+      quantidade: i.quantidade,
+      preco_unitario: i.preco_unitario
+    }));
+  }
+
+  function renderItensRecibo(itens) {
+    return itens.map(i => {
+      const icon = i.tipo === 'servico' ? '✂️' : '';
+      const nome = i.tipo === 'servico' ? i.servico_nome || i.nome : (i.produto?.nome || i.nome || '');
+      return `<tr><td>${icon} ${nome}</td><td style="text-align:center">${i.quantidade}</td><td style="text-align:right">${Fmt.moeda(i.quantidade*i.preco_unitario)}</td></tr>`;
+    }).join('');
+  }
+
+  async function finalizarVendaPDV() {
+    if (_salvando) return;
+    if (!carrinho.length) return mostrarToast('Adicione produtos ou serviços ao carrinho', 'warning');
+    _salvando = true;
+    document.getElementById('btn-finalizar').disabled = true;
+
+    const subtotal = carrinho.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0);
+    const descRaw = parseFloat(document.getElementById('pdv-desconto').value) || 0;
+    const descTipo = document.getElementById('pdv-desc-tipo').value;
+    const desconto = descTipo === 'pct' ? subtotal * descRaw / 100 : descRaw;
+    const total = Math.max(0, subtotal - desconto);
+    const clienteNome = document.getElementById('pdv-cliente-input').value.trim();
+    const clienteId = Number(document.getElementById('pdv-cliente-id').value) || null;
+    const itensRecibo = [...carrinho];
+    const itens = montarItens();
+
+    // --- Fluxo Carnê ---
+    if (formaPgto === 'carne') {
+      if (!clienteNome) { _salvando = false; document.getElementById('btn-finalizar').disabled = false; return mostrarToast('Selecione um cliente para criar o carnê', 'warning'); }
+      const numParcelas = Math.max(1, parseInt(document.getElementById('pdv-carne-parcelas').value) || 3);
+      const diaVenc = Math.min(28, Math.max(1, parseInt(document.getElementById('pdv-carne-dia').value) || 10));
+      const entrada = Math.max(0, parseFloat(document.getElementById('pdv-carne-entrada').value) || 0);
+      if (entrada >= total) { _salvando = false; document.getElementById('btn-finalizar').disabled = false; return mostrarToast('Entrada não pode ser maior ou igual ao total', 'warning'); }
+      const parcelas = calcularParcelasCarne(total, numParcelas, entrada, diaVenc);
+
+      const venda = await DB.Vendas.salvar({
+        cliente: clienteNome, cliente_nome: clienteNome, cliente_id: clienteId,
+        itens, subtotal, desconto, total,
+        forma_pagamento: 'carne', num_parcelas: numParcelas, parcelas,
+        status_pgto: 'pendente', status: 'ativa',
+        vendedor_id: Auth.usuario().id, vendedor_nome: Auth.usuario().nome, origem: 'pdv'
+      });
+
+      const itensDesc = itensRecibo.slice(0, 3).map(i => i.nome).join(', ') + (itensRecibo.length > 3 ? '...' : '');
+      try {
+        await DB.Carnes.salvar({
+          cliente: clienteNome, cliente_nome: clienteNome, cliente_id: clienteId,
+          descricao: `PDV #${venda.numero} — ${itensDesc}`,
+          valor_total: total, num_parcelas: numParcelas, parcelas,
+          observacoes: entrada > 0 ? `Entrada: ${Fmt.moeda(entrada)}` : ''
+        });
+      } catch(e) { console.error('Erro ao criar carnê:', e); }
+
+      document.getElementById('recibo-body').innerHTML = `
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:32px">📋</div>
+          <div style="font-size:22px;font-weight:800;color:var(--primary)">Venda #${venda.numero}</div>
+          <div style="font-size:13px;color:var(--text2)">${new Date().toLocaleString('pt-BR')}</div>
+        </div>
+        <table style="width:100%;font-size:13px;margin-bottom:12px">
+          <thead style="background:var(--bg)"><tr><th style="padding:6px 8px;text-align:left">Item</th><th style="padding:6px;text-align:center">Qtd</th><th style="padding:6px 8px;text-align:right">Valor</th></tr></thead>
+          <tbody>${renderItensRecibo(itensRecibo)}</tbody>
+        </table>
+        <div style="background:var(--bg);padding:12px;border-radius:8px">
+          ${desconto>0 ? `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Desconto</span><span class="text-danger">-${Fmt.moeda(desconto)}</span></div>` : ''}
+          <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--primary)"><span>Total</span><span>${Fmt.moeda(total)}</span></div>
+          <div style="font-size:13px;margin-top:6px;color:var(--text2)">📋 Carnê em ${numParcelas}x de ${Fmt.moeda((total-entrada)/numParcelas)} · venc. dia ${diaVenc}</div>
+        </div>
+        <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2)">Cliente: ${clienteNome} · Vendedor: ${Auth.usuario().nome}</div>`;
+
+      mostrarToast('Carnê criado com sucesso!', 'success');
+      Modal.abrir('modal-recibo');
+      await carregar();
+      _salvando = false;
+      return;
+    }
+
+    // --- Fluxo normal ---
+    const venda = await DB.Vendas.salvar({
+      cliente: clienteNome || 'Consumidor', cliente_nome: clienteNome || 'Consumidor', cliente_id: clienteId,
+      itens, subtotal, desconto, total,
+      forma_pagamento: formaPgto, num_parcelas: 1,
+      parcelas: [{ numero: 1, valor: total, vencimento: hoje(), pago: true, data_pagamento: hoje() }],
+      status_pgto: 'pago', status: 'ativa',
+      vendedor_id: Auth.usuario().id, vendedor_nome: Auth.usuario().nome, origem: 'pdv'
+    });
+
+    const recibido = parseFloat(document.getElementById('pdv-recebido').value) || 0;
+    const troco = formaPgto === 'dinheiro' ? Math.max(0, recibido - total) : 0;
+
+    document.getElementById('recibo-body').innerHTML = `
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:32px">🎉</div>
+        <div style="font-size:22px;font-weight:800;color:var(--primary)">Venda #${venda.numero}</div>
+        <div style="font-size:13px;color:var(--text2)">${new Date().toLocaleString('pt-BR')}</div>
+      </div>
+      <table style="width:100%;font-size:13px;margin-bottom:12px">
+        <thead style="background:var(--bg)"><tr><th style="padding:6px 8px;text-align:left">Item</th><th style="padding:6px;text-align:center">Qtd</th><th style="padding:6px 8px;text-align:right">Valor</th></tr></thead>
+        <tbody>${renderItensRecibo(itensRecibo)}</tbody>
+      </table>
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        ${desconto>0 ? `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Desconto</span><span class="text-danger">-${Fmt.moeda(desconto)}</span></div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--primary)"><span>Total</span><span>${Fmt.moeda(total)}</span></div>
+        <div style="font-size:13px;margin-top:6px;color:var(--text2)">${labelFormaPgto(formaPgto)}</div>
+        ${formaPgto==='dinheiro' && recibido > 0 ? `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--success);margin-top:4px"><span>Troco</span><span>${Fmt.moeda(troco)}</span></div>` : ''}
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2)">
+        ${clienteNome ? `Cliente: ${clienteNome}` : ''} · Vendedor: ${Auth.usuario().nome}
+      </div>`;
+
+    Modal.abrir('modal-recibo');
+    await carregar();
+    _salvando = false;
+  }
+
+  function imprimirRecibo() {
+    const conteudo = document.getElementById('recibo-body').innerHTML;
+    const janela = window.open('', '_blank', 'width=400,height=600');
+    janela.document.write(`<html><head><title>Recibo</title>
+      <style>body{font-family:Arial,sans-serif;padding:20px;font-size:13px}table{width:100%}th,td{padding:6px;border-bottom:1px solid #eee}h1{text-align:center}</style>
+      </head><body><h1>Recibo</h1>${conteudo}</body></html>`);
+    janela.document.close();
+    janela.print();
+  }
+
+  setupClienteAutocomplete('pdv-cliente-input', 'pdv-cliente-id');
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compras — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">🚚 Compras de Mercadorias</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="abrirNovaCompra()">+ Nova Compra</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Filtros -->
+      <div class="card" style="padding:14px 18px; margin-bottom:20px">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <div class="search-input-wrap" style="flex:1; min-width:200px">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="busca" class="form-control" placeholder="Buscar por nº ou fornecedor..." oninput="filtrar()" />
+          </div>
+          <input type="date" id="data-inicio" class="form-control" style="max-width:150px" onchange="filtrar()" />
+          <input type="date" id="data-fim" class="form-control" style="max-width:150px" onchange="filtrar()" />
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:20px" id="stats-compras"></div>
+
+      <!-- Tabela -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Lista de Compras</div>
+          <span id="count-label" class="badge badge-secondary"></span>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrapper" id="tabela-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Compra -->
+<div class="modal-overlay" id="modal-compra">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">🚚 Nova Compra</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-compra')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label class="form-label">Fornecedor *</label>
+          <input type="text" id="comp-fornecedor" class="form-control" placeholder="Nome do fornecedor" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data da Compra</label>
+          <input type="date" id="comp-data" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Forma de Pagamento</label>
+          <select id="comp-forma" class="form-control form-select"></select>
+        </div>
+      </div>
+
+      <hr style="border:none; border-top:1px solid var(--border); margin: 16px 0" />
+
+      <div class="flex items-center justify-between mb-4">
+        <label class="form-label" style="margin:0">Itens Comprados</label>
+        <button class="btn btn-sm btn-outline" onclick="adicionarItem()">+ Adicionar Item</button>
+      </div>
+
+      <div id="itens-compra"></div>
+
+      <hr style="border:none; border-top:1px solid var(--border); margin: 16px 0" />
+
+      <!-- Total -->
+      <div class="total-box" style="margin-bottom:16px">
+        <div>
+          <div class="total-label">Total de Itens: <span id="total-itens-txt">0</span></div>
+        </div>
+        <div>
+          <div class="total-label" style="text-align:right">Total da Compra</div>
+          <div class="total-value" id="total-compra-txt">R$ 0,00</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea id="comp-obs" class="form-control" rows="2" placeholder="NF, prazo, condições..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-compra')">Cancelar</button>
+      <button class="btn btn-primary" onclick="finalizarCompra()">✅ Registrar Compra</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes -->
+<div class="modal-overlay" id="modal-detalhe">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="det-titulo">Detalhes da Compra</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">✕</button>
+    </div>
+    <div class="modal-body" id="det-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-detalhe')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirPermissao('compras')) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('compras'));
+
+  const selForma = document.getElementById('comp-forma');
+  FORMAS_PGTO.forEach(f => {
+    selForma.innerHTML += `<option value="${f.value}">${f.label}</option>`;
+  });
+
+  const hoje_ = hoje();
+  const inicioMes = hoje_.slice(0, 8) + '01';
+  document.getElementById('data-inicio').value = inicioMes;
+  document.getElementById('data-fim').value = hoje_;
+
+  let itemCount = 0;
+  let _todasCompras = [];
+  let _prodsCache = [];
+  let _prodMap = {};
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      const [compras, prods] = await Promise.all([DB.Compras.todas(), DB.Produtos.ativos()]);
+      _todasCompras = compras;
+      _prodsCache = prods;
+      _prodMap = Object.fromEntries(prods.map(p => [p.id, p]));
+      filtrar();
+    } catch(e) {
+      mostrarToast('Erro ao carregar compras', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function filtrar() {
+    const busca = document.getElementById('busca').value.toLowerCase();
+    const dinicio = document.getElementById('data-inicio').value;
+    const dfim = document.getElementById('data-fim').value;
+
+    const lista = _todasCompras.filter(c => {
+      const cData = c.data ? c.data.split('T')[0] : '';
+      const matchBusca = !busca ||
+        (c.numero || '').toLowerCase().includes(busca) ||
+        (c.fornecedor || '').toLowerCase().includes(busca);
+      const matchData = (!dinicio || cData >= dinicio) && (!dfim || cData <= dfim);
+      return matchBusca && matchData;
+    }).sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    renderStats(lista);
+    renderTabela(lista);
+    document.getElementById('count-label').textContent = lista.length + ' compras';
+  }
+
+  function renderStats(lista) {
+    const totalGasto = lista.reduce((s, c) => s + (c.total || 0), 0);
+    const totalItens = lista.reduce((s, c) => s + (c.compra_itens || []).reduce((si, i) => si + i.quantidade, 0), 0);
+    const qtdFornecedores = new Set(lista.map(c => c.fornecedor)).size;
+
+    document.getElementById('stats-compras').innerHTML = `
+      <div class="stat-card"><div class="stat-icon blue">💸</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalGasto)}</div><div class="stat-label">Total gasto no período</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">📦</div>
+        <div class="stat-info"><div class="stat-value">${totalItens}</div><div class="stat-label">Peças compradas</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">🏭</div>
+        <div class="stat-info"><div class="stat-value">${qtdFornecedores}</div><div class="stat-label">Fornecedores</div></div></div>`;
+  }
+
+  function renderTabela(lista) {
+    if (!lista.length) {
+      document.getElementById('tabela-wrap').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">🚚</div>
+        <div class="empty-title">Nenhuma compra registrada</div>
+        <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirNovaCompra()">+ Registrar compra</button></div></div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Nº</th><th>Data</th><th>Fornecedor</th><th>Itens</th>
+      <th>Qtd Total</th><th>Total</th><th>Pagamento</th><th>Ações</th>
+    </tr></thead><tbody>`;
+
+    lista.forEach(c => {
+      const itens = c.compra_itens || [];
+      const totalQtd = itens.reduce((s, i) => s + i.quantidade, 0);
+      html += `<tr>
+        <td><strong>${c.numero}</strong></td>
+        <td>${Fmt.data(c.data)}</td>
+        <td>${c.fornecedor}</td>
+        <td>${itens.length} item(s)</td>
+        <td>${totalQtd} peças</td>
+        <td><strong>${Fmt.moeda(c.total)}</strong></td>
+        <td>${labelFormaPgto(c.forma_pagamento)}</td>
+        <td>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${c.id})" title="Detalhes">👁️</button>
+        </td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('tabela-wrap').innerHTML = html;
+  }
+
+  function abrirNovaCompra() {
+    itemCount = 0;
+    document.getElementById('itens-compra').innerHTML = '';
+    document.getElementById('comp-fornecedor').value = '';
+    document.getElementById('comp-data').value = hoje();
+    document.getElementById('comp-forma').value = 'dinheiro';
+    document.getElementById('comp-obs').value = '';
+    calcularTotalCompra();
+    adicionarItem();
+    Modal.abrir('modal-compra');
+  }
+
+  function adicionarItem() {
+    itemCount++;
+    const id = 'citem-' + itemCount;
+    const div = document.createElement('div');
+    div.className = 'compra-item-row';
+    div.id = id;
+
+    let opsProd = '<option value="">Selecione o produto...</option>';
+    _prodsCache.forEach(p => {
+      opsProd += `<option value="${p.id}" data-custo="${p.custo||0}">[Est: ${p.estoque||0}] ${p.nome} ${p.tamanho ? '('+p.tamanho+')' : ''}</option>`;
+    });
+
+    div.innerHTML = `
+      <div class="form-group" style="margin:0; flex:1">
+        <label class="form-label" style="font-size:11px">Produto</label>
+        <select class="form-control form-select ci-produto" onchange="onCIProduto('${id}')">
+          ${opsProd}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0; width:80px">
+        <label class="form-label" style="font-size:11px">Qtd</label>
+        <input type="number" class="form-control ci-qtd" value="1" min="1" oninput="calcularCompraItem('${id}')" />
+      </div>
+      <div class="form-group" style="margin:0; width:110px">
+        <label class="form-label" style="font-size:11px">Custo Unit. (R$)</label>
+        <input type="number" class="form-control ci-custo" value="" step="0.01" min="0" oninput="calcularCompraItem('${id}')" />
+      </div>
+      <div class="item-subtotal">
+        <label class="form-label" style="font-size:11px">Subtotal</label>
+        <div class="form-control" style="background:var(--bg); border-color:transparent; font-weight:700; color:var(--primary)" id="${id}-sub">R$ 0,00</div>
+      </div>
+      <div>
+        <label class="form-label" style="font-size:11px">&nbsp;</label>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="removerItem('${id}')">🗑️</button>
+      </div>`;
+
+    document.getElementById('itens-compra').appendChild(div);
+    calcularTotalCompra();
+  }
+
+  function onCIProduto(id) {
+    const row = document.getElementById(id);
+    const sel = row.querySelector('.ci-produto');
+    const opt = sel.options[sel.selectedIndex];
+    const custo = parseFloat(opt.dataset.custo) || 0;
+    row.querySelector('.ci-custo').value = custo.toFixed(2);
+    calcularCompraItem(id);
+  }
+
+  function calcularCompraItem(id) {
+    const row = document.getElementById(id);
+    const qtd = parseFloat(row.querySelector('.ci-qtd').value) || 0;
+    const custo = parseFloat(row.querySelector('.ci-custo').value) || 0;
+    row.querySelector(`#${id}-sub`).textContent = Fmt.moeda(qtd * custo);
+    calcularTotalCompra();
+  }
+
+  function removerItem(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    if (!document.getElementById('itens-compra').children.length) adicionarItem();
+    calcularTotalCompra();
+  }
+
+  function calcularTotalCompra() {
+    let total = 0, totalItens = 0;
+    document.querySelectorAll('.compra-item-row').forEach(row => {
+      const qtd = parseFloat(row.querySelector('.ci-qtd').value) || 0;
+      const custo = parseFloat(row.querySelector('.ci-custo').value) || 0;
+      total += qtd * custo;
+      totalItens += qtd;
+    });
+    document.getElementById('total-compra-txt').textContent = Fmt.moeda(total);
+    document.getElementById('total-itens-txt').textContent = totalItens;
+  }
+
+  async function finalizarCompra() {
+    const fornecedor = document.getElementById('comp-fornecedor').value.trim();
+    const dataCompra = document.getElementById('comp-data').value || hoje();
+    const forma = document.getElementById('comp-forma').value;
+    const obs = document.getElementById('comp-obs').value.trim();
+
+    if (!fornecedor) return mostrarToast('Informe o fornecedor', 'warning');
+
+    const itens = [];
+    let total = 0;
+    document.querySelectorAll('.compra-item-row').forEach(row => {
+      const prodId = Number(row.querySelector('.ci-produto').value);
+      const qtd = parseInt(row.querySelector('.ci-qtd').value) || 0;
+      const custo = parseFloat(row.querySelector('.ci-custo').value) || 0;
+      if (!prodId || qtd <= 0) return;
+      itens.push({ produto_id: prodId, quantidade: qtd, custo_unitario: custo });
+      total += qtd * custo;
+    });
+
+    if (!itens.length) return mostrarToast('Adicione pelo menos um item', 'warning');
+
+    await DB.Compras.salvar({
+      fornecedor,
+      data: dataCompra + 'T' + new Date().toTimeString().slice(0,8),
+      itens, total,
+      forma_pagamento: forma,
+      observacoes: obs,
+      usuario_id: Auth.usuario().id
+    });
+
+    mostrarToast('Compra registrada! Estoque atualizado. 📦', 'success');
+    Modal.fechar('modal-compra');
+    await carregar();
+  }
+
+  function verDetalhes(id) {
+    const c = _todasCompras.find(x => x.id === id);
+    if (!c) return;
+
+    document.getElementById('det-titulo').textContent = `Compra ${c.numero}`;
+
+    let itensHtml = '';
+    (c.compra_itens || []).forEach(item => {
+      const p = _prodMap[item.produto_id];
+      itensHtml += `<tr>
+        <td>${p ? p.nome : '#' + item.produto_id}</td>
+        <td>${item.quantidade}</td>
+        <td>${Fmt.moeda(item.custo_unitario)}</td>
+        <td><strong>${Fmt.moeda(item.quantidade * item.custo_unitario)}</strong></td>
+      </tr>`;
+    });
+
+    document.getElementById('det-body').innerHTML = `
+      <div class="form-row cols-2" style="margin-bottom:16px">
+        <div><label class="form-label">Fornecedor</label><p>${c.fornecedor}</p></div>
+        <div><label class="form-label">Data</label><p>${Fmt.dataHora(c.data)}</p></div>
+        <div><label class="form-label">Forma de Pgto</label><p>${labelFormaPgto(c.forma_pagamento)}</p></div>
+        <div><label class="form-label">Nº</label><p>${c.numero}</p></div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Produto</th><th>Qtd</th><th>Custo Unit.</th><th>Subtotal</th></tr></thead>
+          <tbody>${itensHtml}</tbody>
+        </table>
+      </div>
+      <div style="text-align:right; padding:12px; margin-top:8px; background:var(--bg); border-radius:var(--radius-sm)">
+        <strong style="font-size:20px; color:var(--primary)">Total: ${Fmt.moeda(c.total)}</strong>
+      </div>
+      ${c.observacoes ? `<div style="margin-top:12px; padding:10px; background:var(--bg); border-radius:var(--radius-sm); font-size:13px"><strong>Obs:</strong> ${c.observacoes}</div>` : ''}
+    `;
+
+    Modal.abrir('modal-detalhe');
+  }
+
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

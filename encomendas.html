@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Encomendas — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .status-kanban { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kanban-col { background: var(--bg); border-radius: var(--radius); padding: 14px; }
+    .kanban-col-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .kanban-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; cursor: pointer; transition: box-shadow .2s; }
+    .kanban-card:hover { box-shadow: 0 4px 12px rgba(181,18,74,.12); }
+    .kanban-card-cliente { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .kanban-card-desc { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+    .kanban-card-footer { display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">📋 Encomendas</div>
+      <div class="topbar-actions">
+        <select id="view-sel" class="form-control form-select" style="max-width:140px;font-size:13px" onchange="renderView()">
+          <option value="kanban">Kanban</option>
+          <option value="lista">Lista</option>
+        </select>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Nova Encomenda</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="stats-area"></div>
+
+      <!-- Conteúdo -->
+      <div id="conteudo-wrap"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Encomenda -->
+<div class="modal-overlay" id="modal-enc">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-titulo">Nova Encomenda</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-enc')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="enc-id" />
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Cliente *</label>
+          <div style="position:relative">
+            <input type="text" id="enc-cliente-input" class="form-control" placeholder="Nome do cliente" />
+            <input type="hidden" id="enc-cliente-id" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone de Contato</label>
+          <input type="text" id="enc-telefone" class="form-control" placeholder="(00) 00000-0000" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição / Produto Encomendado *</label>
+        <textarea id="enc-descricao" class="form-control" rows="3" placeholder="Descreva o produto, tamanho, cor, referência..."></textarea>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label class="form-label">Valor Total (R$)</label>
+          <input type="number" id="enc-valor" class="form-control" step="0.01" min="0" placeholder="0,00" oninput="calcularSaldo()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sinal / Entrada (R$)</label>
+          <input type="number" id="enc-sinal" class="form-control" step="0.01" min="0" placeholder="0,00" oninput="calcularSaldo()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Saldo a Pagar</label>
+          <div class="form-control" id="enc-saldo" style="background:var(--bg);border-color:transparent;font-weight:700;color:var(--primary)">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Previsão de Entrega</label>
+          <input type="date" id="enc-previsao" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="enc-status" class="form-control form-select">
+            <option value="aguardando">Aguardando</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="em_producao">Em Produção</option>
+            <option value="pronta">Pronta p/ Retirada</option>
+            <option value="entregue">Entregue</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea id="enc-obs" class="form-control" rows="2" placeholder="Informações adicionais..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-enc')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes -->
+<div class="modal-overlay" id="modal-det">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="det-titulo">Encomenda</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-det')">✕</button>
+    </div>
+    <div class="modal-body" id="det-body"></div>
+    <div class="modal-footer" id="det-footer"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('encomendas'));
+
+  const STATUS_KANBAN = [
+    { id: 'aguardando', label: 'Aguardando', cor: '#E65100' },
+    { id: 'confirmada',  label: 'Confirmada', cor: '#01579B' },
+    { id: 'em_producao',label: 'Em Produção', cor: '#6A1B9A' },
+    { id: 'pronta',     label: 'Pronta',      cor: '#2E7D32' },
+    { id: 'entregue',   label: 'Entregue',    cor: '#546E7A' },
+  ];
+
+  let _encCache = [];
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      _encCache = await DB.Encomendas.todas();
+      renderStats();
+      renderView();
+    } catch(e) {
+      mostrarToast('Erro ao carregar encomendas', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats() {
+    const abertas = _encCache.filter(e => !['entregue','cancelada'].includes(e.status));
+    const prontas = _encCache.filter(e => e.status === 'pronta');
+    const totalValor = abertas.reduce((s, e) => s + (e.valor || 0), 0);
+    const sinalTotal = abertas.reduce((s, e) => s + (e.sinal || 0), 0);
+
+    document.getElementById('stats-area').innerHTML = `
+      <div class="stat-card"><div class="stat-icon orange">📋</div>
+        <div class="stat-info"><div class="stat-value">${abertas.length}</div><div class="stat-label">Encomendas Abertas</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
+        <div class="stat-info"><div class="stat-value">${prontas.length}</div><div class="stat-label">Prontas p/ Retirada</div></div></div>
+      <div class="stat-card"><div class="stat-icon pink">💰</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(totalValor)}</div><div class="stat-label">Valor Total Aberto</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">💵</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(sinalTotal)}</div><div class="stat-label">Sinais Recebidos</div></div></div>`;
+  }
+
+  function renderView() {
+    const view = document.getElementById('view-sel').value;
+    if (view === 'kanban') renderKanban();
+    else renderLista();
+  }
+
+  function renderKanban() {
+    const ativas = _encCache.filter(e => e.status !== 'cancelada');
+    let html = '<div class="status-kanban">';
+    STATUS_KANBAN.forEach(col => {
+      const items = ativas.filter(e => e.status === col.id);
+      html += `<div class="kanban-col">
+        <div class="kanban-col-header" style="color:${col.cor}">
+          ${col.label}
+          <span class="badge badge-secondary">${items.length}</span>
+        </div>`;
+      if (!items.length) {
+        html += `<div style="font-size:12px;color:var(--text2);text-align:center;padding:16px">Vazio</div>`;
+      } else {
+        items.forEach(e => {
+          const saldo = (e.valor || 0) - (e.sinal || 0);
+          html += `<div class="kanban-card" onclick="verDetalhes(${e.id})">
+            <div class="kanban-card-cliente">${e.cliente_nome || e.cliente}</div>
+            <div class="kanban-card-desc">${(e.descricao||'').slice(0,60)}${(e.descricao||'').length>60?'...':''}</div>
+            <div class="kanban-card-footer">
+              <span class="badge badge-primary">${e.numero}</span>
+              ${saldo > 0 ? `<span style="font-size:12px;font-weight:700;color:var(--danger)">Saldo: ${Fmt.moeda(saldo)}</span>` : '<span class="badge badge-success">Quitado</span>'}
+            </div>
+            ${e.previsao ? `<div style="font-size:11px;color:var(--text2);margin-top:6px">📅 ${Fmt.data(e.previsao+'T00:00:00')}</div>` : ''}
+          </div>`;
+        });
+      }
+      html += `</div>`;
+    });
+    html += '</div>';
+
+    const canceladas = _encCache.filter(e => e.status === 'cancelada');
+    if (canceladas.length) {
+      html += `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;color:var(--text2)">Canceladas (${canceladas.length})</summary>`;
+      canceladas.forEach(e => {
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-top:6px;font-size:13px">
+          <span>${e.numero} · ${e.cliente_nome||e.cliente}</span>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${e.id})">👁️</button>
+        </div>`;
+      });
+      html += '</details>';
+    }
+
+    document.getElementById('conteudo-wrap').innerHTML = html || '<div class="empty-state card" style="padding:60px"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma encomenda</div></div>';
+  }
+
+  function renderLista() {
+    const todas = [..._encCache].sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+    if (!todas.length) {
+      document.getElementById('conteudo-wrap').innerHTML =
+        `<div class="empty-state card" style="padding:60px"><div class="empty-icon">📋</div><div class="empty-title">Nenhuma encomenda</div></div>`;
+      return;
+    }
+
+    let html = `<div class="card"><div class="table-wrapper"><table><thead><tr>
+      <th>Nº</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Sinal</th><th>Saldo</th><th>Previsão</th><th>Status</th><th>Ações</th>
+    </tr></thead><tbody>`;
+
+    todas.forEach(e => {
+      const saldo = (e.valor||0) - (e.sinal||0);
+      html += `<tr>
+        <td><strong>${e.numero}</strong></td>
+        <td>${e.cliente_nome||e.cliente}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.descricao}</td>
+        <td>${Fmt.moeda(e.valor)}</td>
+        <td>${Fmt.moeda(e.sinal)}</td>
+        <td class="${saldo>0?'text-danger font-bold':''}">${saldo>0?Fmt.moeda(saldo):'✅'}</td>
+        <td>${e.previsao ? Fmt.data(e.previsao+'T00:00:00') : '-'}</td>
+        <td>${badgeStatus(e.status)}</td>
+        <td><div class="td-actions">
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${e.id})">👁️</button>
+          <button class="btn btn-sm btn-ghost btn-icon" onclick="editar(${e.id})">✏️</button>
+        </div></td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div></div>';
+    document.getElementById('conteudo-wrap').innerHTML = html;
+  }
+
+  function calcularSaldo() {
+    const val = parseFloat(document.getElementById('enc-valor').value) || 0;
+    const sinal = parseFloat(document.getElementById('enc-sinal').value) || 0;
+    const saldo = Math.max(0, val - sinal);
+    document.getElementById('enc-saldo').textContent = Fmt.moeda(saldo);
+    document.getElementById('enc-saldo').style.color = saldo > 0 ? 'var(--danger)' : 'var(--success)';
+  }
+
+  function abrirModal(e = null) {
+    document.getElementById('enc-id').value = e ? e.id : '';
+    document.getElementById('enc-cliente-input').value = e ? (e.cliente_nome||e.cliente||'') : '';
+    document.getElementById('enc-cliente-id').value = e ? (e.cliente_id||'') : '';
+    document.getElementById('enc-telefone').value = e ? (e.telefone||'') : '';
+    document.getElementById('enc-descricao').value = e ? (e.descricao||'') : '';
+    document.getElementById('enc-valor').value = e ? (e.valor||'') : '';
+    document.getElementById('enc-sinal').value = e ? (e.sinal||'') : '';
+    document.getElementById('enc-previsao').value = e ? (e.previsao||addDias(hoje(),7)) : addDias(hoje(),7);
+    document.getElementById('enc-status').value = e ? (e.status||'aguardando') : 'aguardando';
+    document.getElementById('enc-obs').value = e ? (e.observacoes||'') : '';
+    document.getElementById('modal-titulo').textContent = e ? 'Editar Encomenda' : 'Nova Encomenda';
+    calcularSaldo();
+    Modal.abrir('modal-enc');
+  }
+
+  function editar(id) { abrirModal(_encCache.find(e => e.id === id)); }
+
+  async function salvar() {
+    const id = document.getElementById('enc-id').value;
+    const clienteNome = document.getElementById('enc-cliente-input').value.trim();
+    const clienteId = Number(document.getElementById('enc-cliente-id').value) || null;
+    const descricao = document.getElementById('enc-descricao').value.trim();
+    if (!clienteNome) return mostrarToast('Informe o cliente', 'warning');
+    if (!descricao) return mostrarToast('Informe a descrição', 'warning');
+
+    await DB.Encomendas.salvar({
+      id: id ? Number(id) : undefined,
+      cliente: clienteNome, cliente_nome: clienteNome, cliente_id: clienteId,
+      telefone: document.getElementById('enc-telefone').value.trim(),
+      descricao,
+      valor: parseFloat(document.getElementById('enc-valor').value) || 0,
+      sinal: parseFloat(document.getElementById('enc-sinal').value) || 0,
+      previsao: document.getElementById('enc-previsao').value,
+      status: document.getElementById('enc-status').value,
+      observacoes: document.getElementById('enc-obs').value.trim()
+    });
+
+    mostrarToast(id ? 'Encomenda atualizada!' : 'Encomenda registrada!', 'success');
+    Modal.fechar('modal-enc');
+    await carregar();
+  }
+
+  function verDetalhes(id) {
+    const e = _encCache.find(x => x.id === id);
+    if (!e) return;
+    const saldo = (e.valor||0) - (e.sinal||0);
+
+    document.getElementById('det-titulo').textContent = `Encomenda ${e.numero}`;
+    document.getElementById('det-body').innerHTML = `
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <label class="form-label">Cliente</label><p><strong>${e.cliente_nome||e.cliente}</strong></p>
+          ${e.telefone ? `<p style="font-size:13px;color:var(--text2)">${Fmt.telefone(e.telefone)}</p>` : ''}
+        </div>
+        <div><label class="form-label">Status</label><p>${badgeStatus(e.status)}</p></div>
+        <div><label class="form-label">Previsão</label><p>${e.previsao ? Fmt.data(e.previsao+'T00:00:00') : '-'}</p></div>
+      </div>
+      <div style="background:var(--bg);padding:14px;border-radius:var(--radius-sm);margin-bottom:14px">
+        <label class="form-label">Descrição</label>
+        <p style="white-space:pre-line;font-size:13px">${e.descricao}</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px">
+        <div style="text-align:center;background:var(--bg);padding:12px;border-radius:var(--radius-sm)">
+          <div style="font-size:16px;font-weight:800;color:var(--primary)">${Fmt.moeda(e.valor)}</div>
+          <div style="font-size:12px;color:var(--text2)">Valor total</div>
+        </div>
+        <div style="text-align:center;background:var(--success-bg);padding:12px;border-radius:var(--radius-sm)">
+          <div style="font-size:16px;font-weight:800;color:var(--success)">${Fmt.moeda(e.sinal)}</div>
+          <div style="font-size:12px;color:var(--text2)">Sinal recebido</div>
+        </div>
+        <div style="text-align:center;background:${saldo>0?'var(--danger-bg)':'var(--success-bg)'};padding:12px;border-radius:var(--radius-sm)">
+          <div style="font-size:16px;font-weight:800;color:${saldo>0?'var(--danger)':'var(--success)'}">${saldo>0?Fmt.moeda(saldo):'Quitado ✅'}</div>
+          <div style="font-size:12px;color:var(--text2)">Saldo a pagar</div>
+        </div>
+      </div>
+      ${e.observacoes ? `<div style="padding:10px;background:var(--bg);border-radius:var(--radius-sm);font-size:13px"><strong>Obs:</strong> ${e.observacoes}</div>` : ''}
+      <div style="font-size:12px;color:var(--text2);margin-top:10px">Criada em: ${Fmt.dataHora(e.criado_em)}</div>`;
+
+    document.getElementById('det-footer').innerHTML = `
+      <button class="btn btn-outline" onclick="Modal.fechar('modal-det');editar(${e.id})">✏️ Editar</button>
+      ${e.status !== 'cancelada' ? `<button class="btn btn-danger btn-sm" onclick="cancelar(${e.id})">Cancelar Encomenda</button>` : ''}
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-det')">Fechar</button>`;
+
+    Modal.abrir('modal-det');
+  }
+
+  function cancelar(id) {
+    confirmar('Cancelar esta encomenda?', async () => {
+      const e = _encCache.find(x => x.id === id);
+      if (!e) return;
+      await DB.Encomendas.salvar({ ...e, status: 'cancelada' });
+      mostrarToast('Encomenda cancelada', 'danger');
+      Modal.fechar('modal-det');
+      await carregar();
+    });
+  }
+
+  setupClienteAutocomplete('enc-cliente-input', 'enc-cliente-id');
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

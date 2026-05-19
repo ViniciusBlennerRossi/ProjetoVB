@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda — Sistema</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== AGENDA ===== */
+    .agenda-nav { display:flex; align-items:center; gap:8px; }
+    .agenda-nav .data-label { font-size:16px; font-weight:700; min-width:200px; text-align:center; }
+    .btn-nav { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 12px; cursor:pointer; font-size:14px; transition:.15s; }
+    .btn-nav:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .btn-hoje { background:var(--primary); color:#fff; border:none; border-radius:var(--radius-sm); padding:6px 14px; cursor:pointer; font-size:13px; font-weight:600; }
+
+    .prof-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+    .prof-tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg); transition:.15s; }
+    .prof-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    .agenda-grid { display:flex; flex-direction:column; gap:0; }
+    .slot { display:grid; grid-template-columns:64px 1fr; min-height:52px; border-bottom:1px solid var(--border); }
+    .slot-hora { font-size:11px; font-weight:600; color:var(--text2); padding:8px 12px 8px 0; text-align:right; line-height:1; padding-top:10px; border-right:2px solid var(--border); }
+    .slot-hora.meia { font-size:10px; font-weight:400; color:var(--text3, #ccc); }
+    .slot-conteudo { padding:4px 8px; position:relative; }
+    .slot-vazio { height:40px; cursor:pointer; border-radius:var(--radius-sm); transition:.15s; }
+    .slot-vazio:hover { background:rgba(var(--primary-rgb, 181,18,74),.06); }
+
+    .ag-card { border-radius:var(--radius-sm); padding:8px 10px; margin-bottom:4px; cursor:pointer; transition:box-shadow .15s; border-left:4px solid transparent; position:relative; }
+    .ag-card:hover { box-shadow:0 2px 8px rgba(0,0,0,.12); }
+    .ag-card-header { display:flex; justify-content:space-between; align-items:flex-start; gap:4px; }
+    .ag-card-cliente { font-size:13px; font-weight:700; }
+    .ag-card-hora { font-size:11px; color:var(--text2); white-space:nowrap; }
+    .ag-card-servico { font-size:12px; color:var(--text2); margin-top:2px; }
+    .ag-card-footer { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+    .ag-card-valor { font-size:12px; font-weight:600; }
+    .ag-card-prof { font-size:11px; color:var(--text2); }
+
+    /* Status colors */
+    .ag-agendado    { background:#EBF4FF; border-left-color:#3B82F6; }
+    .ag-confirmado  { background:#ECFDF5; border-left-color:#10B981; }
+    .ag-em_atendimento { background:#FFF7ED; border-left-color:#F59E0B; }
+    .ag-concluido   { background:#F3F4F6; border-left-color:#9CA3AF; opacity:.8; }
+    .ag-cancelado   { background:#FEF2F2; border-left-color:#EF4444; text-decoration:line-through; opacity:.7; }
+
+    .badge-status { font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; }
+    .bs-agendado    { background:#DBEAFE; color:#1D4ED8; }
+    .bs-confirmado  { background:#D1FAE5; color:#065F46; }
+    .bs-em_atendimento { background:#FEF3C7; color:#92400E; }
+    .bs-concluido   { background:#E5E7EB; color:#374151; }
+    .bs-cancelado   { background:#FEE2E2; color:#991B1B; }
+
+    .stats-resumo { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+
+    /* Modal status buttons */
+    .status-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .btn-status { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:none; transition:.15s; }
+    .btn-status:hover { filter:brightness(.9); }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">📅 Agenda</div>
+      <div class="topbar-actions">
+        <div class="agenda-nav">
+          <button class="btn-nav" onclick="mudarDia(-1)">‹</button>
+          <button class="btn-hoje" onclick="irHoje()">Hoje</button>
+          <span class="data-label" id="label-data"></span>
+          <button class="btn-nav" onclick="mudarDia(1)">›</button>
+        </div>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Agendamento</button>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="stats-resumo" id="stats-area"></div>
+      <div class="prof-tabs" id="prof-tabs"></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="agenda-grid" id="agenda-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Agendamento -->
+<div class="modal-overlay" id="modal-ag">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-titulo">Novo Agendamento</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-ag')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ag-id" />
+
+      <div class="form-row cols-2">
+        <div class="form-group" style="grid-column:span 2">
+          <label class="form-label">Cliente *</label>
+          <input type="text" id="ag-cliente-input" class="form-control" placeholder="Buscar cliente..." autocomplete="off" />
+          <input type="hidden" id="ag-cliente-id" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Serviço *</label>
+          <select id="ag-servico" class="form-control form-select" onchange="preencherValor()">
+            <option value="">Selecionar serviço...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profissional</label>
+          <select id="ag-funcionario" class="form-control form-select">
+            <option value="">Sem profissional</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data *</label>
+          <input type="date" id="ag-data" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora de início *</label>
+          <input type="time" id="ag-hora" class="form-control" step="900" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor (R$)</label>
+          <input type="number" id="ag-valor" class="form-control" placeholder="0,00" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="ag-status" class="form-control form-select">
+            <option value="agendado">Agendado</option>
+            <option value="confirmado">Confirmado</option>
+            <option value="em_atendimento">Em Atendimento</option>
+            <option value="concluido">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:span 2">
+          <label class="form-label">Observações</label>
+          <textarea id="ag-obs" class="form-control" rows="2" placeholder="Anotações sobre o atendimento..."></textarea>
+        </div>
+      </div>
+
+      <!-- Ações rápidas de status (só em edição) -->
+      <div id="status-rapido" style="display:none">
+        <div class="form-label" style="margin-bottom:4px">Ação rápida:</div>
+        <div class="status-btns" id="status-btns"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-danger-outline" id="btn-deletar" style="display:none" onclick="deletarAtual()">Excluir</button>
+      <button class="btn btn-outline" onclick="Modal.fechar('modal-ag')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/tenant.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('agenda'));
+
+  let _dataAtual = hoje();
+  let _agCache = [];
+  let _servicosCache = [];
+  let _funcsCache = [];
+  let _profFiltro = 'todos';
+
+  const HORA_INICIO = 7;
+  const HORA_FIM = 21;
+
+  const STATUS_LABEL = {
+    agendado: 'Agendado', confirmado: 'Confirmado',
+    em_atendimento: 'Em Atendimento', concluido: 'Concluído', cancelado: 'Cancelado'
+  };
+  const STATUS_COR = {
+    agendado:'#3B82F6', confirmado:'#10B981',
+    em_atendimento:'#F59E0B', concluido:'#9CA3AF', cancelado:'#EF4444'
+  };
+  const PROXIMO_STATUS = {
+    agendado: 'confirmado', confirmado: 'em_atendimento', em_atendimento: 'concluido'
+  };
+
+  // ===== NAVEGAÇÃO DE DATA =====
+  function mudarDia(delta) {
+    const d = new Date(_dataAtual + 'T00:00:00');
+    d.setDate(d.getDate() + delta);
+    _dataAtual = d.toISOString().split('T')[0];
+    carregar();
+  }
+  function irHoje() { _dataAtual = hoje(); carregar(); }
+
+  function labelData(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    return `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  // ===== CARREGAR =====
+  async function carregar() {
+    document.getElementById('label-data').textContent = labelData(_dataAtual);
+    mostrarLoader();
+    try {
+      [_agCache, _servicosCache, _funcsCache] = await Promise.all([
+        DB.Agendamentos.porData(_dataAtual),
+        DB.Servicos.ativos(),
+        DB.Funcionarios.ativos()
+      ]);
+      renderStats();
+      renderProfTabs();
+      renderAgenda();
+      popularSelects();
+    } catch(e) {
+      mostrarToast('Erro ao carregar agenda', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats() {
+    const ags = _agCache;
+    const total = ags.length;
+    const concluidos = ags.filter(a => a.status === 'concluido').length;
+    const faturamento = ags.filter(a => a.status === 'concluido').reduce((s, a) => s + (a.valor || 0), 0);
+    const pendentes = ags.filter(a => !['concluido','cancelado'].includes(a.status)).length;
+    document.getElementById('stats-area').innerHTML = `
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-info"><div class="stat-value">${total}</div><div class="stat-label">Agendamentos</div></div></div>
+      <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-info"><div class="stat-value">${pendentes}</div><div class="stat-label">Pendentes</div></div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-info"><div class="stat-value">${concluidos}</div><div class="stat-label">Concluídos</div></div></div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-info"><div class="stat-value">${Fmt.moeda(faturamento)}</div><div class="stat-label">Faturamento</div></div></div>
+    `;
+  }
+
+  function renderProfTabs() {
+    const tabs = document.getElementById('prof-tabs');
+    const profs = _funcsCache;
+    let html = `<button class="prof-tab ${_profFiltro === 'todos' ? 'active' : ''}" onclick="filtrarProf('todos')">Todos</button>`;
+    profs.forEach(f => {
+      html += `<button class="prof-tab ${_profFiltro == f.id ? 'active' : ''}" onclick="filtrarProf(${f.id})">${f.nome}</button>`;
+    });
+    tabs.innerHTML = html;
+  }
+
+  function filtrarProf(id) { _profFiltro = id; renderProfTabs(); renderAgenda(); }
+
+  function agsDaHora(hora, min) {
+    const horaStr = `${String(hora).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+    return _agCache.filter(a => {
+      if (_profFiltro !== 'todos' && a.funcionario_id != _profFiltro) return false;
+      return a.hora_inicio && a.hora_inicio.startsWith(horaStr);
+    });
+  }
+
+  function renderAgenda() {
+    let html = '';
+    for (let h = HORA_INICIO; h < HORA_FIM; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const ehMeia = m === 30;
+        const horaLabel = ehMeia ? '' : `${String(h).padStart(2,'0')}:00`;
+        const ags = agsDaHora(h, m);
+        const slotData = `${_dataAtual}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+
+        let cardsHtml = '';
+        ags.forEach(a => {
+          const cls = `ag-${a.status || 'agendado'}`;
+          const bcls = `bs-${a.status || 'agendado'}`;
+          cardsHtml += `
+            <div class="ag-card ${cls}" onclick="editarAg(${a.id})">
+              <div class="ag-card-header">
+                <div class="ag-card-cliente">${a.cliente}</div>
+                <span class="badge-status ${bcls}">${STATUS_LABEL[a.status] || a.status}</span>
+              </div>
+              <div class="ag-card-servico">✂️ ${a.servico}</div>
+              <div class="ag-card-footer">
+                <span class="ag-card-valor">${Fmt.moeda(a.valor || 0)}</span>
+                ${a.funcionario ? `<span class="ag-card-prof">👤 ${a.funcionario}</span>` : ''}
+              </div>
+            </div>`;
+        });
+
+        html += `
+          <div class="slot">
+            <div class="slot-hora ${ehMeia ? 'meia' : ''}">${horaLabel}</div>
+            <div class="slot-conteudo">
+              ${cardsHtml}
+              <div class="slot-vazio" title="Clique para agendar" onclick="abrirModalHora('${slotData}')"></div>
+            </div>
+          </div>`;
+      }
+    }
+    document.getElementById('agenda-grid').innerHTML = html;
+  }
+
+  // ===== SELECTS =====
+  function popularSelects() {
+    const selServ = document.getElementById('ag-servico');
+    selServ.innerHTML = '<option value="">Selecionar serviço...</option>' +
+      _servicosCache.map(s => `<option value="${s.id}" data-preco="${s.preco}" data-dur="${s.duracao_min}">${s.nome} — ${Fmt.moeda(s.preco)}</option>`).join('');
+
+    const selFunc = document.getElementById('ag-funcionario');
+    selFunc.innerHTML = '<option value="">Sem profissional</option>' +
+      _funcsCache.map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
+  }
+
+  function preencherValor() {
+    const sel = document.getElementById('ag-servico');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt?.dataset.preco) document.getElementById('ag-valor').value = opt.dataset.preco;
+  }
+
+  // ===== MODAL =====
+  function abrirModal(ag = null) {
+    document.getElementById('ag-id').value = ag?.id || '';
+    document.getElementById('ag-cliente-input').value = ag?.cliente || '';
+    document.getElementById('ag-cliente-id').value = ag?.cliente_id || '';
+    document.getElementById('ag-servico').value = ag?.servico_id || '';
+    document.getElementById('ag-funcionario').value = ag?.funcionario_id || '';
+    document.getElementById('ag-data').value = ag?.data || _dataAtual;
+    document.getElementById('ag-hora').value = ag?.hora_inicio?.substring(0,5) || '';
+    document.getElementById('ag-valor').value = ag?.valor || '';
+    document.getElementById('ag-status').value = ag?.status || 'agendado';
+    document.getElementById('ag-obs').value = ag?.observacoes || '';
+    document.getElementById('modal-titulo').textContent = ag ? 'Editar Agendamento' : 'Novo Agendamento';
+    document.getElementById('btn-deletar').style.display = ag ? '' : 'none';
+
+    // Status rápido (só em edição)
+    const statusDiv = document.getElementById('status-rapido');
+    if (ag && PROXIMO_STATUS[ag.status]) {
+      const prox = PROXIMO_STATUS[ag.status];
+      document.getElementById('status-btns').innerHTML = `
+        <button class="btn-status" style="background:${STATUS_COR[prox]};color:#fff" onclick="mudarStatusRapido(${ag.id},'${prox}')">
+          → ${STATUS_LABEL[prox]}
+        </button>
+        ${ag.status !== 'cancelado' ? `<button class="btn-status" style="background:#EF4444;color:#fff" onclick="mudarStatusRapido(${ag.id},'cancelado')">✕ Cancelar</button>` : ''}
+      `;
+      statusDiv.style.display = '';
+    } else {
+      statusDiv.style.display = 'none';
+    }
+
+    Modal.abrir('modal-ag');
+    setupClienteAutocomplete('ag-cliente-input', 'ag-cliente-id', () => {});
+  }
+
+  function abrirModalHora(dtStr) {
+    const dt = new Date(dtStr);
+    const hora = `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    abrirModal(null);
+    document.getElementById('ag-hora').value = hora;
+  }
+
+  async function editarAg(id) {
+    const ag = _agCache.find(a => a.id === id);
+    if (ag) abrirModal(ag);
+  }
+
+  async function mudarStatusRapido(id, status) {
+    try {
+      await DB.Agendamentos.atualizarStatus(id, status);
+      Modal.fechar('modal-ag');
+      mostrarToast(`Status: ${STATUS_LABEL[status]}`);
+      await carregar();
+    } catch(e) {
+      mostrarToast('Erro ao atualizar status', 'danger');
+    }
+  }
+
+  async function salvar() {
+    const cliente = document.getElementById('ag-cliente-input').value.trim();
+    const servico_id = document.getElementById('ag-servico').value;
+    const data = document.getElementById('ag-data').value;
+    const hora_inicio = document.getElementById('ag-hora').value;
+    if (!cliente || !servico_id || !data || !hora_inicio) {
+      mostrarToast('Preencha cliente, serviço, data e hora', 'warning');
+      return;
+    }
+    const sel = document.getElementById('ag-servico');
+    const servicoNome = sel.options[sel.selectedIndex]?.text.split(' — ')[0] || '';
+    const selFunc = document.getElementById('ag-funcionario');
+    const funcNome = selFunc.value ? selFunc.options[selFunc.selectedIndex]?.text : '';
+    try {
+      await DB.Agendamentos.salvar({
+        id: document.getElementById('ag-id').value || undefined,
+        cliente,
+        cliente_id: document.getElementById('ag-cliente-id').value || null,
+        servico_id: parseInt(servico_id),
+        servico: servicoNome,
+        funcionario_id: selFunc.value ? parseInt(selFunc.value) : null,
+        funcionario: funcNome || null,
+        data,
+        hora_inicio,
+        valor: parseFloat(document.getElementById('ag-valor').value) || 0,
+        status: document.getElementById('ag-status').value,
+        observacoes: document.getElementById('ag-obs').value.trim() || null
+      });
+      Modal.fechar('modal-ag');
+      mostrarToast('Agendamento salvo!');
+      await carregar();
+    } catch(e) {
+      mostrarToast('Erro ao salvar agendamento', 'danger');
+    }
+  }
+
+  async function deletarAtual() {
+    const id = document.getElementById('ag-id').value;
+    if (!id) return;
+    confirmar('Excluir este agendamento?', async () => {
+      await DB.Agendamentos.deletar(id);
+      Modal.fechar('modal-ag');
+      mostrarToast('Agendamento excluído');
+      await carregar();
+    });
+  }
+
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

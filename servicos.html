@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Serviços — Sistema</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .badge-cat { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--primary-light); color:var(--primary); }
+    .duracao-chip { font-size:12px; color:var(--text2); }
+  </style>
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">✂️ Serviços</div>
+      <div class="topbar-actions">
+        <input type="text" id="busca" class="form-control" placeholder="Buscar serviço..." style="max-width:220px" oninput="renderTabela()" />
+        <select id="filtro-cat" class="form-control form-select" style="max-width:160px" onchange="renderTabela()">
+          <option value="">Todas categorias</option>
+          <option>Sobrancelha</option>
+          <option>Manicure</option>
+          <option>Pedicure</option>
+          <option>Cabelo</option>
+          <option>Depilação</option>
+          <option>Outro</option>
+        </select>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Novo Serviço</button>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="stats-area"></div>
+      <div id="conteudo-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Serviço -->
+<div class="modal-overlay" id="modal-serv">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-titulo">Novo Serviço</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-serv')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="serv-id" />
+      <div class="form-row cols-2">
+        <div class="form-group" style="grid-column:span 2">
+          <label class="form-label">Nome do Serviço *</label>
+          <input type="text" id="serv-nome" class="form-control" placeholder="Ex: Design de Sobrancelha" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select id="serv-categoria" class="form-control form-select">
+            <option value="">Selecionar...</option>
+            <option>Sobrancelha</option>
+            <option>Manicure</option>
+            <option>Pedicure</option>
+            <option>Cabelo</option>
+            <option>Depilação</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duração (minutos)</label>
+          <input type="number" id="serv-duracao" class="form-control" placeholder="30" min="5" step="5" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preço (R$)</label>
+          <input type="number" id="serv-preco" class="form-control" placeholder="0,00" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comissão (%)</label>
+          <input type="number" id="serv-comissao" class="form-control" placeholder="0" min="0" max="100" step="0.5" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.fechar('modal-serv')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/tenant.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('servicos'));
+
+  let _cache = [];
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      _cache = await DB.Servicos.todos();
+      renderStats();
+      renderTabela();
+    } catch(e) {
+      mostrarToast('Erro ao carregar serviços', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats() {
+    const ativos = _cache.filter(s => s.ativo);
+    const cats = [...new Set(ativos.map(s => s.categoria).filter(Boolean))].length;
+    const precoMedio = ativos.length ? ativos.reduce((s, v) => s + (v.preco || 0), 0) / ativos.length : 0;
+    const totalValor = ativos.reduce((s, v) => s + (v.preco || 0), 0);
+    document.getElementById('stats-area').innerHTML = `
+      <div class="stat-card"><div class="stat-icon">✂️</div><div class="stat-info"><div class="stat-value">${ativos.length}</div><div class="stat-label">Serviços Ativos</div></div></div>
+      <div class="stat-card"><div class="stat-icon">🏷️</div><div class="stat-info"><div class="stat-value">${cats}</div><div class="stat-label">Categorias</div></div></div>
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-info"><div class="stat-value">${Fmt.moeda(precoMedio)}</div><div class="stat-label">Preço Médio</div></div></div>
+      <div class="stat-card"><div class="stat-icon">💎</div><div class="stat-info"><div class="stat-value">${Fmt.moeda(totalValor)}</div><div class="stat-label">Valor Total Tabela</div></div></div>
+    `;
+  }
+
+  function renderTabela() {
+    const busca = document.getElementById('busca').value.toLowerCase();
+    const cat = document.getElementById('filtro-cat').value;
+    const lista = _cache.filter(s => {
+      if (busca && !s.nome.toLowerCase().includes(busca)) return false;
+      if (cat && s.categoria !== cat) return false;
+      return true;
+    });
+
+    if (!lista.length) {
+      document.getElementById('conteudo-wrap').innerHTML = `
+        <div class="card" style="text-align:center;padding:48px">
+          <div style="font-size:48px">✂️</div>
+          <div style="font-size:16px;font-weight:600;margin-top:12px">Nenhum serviço encontrado</div>
+          <div style="color:var(--text2);margin-top:4px">Cadastre os serviços do salão</div>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="abrirModal()">+ Novo Serviço</button>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('conteudo-wrap').innerHTML = `
+      <div class="card">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr>
+              <th>Serviço</th><th>Categoria</th><th>Duração</th><th>Preço</th><th>Comissão</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody>
+              ${lista.map(s => `
+                <tr>
+                  <td><strong>${s.nome}</strong></td>
+                  <td>${s.categoria ? `<span class="badge-cat">${s.categoria}</span>` : '<span style="color:var(--text2)">—</span>'}</td>
+                  <td><span class="duracao-chip">⏱ ${s.duracao_min || 30} min</span></td>
+                  <td><strong>${Fmt.moeda(s.preco || 0)}</strong></td>
+                  <td>${s.comissao_perc ? s.comissao_perc + '%' : '—'}</td>
+                  <td>${s.ativo ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>'}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline" onclick="editar(${s.id})">Editar</button>
+                    <button class="btn btn-sm btn-outline" style="color:var(--danger)" onclick="deletar(${s.id},'${s.nome.replace(/'/g,"\\'")}')">Inativar</button>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  function abrirModal(serv = null) {
+    document.getElementById('serv-id').value = serv?.id || '';
+    document.getElementById('serv-nome').value = serv?.nome || '';
+    document.getElementById('serv-categoria').value = serv?.categoria || '';
+    document.getElementById('serv-duracao').value = serv?.duracao_min || 30;
+    document.getElementById('serv-preco').value = serv?.preco || '';
+    document.getElementById('serv-comissao').value = serv?.comissao_perc || '';
+    document.getElementById('modal-titulo').textContent = serv ? 'Editar Serviço' : 'Novo Serviço';
+    Modal.abrir('modal-serv');
+    setTimeout(() => document.getElementById('serv-nome').focus(), 100);
+  }
+
+  async function editar(id) {
+    const s = _cache.find(x => x.id === id);
+    if (s) abrirModal(s);
+  }
+
+  async function salvar() {
+    const nome = document.getElementById('serv-nome').value.trim();
+    if (!nome) { mostrarToast('Informe o nome do serviço', 'warning'); return; }
+    try {
+      await DB.Servicos.salvar({
+        id: document.getElementById('serv-id').value || undefined,
+        nome,
+        categoria: document.getElementById('serv-categoria').value || null,
+        duracao_min: parseInt(document.getElementById('serv-duracao').value) || 30,
+        preco: parseFloat(document.getElementById('serv-preco').value) || 0,
+        comissao_perc: parseFloat(document.getElementById('serv-comissao').value) || 0
+      });
+      Modal.fechar('modal-serv');
+      mostrarToast('Serviço salvo!');
+      await carregar();
+    } catch(e) {
+      mostrarToast('Erro ao salvar', 'danger');
+    }
+  }
+
+  async function deletar(id, nome) {
+    confirmar(`Inativar "${nome}"?`, async () => {
+      await DB.Servicos.deletar(id);
+      mostrarToast('Serviço inativado');
+      await carregar();
+    });
+  }
+
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

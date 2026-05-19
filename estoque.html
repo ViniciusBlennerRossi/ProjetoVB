@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estoque — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">📦 Controle de Estoque</div>
+      <div class="topbar-actions">
+        <button class="btn btn-success" onclick="abrirModalMov('entrada')">⬆️ Entrada</button>
+        <button class="btn btn-danger" onclick="abrirModalMov('saida')">⬇️ Saída</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Totalizadores de estoque -->
+      <div class="stats-grid" id="stats-estoque" style="margin-bottom:20px"></div>
+
+      <!-- Estoque atual dos produtos -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-header">
+          <div class="card-title">📋 Posição Atual do Estoque</div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <input type="text" id="busca-est" class="form-control" placeholder="Buscar produto..." style="max-width:200px" oninput="filtrarEstoque()" />
+            <select id="filtro-est" class="form-control form-select" style="max-width:160px" onchange="filtrarEstoque()">
+              <option value="">Todos</option>
+              <option value="baixo">Estoque baixo</option>
+              <option value="zero">Zerado</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrapper" id="tabela-estoque-atual"></div>
+        </div>
+      </div>
+
+      <!-- Tabs: Histórico -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📜 Histórico de Movimentações</div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <input type="date" id="data-inicio" class="form-control" style="max-width:150px" onchange="filtrarHistorico()" />
+            <span style="color:var(--text2); font-size:13px">até</span>
+            <input type="date" id="data-fim" class="form-control" style="max-width:150px" onchange="filtrarHistorico()" />
+            <select id="filtro-tipo" class="form-control form-select" style="max-width:130px" onchange="filtrarHistorico()">
+              <option value="">Todos tipos</option>
+              <option value="entrada">Entradas</option>
+              <option value="saida">Saídas</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrapper" id="tabela-historico"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Movimentação -->
+<div class="modal-overlay" id="modal-mov">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-mov-titulo">Nova Movimentação</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-mov')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mov-tipo" />
+
+      <div class="form-group">
+        <label class="form-label">Produto *</label>
+        <select id="mov-produto" class="form-control form-select" onchange="mostrarEstoqueAtual()">
+          <option value="">Selecione o produto...</option>
+        </select>
+        <div class="form-hint" id="mov-estoque-atual"></div>
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Quantidade *</label>
+          <input type="number" id="mov-qtd" class="form-control" min="1" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" id="mov-data" class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Motivo / Observação</label>
+        <input type="text" id="mov-motivo" class="form-control" placeholder="Ex: Ajuste de inventário, devolução..." />
+      </div>
+
+      <div id="mov-alerta-saldo" class="alert alert-danger d-none">
+        ⚠️ Quantidade maior que o estoque disponível!
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-mov')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-mov" onclick="salvarMovimentacao()">💾 Registrar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('estoque'));
+
+  const dfim = hoje();
+  const dinicio = addDias(dfim, -30);
+  document.getElementById('data-inicio').value = dinicio;
+  document.getElementById('data-fim').value = dfim;
+
+  let _prodsCache = [];
+  let _catMap = {};
+  let _movsCache = [];
+
+  async function carregar() {
+    mostrarLoader();
+    try {
+      const [prods, cats, movs] = await Promise.all([
+        DB.Produtos.ativos(), DB.Categorias.todas(), DB.Movimentacoes.todas()
+      ]);
+      _prodsCache = prods;
+      _catMap = Object.fromEntries(cats.map(c => [c.id, c]));
+      _movsCache = movs;
+      renderTotalizadores();
+      popularSelectProdutos();
+      renderEstoqueAtual();
+      filtrarHistorico();
+    } catch(e) {
+      mostrarToast('Erro ao carregar estoque', 'danger');
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderTotalizadores() {
+    const qtdTotal = _prodsCache.reduce((s, p) => s + (p.estoque || 0), 0);
+    const valorCusto = _prodsCache.reduce((s, p) => s + (p.estoque || 0) * (p.custo || 0), 0);
+    const valorVenda = _prodsCache.reduce((s, p) => s + (p.estoque || 0) * (p.preco || 0), 0);
+    const semEstoque = _prodsCache.filter(p => (p.estoque || 0) <= 0).length;
+    const total = _prodsCache.length;
+    document.getElementById('stats-estoque').innerHTML = `
+      <div class="stat-card"><div class="stat-icon blue">📦</div>
+        <div class="stat-info"><div class="stat-value">${qtdTotal.toLocaleString('pt-BR')} un.</div><div class="stat-label">Qtd. total em estoque</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">💰</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(valorCusto)}</div><div class="stat-label">Valor em estoque (custo)</div></div></div>
+      <div class="stat-card"><div class="stat-icon pink">🏷️</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(valorVenda)}</div><div class="stat-label">Valor em estoque (venda)</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">⚠️</div>
+        <div class="stat-info"><div class="stat-value">${semEstoque} / ${total}</div><div class="stat-label">Produtos sem estoque</div></div></div>`;
+  }
+
+  function popularSelectProdutos() {
+    const sel = document.getElementById('mov-produto');
+    sel.innerHTML = '<option value="">Selecione o produto...</option>';
+    _prodsCache.forEach(p => {
+      sel.innerHTML += `<option value="${p.id}">[${p.estoque || 0} un.] ${p.nome} ${p.tamanho ? '(' + p.tamanho + ')' : ''} ${p.cor ? '- ' + p.cor : ''}</option>`;
+    });
+  }
+
+  function filtrarEstoque() {
+    const busca = document.getElementById('busca-est').value.toLowerCase();
+    const filtro = document.getElementById('filtro-est').value;
+    const prods = _prodsCache.filter(p => {
+      const matchBusca = !busca || p.nome.toLowerCase().includes(busca) || (p.codigo||'').toLowerCase().includes(busca);
+      const matchFiltro = !filtro ||
+        (filtro === 'baixo' && p.estoque > 0 && p.estoque <= 5) ||
+        (filtro === 'zero' && (p.estoque || 0) <= 0);
+      return matchBusca && matchFiltro;
+    });
+    renderEstoqueAtual(prods);
+  }
+
+  function renderEstoqueAtual(prods = null) {
+    prods = prods || _prodsCache;
+    if (!prods.length) {
+      document.getElementById('tabela-estoque-atual').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Nenhum produto cadastrado</div>
+        <div class="empty-desc"><a href="produtos.html">Cadastrar produtos</a></div></div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Código</th><th>Produto</th><th>Categoria</th><th>Tamanho</th><th>Cor</th>
+      <th>Estoque</th><th>Custo Unit.</th><th>Valor Total</th>
+    </tr></thead><tbody>`;
+
+    prods.forEach(p => {
+      const cat = _catMap[p.categoria_id];
+      const est = p.estoque || 0;
+      const valorTotal = est * (p.custo || 0);
+      const estBadge = est <= 0
+        ? `<span class="badge badge-danger">${est}</span>`
+        : est <= 5 ? `<span class="badge badge-warning">${est} ⚠️</span>`
+        : `<span class="badge badge-success">${est}</span>`;
+      html += `<tr>
+        <td><code>${p.codigo || '-'}</code></td>
+        <td><strong>${p.nome}</strong></td>
+        <td>${cat ? cat.nome : '-'}</td>
+        <td>${p.tamanho || '-'}</td>
+        <td>${p.cor || '-'}</td>
+        <td>${estBadge}</td>
+        <td>${Fmt.moeda(p.custo)}</td>
+        <td>${Fmt.moeda(valorTotal)}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('tabela-estoque-atual').innerHTML = html;
+  }
+
+  function filtrarHistorico() {
+    const tipo = document.getElementById('filtro-tipo').value;
+    const di = document.getElementById('data-inicio').value;
+    const df = document.getElementById('data-fim').value;
+
+    const movs = _movsCache.filter(m => {
+      const mData = m.data ? m.data.split('T')[0] : '';
+      return (!tipo || m.tipo === tipo) && (!di || mData >= di) && (!df || mData <= df);
+    }).sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    renderHistorico(movs);
+  }
+
+  function renderHistorico(movs) {
+    const prodMap = Object.fromEntries(_prodsCache.map(p => [p.id, p]));
+    if (!movs.length) {
+      document.getElementById('tabela-historico').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">📜</div><div class="empty-title">Nenhuma movimentação no período</div></div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Motivo</th>
+    </tr></thead><tbody>`;
+
+    movs.forEach(m => {
+      const prod = prodMap[m.produto_id];
+      html += `<tr>
+        <td>${Fmt.dataHora(m.data)}</td>
+        <td>${prod ? prod.nome : `Produto #${m.produto_id}`}</td>
+        <td>${badgeStatus(m.tipo)}</td>
+        <td><strong>${m.tipo === 'entrada' ? '+' : '-'}${m.quantidade}</strong></td>
+        <td class="text-muted">${m.motivo || '-'}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('tabela-historico').innerHTML = html;
+  }
+
+  function abrirModalMov(tipo) {
+    document.getElementById('mov-tipo').value = tipo;
+    document.getElementById('mov-produto').value = '';
+    document.getElementById('mov-qtd').value = '';
+    document.getElementById('mov-data').value = hoje();
+    document.getElementById('mov-motivo').value = '';
+    document.getElementById('mov-estoque-atual').textContent = '';
+    document.getElementById('mov-alerta-saldo').classList.add('d-none');
+    const titleMap = { entrada: '⬆️ Entrada de Estoque', saida: '⬇️ Saída de Estoque' };
+    document.getElementById('modal-mov-titulo').textContent = titleMap[tipo];
+    const btn = document.getElementById('btn-salvar-mov');
+    btn.className = tipo === 'entrada' ? 'btn btn-success' : 'btn btn-danger';
+    btn.textContent = tipo === 'entrada' ? '⬆️ Registrar Entrada' : '⬇️ Registrar Saída';
+    Modal.abrir('modal-mov');
+  }
+
+  function mostrarEstoqueAtual() {
+    const prodId = Number(document.getElementById('mov-produto').value);
+    const hint = document.getElementById('mov-estoque-atual');
+    if (!prodId) { hint.textContent = ''; return; }
+    const prod = _prodsCache.find(p => p.id === prodId);
+    hint.textContent = `Estoque atual: ${prod ? prod.estoque || 0 : 0} unidades`;
+    hint.style.color = (prod && prod.estoque <= 5) ? 'var(--warning)' : 'var(--text2)';
+  }
+
+  async function salvarMovimentacao() {
+    const tipo = document.getElementById('mov-tipo').value;
+    const prodId = Number(document.getElementById('mov-produto').value);
+    const qtd = parseInt(document.getElementById('mov-qtd').value) || 0;
+    const data = document.getElementById('mov-data').value || hoje();
+    const motivo = document.getElementById('mov-motivo').value.trim();
+
+    if (!prodId) return mostrarToast('Selecione o produto', 'warning');
+    if (qtd <= 0) return mostrarToast('Informe uma quantidade válida', 'warning');
+
+    const prod = _prodsCache.find(p => p.id === prodId);
+    if (tipo === 'saida' && (prod.estoque || 0) < qtd) {
+      document.getElementById('mov-alerta-saldo').classList.remove('d-none');
+      return;
+    }
+    document.getElementById('mov-alerta-saldo').classList.add('d-none');
+
+    await DB.Movimentacoes.salvar({
+      produto_id: prodId, tipo, quantidade: qtd,
+      motivo: motivo || (tipo === 'entrada' ? 'Entrada manual' : 'Saída manual'),
+      usuario_id: Auth.usuario().id,
+      data: data + 'T' + new Date().toTimeString().slice(0, 8)
+    });
+
+    mostrarToast(`${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`, 'success');
+    Modal.fechar('modal-mov');
+    await carregar();
+  }
+
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>

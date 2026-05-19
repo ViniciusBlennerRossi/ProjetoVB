@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fiore Pijamas - Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .login-form { margin-top: 8px; }
+    .pass-toggle { position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2); }
+    .input-group { position:relative; }
+  </style>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="Imagens/logo2.png" alt="Logo" id="login-logo-img" style="width:180px;margin-bottom:4px;" />
+      <h1 id="login-nome-loja" style="display:none"></h1>
+    </div>
+
+    <form class="login-form" onsubmit="fazerLogin(event)">
+      <div id="login-error" class="alert alert-danger d-none">❌ E-mail ou senha incorretos.</div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">E-mail</label>
+        <input type="email" id="email" class="form-control" placeholder="seu@email.com" required autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="senha">Senha</label>
+        <div class="input-group">
+          <input type="password" id="senha" class="form-control" placeholder="••••••••" required autocomplete="current-password" />
+          <button type="button" class="pass-toggle" onclick="toggleSenha()" id="pass-icon">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-login" style="margin-top:8px">
+        Entrar
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/tenant.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (Auth.isLogado()) window.location.href = 'dashboard.html';
+
+  // Inicializar tenant: detecta subdomínio, carrega loja, aplica tema
+  let _lojaAtual = null;
+  Tenant.inicializarTenant().then(loja => {
+    _lojaAtual = loja;
+    const imgEl  = document.getElementById('login-logo-img');
+    const nomeEl = document.getElementById('login-nome-loja');
+    if (loja?.slug === 'fiore') {
+      imgEl.src = 'Imagens/logo.jpg';
+      nomeEl.textContent = 'Fiore Pijamas';
+      nomeEl.style.display = '';
+    } else if (loja?.slug === 'prateada') {
+      imgEl.src = 'Imagens/logo2.png';
+      // logo já contém o nome — não exibe texto
+    } else if (loja?.nome) {
+      nomeEl.textContent = loja.nome;
+      nomeEl.style.display = '';
+    }
+  });
+
+  async function fazerLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+    const errEl = document.getElementById('login-error');
+    const btn   = document.getElementById('btn-login');
+
+    errEl.classList.add('d-none');
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    try {
+      // Passa o id_loja para filtrar usuários do tenant correto
+      const user = await DB.Usuarios.autenticar(email, senha, _lojaAtual?.id_loja);
+      if (user) {
+        if (_lojaAtual) {
+          user.loja_slug = _lojaAtual.slug;
+          Tenant.salvarLoja(_lojaAtual);
+        }
+        Auth.login(user);
+        window.location.href = 'dashboard.html';
+      } else {
+        errEl.classList.remove('d-none');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+        document.getElementById('senha').value = '';
+        document.getElementById('senha').focus();
+      }
+    } catch (err) {
+      errEl.textContent = '❌ Erro de conexão. Verifique sua internet.';
+      errEl.classList.remove('d-none');
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  }
+
+  function toggleSenha() {
+    const input = document.getElementById('senha');
+    const icon  = document.getElementById('pass-icon');
+    input.type  = input.type === 'password' ? 'text' : 'password';
+    icon.textContent = input.type === 'password' ? '👁️' : '🙈';
+  }
+
+</script>
+</body>
+</html>

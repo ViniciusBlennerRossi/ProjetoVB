@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendas — Fiore Pijamas</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="layout" id="app">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">🛍️ Vendas</div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="abrirNovaVenda()">+ Nova Venda</button>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- Filtros -->
+      <div class="card" style="padding:14px 18px; margin-bottom:20px">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <div class="search-input-wrap" style="flex:1; min-width:200px">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="busca" class="form-control" placeholder="Buscar por nº venda ou cliente..." oninput="filtrar()" />
+          </div>
+          <input type="date" id="data-inicio" class="form-control" style="max-width:150px" onchange="filtrar()" />
+          <input type="date" id="data-fim" class="form-control" style="max-width:150px" onchange="filtrar()" />
+          <select id="filtro-status" class="form-control form-select" style="max-width:150px" onchange="filtrar()">
+            <option value="">Todos status</option>
+            <option value="pago">Pago</option>
+            <option value="pendente">Pendente</option>
+            <option value="parcial">Parcial</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Totais -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom:20px" id="stats-vendas"></div>
+
+      <!-- Tabela -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Lista de Vendas</div>
+          <span id="count-label" class="badge badge-secondary"></span>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrapper" id="tabela-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Venda -->
+<div class="modal-overlay" id="modal-venda">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">🛍️ Nova Venda</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-venda')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row cols-2" style="margin-bottom:0">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <div style="position:relative">
+            <input type="text" id="venda-cliente" class="form-control" placeholder="Digite para buscar cliente cadastrado..." />
+            <input type="hidden" id="venda-cliente-id" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data da Venda</label>
+          <input type="date" id="venda-data" class="form-control" />
+        </div>
+      </div>
+
+      <hr style="border:none; border-top:1px solid var(--border); margin: 16px 0" />
+
+      <!-- Itens da venda -->
+      <div class="flex items-center justify-between mb-4">
+        <label class="form-label" style="margin:0">Itens da Venda</label>
+        <button class="btn btn-sm btn-outline" onclick="adicionarItem()">+ Adicionar Item</button>
+      </div>
+      <div id="itens-venda"></div>
+
+      <hr style="border:none; border-top:1px solid var(--border); margin: 16px 0" />
+
+      <!-- Desconto e Pagamento -->
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label class="form-label">Desconto (R$)</label>
+          <input type="number" id="venda-desconto" class="form-control" value="0" min="0" step="0.01" oninput="calcularTotal()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Forma de Pagamento *</label>
+          <select id="venda-forma-pgto" class="form-control form-select" onchange="onFormaPgtoChange()"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nº de Parcelas</label>
+          <select id="venda-parcelas" class="form-control form-select" onchange="onParcelasChange()">
+            <option value="1">À vista</option>
+            <option value="2">2x</option>
+            <option value="3">3x</option>
+            <option value="4">4x</option>
+            <option value="5">5x</option>
+            <option value="6">6x</option>
+            <option value="10">10x</option>
+            <option value="12">12x</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="total-box" style="margin-bottom:16px">
+        <div>
+          <div class="total-label">Subtotal: <span id="subtotal-txt">R$ 0,00</span></div>
+          <div class="total-label">Desconto: <span id="desconto-txt">R$ 0,00</span></div>
+        </div>
+        <div>
+          <div class="total-label" style="text-align:right">Total</div>
+          <div class="total-value" id="total-venda-txt">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- Parcelas geradas -->
+      <div id="parcelas-wrap" class="d-none">
+        <label class="form-label" style="margin-bottom:8px">📅 Parcelas</label>
+        <div id="parcelas-lista"></div>
+      </div>
+
+      <!-- Status pagamento (para à vista) -->
+      <div id="status-pgto-wrap">
+        <div class="form-group">
+          <label class="form-label">Status do Pagamento</label>
+          <select id="venda-status-pgto" class="form-control form-select">
+            <option value="pago">Pago</option>
+            <option value="pendente">Pendente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea id="venda-obs" class="form-control" rows="2" placeholder="Observações da venda..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-venda')">Cancelar</button>
+      <button class="btn btn-primary" onclick="finalizarVenda()">✅ Finalizar Venda</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes da Venda -->
+<div class="modal-overlay" id="modal-detalhe">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="detalhe-titulo">Detalhes da Venda</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-detalhe')">✕</button>
+    </div>
+    <div class="modal-body" id="detalhe-body"></div>
+    <div class="modal-footer" id="detalhe-footer"></div>
+  </div>
+</div>
+
+<!-- Modal Troca de Produtos -->
+<div class="modal-overlay" id="modal-troca">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Troca de Produtos</div>
+      <button class="modal-close" onclick="Modal.fechar('modal-troca')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="troca-venda-info" style="background:var(--bg);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:13px;color:var(--text2)"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- Coluna Esquerda: Devolver -->
+        <div>
+          <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">📦 Itens a Devolver</h4>
+          <input type="text" id="troca-filter-dev" class="form-control" placeholder="Filtrar produto..." oninput="_renderListaDev()" autocomplete="off" style="margin-bottom:6px;font-size:13px" />
+          <div id="troca-lista-dev" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
+        </div>
+
+        <!-- Coluna Direita: Novos Produtos -->
+        <div>
+          <h4 style="font-size:13px;font-weight:700;margin-bottom:8px">🛍️ Novos Produtos</h4>
+          <input type="text" id="troca-filter-levar" class="form-control" placeholder="Filtrar produto..." oninput="_renderListaLevar()" autocomplete="off" style="margin-bottom:6px;font-size:13px" />
+          <div id="troca-lista-levar" style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
+          <div id="troca-levar" style="margin-top:8px"></div>
+        </div>
+
+      </div>
+
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">Observações</label>
+        <textarea id="troca-obs" class="form-control" rows="2" placeholder="Motivo ou observações da troca..."></textarea>
+      </div>
+
+      <div class="total-box" style="margin-top:10px">
+        <div>
+          <div class="total-label">Devolvido: <span id="troca-total-dev" style="font-weight:600">R$ 0,00</span></div>
+          <div class="total-label">Novos itens: <span id="troca-total-novo" style="font-weight:600">R$ 0,00</span></div>
+        </div>
+        <div>
+          <div class="total-label" style="text-align:right">Diferença</div>
+          <div class="total-value" id="troca-diferenca">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Modal.fechar('modal-troca')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarTroca()">🔄 Confirmar Troca</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/tenant.js"></script>
+  <script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  if (!Auth.exigirLogin()) throw '';
+  Tenant.inicializarTenant();
+  document.getElementById('app').insertAdjacentHTML('afterbegin', renderSidebar('vendas'));
+  setupClienteAutocomplete('venda-cliente', 'venda-cliente-id');
+
+  // Datas padrão: este mês
+  const hoje_ = hoje();
+  const inicioMes = hoje_.slice(0, 8) + '01';
+  document.getElementById('data-inicio').value = inicioMes;
+  document.getElementById('data-fim').value = hoje_;
+
+  // Popular formas de pagamento
+  const selForma = document.getElementById('venda-forma-pgto');
+  FORMAS_PGTO.forEach(f => {
+    selForma.innerHTML += `<option value="${f.value}">${f.label}</option>`;
+  });
+
+  let itemCount = 0;
+  let _prodMap = {};
+
+  async function carregar() {
+    const prods = await DB.Produtos.ativos();
+    _prodMap = Object.fromEntries(prods.map(p => [p.id, p]));
+    await filtrar();
+  }
+
+  async function filtrar() {
+    mostrarLoader();
+    try {
+      const busca = document.getElementById('busca').value.toLowerCase();
+      const dinicio = document.getElementById('data-inicio').value;
+      const dfim = document.getElementById('data-fim').value;
+      const status = document.getElementById('filtro-status').value;
+
+      const [todas, todosCarnes] = await Promise.all([DB.Vendas.todas(), DB.Carnes.todos()]);
+
+      let lista = todas.filter(v => {
+        // Oculta vendas que são apenas o registro auxiliar de um carnê (já exibido como CRN)
+        if (v.forma_pagamento === 'carne') return false;
+        const vData = v.data ? v.data.split('T')[0] : '';
+        const matchBusca = !busca ||
+          (v.numero || '').includes(busca) ||
+          (v.cliente || '').toLowerCase().includes(busca);
+        const matchData = (!dinicio || vData >= dinicio) && (!dfim || vData <= dfim);
+        const matchStatus = !status || v.status === status || v.status_pgto === status;
+        return matchBusca && matchData && matchStatus;
+      }).map(v => ({ ...v, _tipo: 'venda', _sortDate: new Date(v.data) }));
+
+      // Carnês como linhas consolidadas
+      const statusMap = { aberto: 'pendente', quitado: 'pago', cancelado: 'cancelada' };
+      const carnesLista = todosCarnes.filter(c => {
+        const cData = c.criado_em ? c.criado_em.split('T')[0] : '';
+        const matchBusca = !busca ||
+          (c.numero || '').toLowerCase().includes(busca) ||
+          (c.cliente_nome || c.cliente || '').toLowerCase().includes(busca);
+        const matchData = (!dinicio || cData >= dinicio) && (!dfim || cData <= dfim);
+        const matchStatus = !status || statusMap[c.status] === status;
+        return matchBusca && matchData && matchStatus;
+      }).map(c => ({ ...c, _tipo: 'carne', _sortDate: new Date(c.criado_em) }));
+
+      const tudo = [...lista, ...carnesLista].sort((a, b) => b._sortDate - a._sortDate);
+
+      renderStats(lista, carnesLista);
+      renderTabela(tudo);
+      document.getElementById('count-label').textContent = tudo.length + ' registro(s)';
+    } finally {
+      ocultarLoader();
+    }
+  }
+
+  function renderStats(lista, carnesLista = []) {
+    // Vendas normais
+    const ativas = lista.filter(v => v.status !== 'cancelada');
+    const total = ativas.reduce((s, v) => s + (v.total || 0), 0);
+    const pagas = ativas.filter(v => v.status_pgto === 'pago').reduce((s, v) => s + (v.total || 0), 0);
+    const pendente = ativas.filter(v => v.status_pgto !== 'pago').reduce((s, v) => s + (v.total || 0), 0);
+    let canceladas = lista.filter(v => v.status === 'cancelada').length;
+
+    // Carnês
+    const carnesAtivos = carnesLista.filter(c => c.status !== 'cancelado');
+    const totalCarne = carnesAtivos.reduce((s, c) => s + (c.valor_total || 0), 0);
+    const pagosCarne = carnesAtivos.filter(c => c.status === 'quitado').reduce((s, c) => s + (c.valor_total || 0), 0);
+    const pendenteCarne = carnesAtivos.filter(c => c.status !== 'quitado').reduce((s, c) => s + (c.valor_total || 0), 0);
+    canceladas += carnesLista.filter(c => c.status === 'cancelado').length;
+
+    document.getElementById('stats-vendas').innerHTML = `
+      <div class="stat-card"><div class="stat-icon pink">💰</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(total + totalCarne)}</div><div class="stat-label">Total no período</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(pagas + pagosCarne)}</div><div class="stat-label">Valor pago</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">⏳</div>
+        <div class="stat-info"><div class="stat-value">${Fmt.moeda(pendente + pendenteCarne)}</div><div class="stat-label">Pendente/Parcelado</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">❌</div>
+        <div class="stat-info"><div class="stat-value">${canceladas}</div><div class="stat-label">Canceladas</div></div></div>`;
+  }
+
+  function renderTabela(lista) {
+    if (!lista.length) {
+      document.getElementById('tabela-wrap').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">🛍️</div>
+        <div class="empty-title">Nenhuma venda no período</div>
+        <div class="empty-desc"><button class="btn btn-primary btn-sm" onclick="abrirNovaVenda()">+ Registrar venda</button></div></div>`;
+      return;
+    }
+
+    let html = `<table><thead><tr>
+      <th>Nº Venda</th><th>Data</th><th>Cliente</th><th>Itens</th>
+      <th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th>
+    </tr></thead><tbody>`;
+
+    lista.forEach(v => {
+      if (v._tipo === 'carne') {
+        const parcPagas = (v.parcelas || []).filter(p => p.pago).length;
+        const totalParc = (v.parcelas || []).length;
+        const statusCarne = v.status === 'quitado' ? 'pago' : v.status === 'cancelado' ? 'cancelada' : 'pendente';
+        html += `<tr style="${v.status === 'cancelado' ? 'opacity:.6' : ''}">
+          <td><strong>${v.numero}</strong> <span style="background:#7C3AED;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:4px">CARNÊ</span></td>
+          <td>${Fmt.data(v.criado_em)}</td>
+          <td>${v.cliente_nome || v.cliente || '<em class="text-muted">—</em>'}</td>
+          <td>${totalParc}x parcelas (${parcPagas} pagas)</td>
+          <td><strong>${Fmt.moeda(v.valor_total)}</strong></td>
+          <td>Parcelado</td>
+          <td>${badgeStatus(statusCarne)}</td>
+          <td><div class="td-actions">
+            <a class="btn btn-sm btn-ghost btn-icon" href="carnes.html" title="Ver carnês">👁️</a>
+            ${v.status !== 'cancelado' && Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="abrirTrocaCarne('${v.id}')" title="Trocar produto">🔄</button>` : ''}
+          </div></td>
+        </tr>`;
+      } else {
+        html += `<tr style="${v.status === 'cancelada' ? 'opacity:.6' : ''}">
+          <td><strong>#${v.numero}</strong></td>
+          <td>${Fmt.data(v.data)}</td>
+          <td>${v.cliente || '<em class="text-muted">Consumidor</em>'}</td>
+          <td>${(v.itens || []).length} item(s)</td>
+          <td><strong>${Fmt.moeda(v.total)}</strong></td>
+          <td>${labelFormaPgto(v.forma_pagamento)}</td>
+          <td>${badgeStatus(v.status === 'cancelada' ? 'cancelada' : (v.status_pgto || 'pago'))}</td>
+          <td>
+            <div class="td-actions">
+              <button class="btn btn-sm btn-ghost btn-icon" onclick="verDetalhes(${v.id})" title="Ver detalhes">👁️</button>
+              ${v.status !== 'cancelada' && Auth.isAdmin() ? `<button class="btn btn-sm btn-ghost btn-icon" onclick="abrirTroca(${v.id})" title="Trocar produto">🔄</button><button class="btn btn-sm btn-ghost btn-icon" onclick="cancelarVenda(${v.id})" title="Cancelar">❌</button>` : ''}
+            </div>
+          </td>
+        </tr>`;
+      }
+    });
+
+    html += '</tbody></table>';
+    document.getElementById('tabela-wrap').innerHTML = html;
+  }
+
+  // ===== NOVA VENDA =====
+  async function abrirNovaVenda() {
+    itemCount = 0;
+    document.getElementById('itens-venda').innerHTML = '';
+    document.getElementById('venda-cliente').value = '';
+    document.getElementById('venda-cliente-id').value = '';
+    document.getElementById('venda-data').value = hoje();
+    document.getElementById('venda-desconto').value = '0';
+    document.getElementById('venda-forma-pgto').value = 'dinheiro';
+    document.getElementById('venda-parcelas').value = '1';
+    document.getElementById('venda-obs').value = '';
+    document.getElementById('venda-status-pgto').value = 'pago';
+    document.getElementById('parcelas-wrap').classList.add('d-none');
+    document.getElementById('status-pgto-wrap').classList.remove('d-none');
+    calcularTotal();
+    await adicionarItem();
+    Modal.abrir('modal-venda');
+  }
+
+  async function adicionarItem() {
+    const prods = Object.values(_prodMap).length ? Object.values(_prodMap) : await DB.Produtos.ativos();
+    if (!prods.length) {
+      mostrarToast('Cadastre produtos antes de criar uma venda', 'warning');
+      return;
+    }
+
+    itemCount++;
+    const id = 'item-' + itemCount;
+    const div = document.createElement('div');
+    div.className = 'venda-item-row';
+    div.id = id;
+
+    let opsProd = '<option value="">Selecione...</option>';
+    prods.forEach(p => {
+      opsProd += `<option value="${p.id}" data-preco="${p.preco}" data-estoque="${p.estoque||0}">[${p.estoque||0}] ${p.nome} ${p.tamanho ? '('+p.tamanho+')' : ''} ${p.cor ? '- '+p.cor : ''}</option>`;
+    });
+
+    div.innerHTML = `
+      <div class="form-group" style="margin:0; flex:1">
+        <label class="form-label" style="font-size:11px">Produto</label>
+        <select class="form-control form-select item-produto" onchange="onProdutoChange('${id}')">
+          ${opsProd}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0; width:80px">
+        <label class="form-label" style="font-size:11px">Qtd</label>
+        <input type="number" class="form-control item-qtd" value="1" min="1" onchange="calcularItem('${id}')" oninput="calcularItem('${id}')" />
+      </div>
+      <div class="form-group" style="margin:0; width:100px">
+        <label class="form-label" style="font-size:11px">Preço (R$)</label>
+        <input type="number" class="form-control item-preco" value="" step="0.01" min="0" onchange="calcularItem('${id}')" oninput="calcularItem('${id}')" />
+      </div>
+      <div class="item-subtotal">
+        <label class="form-label" style="font-size:11px">Subtotal</label>
+        <div class="form-control" style="background:var(--bg); border-color:transparent; font-weight:700; color:var(--primary)" id="${id}-sub">R$ 0,00</div>
+      </div>
+      <div>
+        <label class="form-label" style="font-size:11px">&nbsp;</label>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="removerItem('${id}')" title="Remover">🗑️</button>
+      </div>`;
+
+    document.getElementById('itens-venda').appendChild(div);
+    calcularTotal();
+  }
+
+  function onProdutoChange(id) {
+    const row = document.getElementById(id);
+    const sel = row.querySelector('.item-produto');
+    const opt = sel.options[sel.selectedIndex];
+    const preco = parseFloat(opt.dataset.preco) || 0;
+    row.querySelector('.item-preco').value = preco.toFixed(2);
+    calcularItem(id);
+  }
+
+  function calcularItem(id) {
+    const row = document.getElementById(id);
+    const qtd = parseFloat(row.querySelector('.item-qtd').value) || 0;
+    const preco = parseFloat(row.querySelector('.item-preco').value) || 0;
+    const sub = qtd * preco;
+    row.querySelector(`#${id}-sub`).textContent = Fmt.moeda(sub);
+    calcularTotal();
+  }
+
+  function removerItem(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    if (!document.getElementById('itens-venda').children.length) adicionarItem();
+    calcularTotal();
+  }
+
+  function calcularTotal() {
+    let subtotal = 0;
+    document.querySelectorAll('.venda-item-row').forEach(row => {
+      const qtd = parseFloat(row.querySelector('.item-qtd').value) || 0;
+      const preco = parseFloat(row.querySelector('.item-preco').value) || 0;
+      subtotal += qtd * preco;
+    });
+
+    const desconto = parseFloat(document.getElementById('venda-desconto').value) || 0;
+    const total = Math.max(0, subtotal - desconto);
+
+    document.getElementById('subtotal-txt').textContent = Fmt.moeda(subtotal);
+    document.getElementById('desconto-txt').textContent = Fmt.moeda(desconto);
+    document.getElementById('total-venda-txt').textContent = Fmt.moeda(total);
+
+    onParcelasChange();
+  }
+
+  function onFormaPgtoChange() {
+    const forma = document.getElementById('venda-forma-pgto').value;
+    const parcelaWrap = document.getElementById('venda-parcelas').parentElement;
+    const statusWrap = document.getElementById('status-pgto-wrap');
+
+    if (['cartao_credito', 'crediario', 'boleto'].includes(forma)) {
+      parcelaWrap.style.opacity = '1';
+    } else {
+      document.getElementById('venda-parcelas').value = '1';
+      parcelaWrap.style.opacity = '.5';
+      onParcelasChange();
+    }
+  }
+
+  function onParcelasChange() {
+    const num = parseInt(document.getElementById('venda-parcelas').value) || 1;
+    const totalTxt = document.getElementById('total-venda-txt').textContent;
+    const total = parseFloat(totalTxt.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+    const dataVenda = document.getElementById('venda-data').value || hoje();
+
+    if (num <= 1) {
+      document.getElementById('parcelas-wrap').classList.add('d-none');
+      document.getElementById('status-pgto-wrap').classList.remove('d-none');
+    } else {
+      document.getElementById('parcelas-wrap').classList.remove('d-none');
+      document.getElementById('status-pgto-wrap').classList.add('d-none');
+
+      const valorParc = total / num;
+      const datas = gerarParcelasDatas(dataVenda, num);
+      let html = '';
+      for (let i = 0; i < num; i++) {
+        html += `<div class="parcela-row">
+          <span class="badge badge-info">${i+1}/${num}</span>
+          <div>${Fmt.moeda(valorParc)}</div>
+          <div>
+            <input type="date" class="form-control parc-venc" id="parc-${i+1}-venc" value="${datas[i]}" style="max-width:150px" />
+          </div>
+          <span class="badge badge-warning">Pendente</span>
+        </div>`;
+      }
+      document.getElementById('parcelas-lista').innerHTML = html;
+    }
+  }
+
+  async function finalizarVenda() {
+    const cliente = document.getElementById('venda-cliente').value.trim();
+    const clienteId = Number(document.getElementById('venda-cliente-id').value) || null;
+    const dataVenda = document.getElementById('venda-data').value || hoje();
+    const desconto = parseFloat(document.getElementById('venda-desconto').value) || 0;
+    const forma = document.getElementById('venda-forma-pgto').value;
+    const numParcelas = parseInt(document.getElementById('venda-parcelas').value) || 1;
+    const obs = document.getElementById('venda-obs').value.trim();
+
+    const itens = [];
+    let subtotal = 0;
+    let erroEstoque = false;
+
+    document.querySelectorAll('.venda-item-row').forEach(row => {
+      const sel = row.querySelector('.item-produto');
+      const prodId = Number(sel.value);
+      const qtd = parseInt(row.querySelector('.item-qtd').value) || 0;
+      const preco = parseFloat(row.querySelector('.item-preco').value) || 0;
+      if (!prodId || qtd <= 0) return;
+      const prod = _prodMap[prodId];
+      if (prod && (prod.estoque || 0) < qtd) {
+        mostrarToast(`Estoque insuficiente para "${prod.nome}" (disponível: ${prod.estoque || 0})`, 'danger');
+        erroEstoque = true;
+        return;
+      }
+      itens.push({ produto_id: prodId, quantidade: qtd, preco_unitario: preco });
+      subtotal += qtd * preco;
+    });
+
+    if (erroEstoque) return;
+    if (!itens.length) return mostrarToast('Adicione pelo menos um item à venda', 'warning');
+
+    const total = Math.max(0, subtotal - desconto);
+    let parcelas = [];
+    let status_pgto;
+
+    if (numParcelas > 1) {
+      const valorParc = total / numParcelas;
+      for (let i = 1; i <= numParcelas; i++) {
+        const vencInput = document.getElementById(`parc-${i}-venc`);
+        parcelas.push({ numero: i, valor: valorParc, vencimento: vencInput ? vencInput.value : addDias(dataVenda, 30 * i), pago: false });
+      }
+      status_pgto = 'pendente';
+    } else {
+      status_pgto = document.getElementById('venda-status-pgto').value;
+      if (status_pgto === 'pago') {
+        parcelas = [{ numero: 1, valor: total, vencimento: dataVenda, pago: true, data_pagamento: dataVenda }];
+      } else {
+        parcelas = [{ numero: 1, valor: total, vencimento: dataVenda, pago: false }];
+      }
+    }
+
+    await DB.Vendas.salvar({
+      cliente, cliente_nome: cliente, cliente_id: clienteId,
+      data: dataVenda + 'T' + new Date().toTimeString().slice(0,8),
+      itens, subtotal, desconto, total,
+      forma_pagamento: forma, num_parcelas: numParcelas, parcelas, status_pgto,
+      status: 'ativa', observacoes: obs,
+      vendedor_id: Auth.usuario().id, vendedor_nome: Auth.usuario().nome
+    });
+
+    mostrarToast('Venda registrada com sucesso! 🎉', 'success');
+    Modal.fechar('modal-venda');
+    await carregar();
+  }
+
+  // ===== DETALHES =====
+  async function verDetalhes(id) {
+    const v = await DB.Vendas.porId(id);
+    if (!v) return;
+
+    document.getElementById('detalhe-titulo').textContent = `Venda #${v.numero}`;
+
+    let itensHtml = '';
+    (v.itens || []).forEach(item => {
+      const p = _prodMap[item.produto_id];
+      itensHtml += `<tr>
+        <td>${p ? p.nome : '#' + item.produto_id}</td>
+        <td>${item.quantidade}</td>
+        <td>${Fmt.moeda(item.preco_unitario)}</td>
+        <td><strong>${Fmt.moeda(item.quantidade * item.preco_unitario)}</strong></td>
+      </tr>`;
+    });
+
+    let parcelasHtml = '';
+    if ((v.parcelas || []).length > 1) {
+      parcelasHtml = `<h4 style="font-size:14px; font-weight:700; margin-top:20px; margin-bottom:10px">📅 Parcelas</h4>`;
+      (v.parcelas || []).forEach(p => {
+        const cls = p.pago ? 'paga' : (p.vencimento < hoje() ? 'vencida' : '');
+        parcelasHtml += `<div class="parcela-row ${cls}">
+          <span class="badge badge-info">${p.numero}/${v.num_parcelas}</span>
+          <strong>${Fmt.moeda(p.valor)}</strong>
+          <span>Venc: ${Fmt.data(p.vencimento + 'T00:00:00')}</span>
+          ${p.pago ? '<span class="badge badge-success">✅ Pago</span>' : '<span class="badge badge-warning">Pendente</span>'}
+        </div>`;
+      });
+    }
+
+    document.getElementById('detalhe-body').innerHTML = `
+      <div class="form-row cols-2" style="margin-bottom:12px">
+        <div><label class="form-label">Cliente</label><p>${v.cliente || 'Consumidor'}</p></div>
+        <div><label class="form-label">Data</label><p>${Fmt.dataHora(v.data)}</p></div>
+        <div><label class="form-label">Vendedor</label><p>${v.vendedor_nome || '-'}</p></div>
+        <div><label class="form-label">Forma de Pgto</label><p>${labelFormaPgto(v.forma_pagamento)}</p></div>
+      </div>
+      <div class="table-wrapper" style="margin-bottom:12px">
+        <table><thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead>
+        <tbody>${itensHtml}</tbody></table>
+      </div>
+      <div style="text-align:right; background:var(--bg); padding:12px 16px; border-radius:var(--radius-sm)">
+        <div style="font-size:13px; color:var(--text2)">Subtotal: ${Fmt.moeda(v.subtotal)}</div>
+        ${v.desconto > 0 ? `<div style="font-size:13px; color:var(--danger)">Desconto: -${Fmt.moeda(v.desconto)}</div>` : ''}
+        <div style="font-size:20px; font-weight:800; color:var(--primary)">Total: ${Fmt.moeda(v.total)}</div>
+        <div style="margin-top:6px">${badgeStatus(v.status === 'cancelada' ? 'cancelada' : v.status_pgto)}</div>
+      </div>
+      ${parcelasHtml}
+      ${v.observacoes ? `<div style="margin-top:12px; padding:10px; background:var(--bg); border-radius:var(--radius-sm); font-size:13px"><strong>Obs:</strong> ${v.observacoes}</div>` : ''}
+    `;
+
+    const footer = document.getElementById('detalhe-footer');
+    footer.innerHTML = '';
+    if (v.status !== 'cancelada' && Auth.isAdmin()) {
+      footer.innerHTML = `<button class="btn btn-danger" onclick="cancelarVenda(${v.id}); Modal.fechar('modal-detalhe')">Cancelar Venda</button>
+        <button class="btn btn-warning" onclick="abrirTroca(${v.id})">🔄 Trocar Produto</button>`;
+    }
+    footer.innerHTML += `<button class="btn btn-ghost" onclick="Modal.fechar('modal-detalhe')">Fechar</button>`;
+    Modal.abrir('modal-detalhe');
+  }
+
+  async function cancelarVenda(id) {
+    const v = await DB.Vendas.porId(id);
+    confirmar(`Cancelar a venda #${v.numero}? Os itens serão devolvidos ao estoque.`, async () => {
+      await DB.Vendas.cancelar(id);
+      mostrarToast('Venda cancelada', 'danger');
+      await carregar();
+    });
+  }
+
+  // ===== TROCA DE PRODUTOS =====
+  let _trocaVendaId = null;        // null = modo carnê, id = modo venda normal
+  let _trocaItensLevar = [];       // produtos que o cliente vai levar
+  let _trocaVendaItens = [];       // itens pré-carregados (modo venda normal)
+
+  // --- Abre troca a partir de uma venda normal ---
+  async function abrirTroca(vendaId) {
+    const v = await DB.Vendas.porId(vendaId);
+    if (!v) return;
+    _trocaVendaId = vendaId;
+    _trocaItensLevar = [];
+    _trocaVendaItens = (v.venda_itens || v.itens || []).filter(i => !i.tipo || i.tipo === 'produto');
+
+    document.getElementById('troca-venda-info').innerHTML =
+      `Venda <strong>#${v.numero}</strong> &nbsp;·&nbsp; ${v.cliente_nome || v.cliente || 'Consumidor'} &nbsp;·&nbsp; ${Fmt.moeda(v.total)}`;
+
+    document.getElementById('troca-filter-dev').value = '';
+    document.getElementById('troca-filter-levar').value = '';
+    document.getElementById('troca-obs').value = '';
+    _renderListaDev();
+    _renderListaLevar();
+    _renderCarrinhoLevar();
+    Modal.fechar('modal-detalhe');
+    Modal.abrir('modal-troca');
+  }
+
+  // --- Abre troca a partir de um carnê ---
+  async function abrirTrocaCarne(carneId) {
+    const c = await DB.Carnes.porId(carneId);
+    if (!c) return;
+    _trocaVendaId = null; // modo carnê
+    _trocaItensLevar = [];
+    _trocaVendaItens = [];
+
+    // Tenta recuperar os produtos da compra original
+    const match = (c.descricao || '').match(/PDV #(\w+)/i);
+    if (match) {
+      const numero = match[1];
+
+      // Estratégia 1: busca via venda_itens
+      const vendaOriginal = await DB.Vendas.porNumero(numero);
+      if (vendaOriginal) {
+        const itensRaw = vendaOriginal.venda_itens || vendaOriginal.itens || [];
+        _trocaVendaItens = itensRaw.filter(i => !i.tipo || i.tipo === 'produto');
+      }
+
+      // Estratégia 2: se venda_itens vazio, busca nas movimentações de estoque
+      if (!_trocaVendaItens.length) {
+        const movs = await DB.Movimentacoes.porVendaNumero(numero);
+        _trocaVendaItens = movs
+          .filter(m => m.produto_id && _prodMap[m.produto_id])
+          .map(m => ({
+            produto_id: m.produto_id,
+            quantidade: m.quantidade,
+            preco_unitario: _prodMap[m.produto_id].preco
+          }));
+      }
+    }
+
+    // Estratégia 3: parse da descrição do carnê contra o catálogo de produtos
+    // Funciona para carnês antigos cujo nome do produto aparece na descrição
+    if (!_trocaVendaItens.length && c.descricao) {
+      const desc = c.descricao.replace(/PDV #\w+\s*[—-]?\s*/i, '').toLowerCase();
+      const encontrados = [];
+      Object.values(_prodMap)
+        .filter(p => p.ativo !== false)
+        .sort((a, b) => b.nome.length - a.nome.length) // mais específico primeiro
+        .forEach(p => {
+          const nome = p.nome.toLowerCase();
+          if (desc.includes(nome)) {
+            // conta quantas vezes o nome aparece na descrição
+            const regex = new RegExp(nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            const qtd = (c.descricao.match(regex) || []).length;
+            if (!encontrados.find(e => e.produto_id === p.id)) {
+              encontrados.push({ produto_id: p.id, quantidade: qtd || 1, preco_unitario: p.preco });
+            }
+          }
+        });
+      if (encontrados.length) _trocaVendaItens = encontrados;
+    }
+
+    document.getElementById('troca-venda-info').innerHTML =
+      `Carnê <strong>${c.numero}</strong> &nbsp;·&nbsp; ${c.cliente_nome || c.cliente || 'Consumidor'} &nbsp;·&nbsp; ${c.descricao || ''}`;
+
+    document.getElementById('troca-filter-dev').value = '';
+    document.getElementById('troca-filter-levar').value = '';
+    document.getElementById('troca-obs').value = '';
+    _renderListaDev();
+    _renderListaLevar();
+    _renderCarrinhoLevar();
+    Modal.abrir('modal-troca');
+  }
+
+  // --- Lista esquerda: Itens a Devolver ---
+  // Usa itens da venda quando disponíveis (_trocaVendaItens.length > 0)
+  // Caso contrário (carnê sem venda vinculada): mostra todos os produtos
+  function _renderListaDev() {
+    const busca = (document.getElementById('troca-filter-dev')?.value || '').toLowerCase();
+    const el = document.getElementById('troca-lista-dev');
+    const temItensVenda = _trocaVendaItens.length > 0;
+
+    if (temItensVenda) {
+      // Mostra apenas os itens da venda/carnê vinculado com checkbox
+      const itens = _trocaVendaItens.filter(i => {
+        const p = _prodMap[i.produto_id];
+        return !busca || (p?.nome || '').toLowerCase().includes(busca);
+      });
+      if (!itens.length) { el.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--text2)">Nenhum item encontrado.</p>'; return; }
+      el.innerHTML = itens.map((item, idx) => {
+        const p = _prodMap[item.produto_id];
+        const nome = p?.nome || ('#' + item.produto_id);
+        const info = [p?.tamanho, p?.cor].filter(Boolean).join(' · ');
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border)">
+          <input type="checkbox" id="dev-cb-v-${idx}" checked onchange="calcularTroca()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0" />
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13px">${nome}</div>
+            ${info ? `<div style="font-size:11px;color:var(--text2)">${info}</div>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text2);white-space:nowrap">${Fmt.moeda(item.preco_unitario)}</div>
+          <input type="number" id="dev-qty-v-${idx}" value="${item.quantidade}" min="1" max="${item.quantidade}"
+            style="width:46px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px"
+            oninput="calcularTroca()" />
+          <input type="hidden" id="dev-pid-v-${idx}" value="${item.produto_id}" />
+          <input type="hidden" id="dev-prc-v-${idx}" value="${item.preco_unitario}" />
+        </div>`;
+      }).join('');
+    } else {
+      // Fallback: carnê sem venda vinculada — mostra todos os produtos
+      const prods = Object.values(_prodMap)
+        .filter(p => p.ativo !== false && (!busca || p.nome.toLowerCase().includes(busca) || (p.tamanho || '').toLowerCase().includes(busca) || (p.cor || '').toLowerCase().includes(busca)))
+        .sort((a, b) => a.nome.localeCompare(b.nome));
+      if (!prods.length) { el.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--text2)">Nenhum produto encontrado.</p>'; return; }
+      el.innerHTML = prods.map(p => {
+        const info = [p.tamanho, p.cor].filter(Boolean).join(' · ');
+        const estqColor = p.estoque <= 0 ? 'var(--danger)' : p.estoque <= 3 ? '#f59e0b' : '#16a34a';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border)">
+          <input type="checkbox" id="dev-cb-${p.id}" onchange="calcularTroca()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0" />
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nome}</div>
+            ${info ? `<div style="font-size:11px;color:var(--text2)">${info}</div>` : ''}
+          </div>
+          <div style="font-size:11px;font-weight:600;color:${estqColor};white-space:nowrap">Estq:${p.estoque ?? '?'}</div>
+          <div style="font-size:11px;white-space:nowrap">${Fmt.moeda(p.preco)}</div>
+          <input type="number" id="dev-qty-${p.id}" value="1" min="1"
+            style="width:46px;text-align:center;border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:12px"
+            oninput="calcularTroca()" />
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // --- Lista direita: Novos Produtos ---
+  function _renderListaLevar() {
+    const busca = (document.getElementById('troca-filter-levar')?.value || '').toLowerCase();
+    const el = document.getElementById('troca-lista-levar');
+    const prods = Object.values(_prodMap)
+      .filter(p => p.ativo !== false && (!busca || p.nome.toLowerCase().includes(busca) || (p.tamanho || '').toLowerCase().includes(busca) || (p.cor || '').toLowerCase().includes(busca)))
+      .sort((a, b) => a.nome.localeCompare(b.nome));
+    if (!prods.length) { el.innerHTML = '<p style="padding:12px;font-size:13px;color:var(--text2)">Nenhum produto encontrado.</p>'; return; }
+    el.innerHTML = prods.map(p => {
+      const info = [p.tamanho, p.cor].filter(Boolean).join(' · ');
+      const semEstoque = (p.estoque || 0) <= 0;
+      const estqColor = semEstoque ? 'var(--danger)' : p.estoque <= 3 ? '#f59e0b' : '#16a34a';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);${semEstoque ? 'opacity:.5' : ''}">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nome}</div>
+          ${info ? `<div style="font-size:11px;color:var(--text2)">${info}</div>` : ''}
+        </div>
+        <div style="font-size:11px;font-weight:600;color:${estqColor};white-space:nowrap">Estq:${p.estoque ?? '?'}</div>
+        <div style="font-size:11px;white-space:nowrap">${Fmt.moeda(p.preco)}</div>
+        <button class="btn btn-sm btn-outline" onclick="adicionarProdutoTroca(${p.id})" ${semEstoque ? 'disabled' : ''} style="min-width:32px;padding:2px 8px">+</button>
+      </div>`;
+    }).join('');
+  }
+
+  // --- Carrinho de itens a levar ---
+  function _renderCarrinhoLevar() {
+    const el = document.getElementById('troca-levar');
+    if (!_trocaItensLevar.length) {
+      el.innerHTML = '<p style="font-size:12px;color:var(--text2);padding:4px 0">Clique em [+] para adicionar.</p>';
+      calcularTroca();
+      return;
+    }
+    el.innerHTML = _trocaItensLevar.map((item, idx) =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg);border-radius:var(--radius-sm);margin-top:4px">
+        <div style="flex:1;font-size:13px;font-weight:600">${item.nome}</div>
+        <div style="font-size:12px;color:var(--text2)">${Fmt.moeda(item.preco_unitario)} ×${item.quantidade}</div>
+        <div style="font-size:13px;font-weight:700">${Fmt.moeda(item.preco_unitario * item.quantidade)}</div>
+        <button class="btn btn-sm btn-ghost btn-icon" onclick="removerItemLevar(${idx})">🗑️</button>
+      </div>`
+    ).join('');
+    calcularTroca();
+  }
+
+  function adicionarProdutoTroca(prodId) {
+    const p = _prodMap[prodId];
+    if (!p) return;
+    const idx = _trocaItensLevar.findIndex(i => i.produto_id === prodId);
+    if (idx >= 0) _trocaItensLevar[idx].quantidade++;
+    else _trocaItensLevar.push({ produto_id: prodId, nome: p.nome, preco_unitario: p.preco, quantidade: 1 });
+    _renderCarrinhoLevar();
+  }
+
+  function removerItemLevar(idx) {
+    _trocaItensLevar.splice(idx, 1);
+    _renderCarrinhoLevar();
+  }
+
+  // --- Lê itens marcados para devolver ---
+  function _getItensDevolver() {
+    const result = [];
+    if (_trocaVendaItens.length > 0) {
+      // Itens da venda conhecidos (venda normal ou carnê com venda vinculada)
+      _trocaVendaItens.forEach((item, idx) => {
+        const cb = document.getElementById(`dev-cb-v-${idx}`);
+        if (cb?.checked) {
+          const qtd = parseInt(document.getElementById(`dev-qty-v-${idx}`)?.value) || 0;
+          const preco = parseFloat(document.getElementById(`dev-prc-v-${idx}`)?.value) || 0;
+          const prodId = parseInt(document.getElementById(`dev-pid-v-${idx}`)?.value);
+          if (qtd > 0 && prodId) result.push({ produto_id: prodId, quantidade: qtd, preco_unitario: preco });
+        }
+      });
+    } else {
+      // Fallback: carnê sem venda vinculada — lê checkboxes da lista completa
+      Object.values(_prodMap).forEach(p => {
+        const cb = document.getElementById(`dev-cb-${p.id}`);
+        if (cb?.checked) {
+          const qtd = parseInt(document.getElementById(`dev-qty-${p.id}`)?.value) || 1;
+          result.push({ produto_id: p.id, quantidade: qtd, preco_unitario: p.preco });
+        }
+      });
+    }
+    return result;
+  }
+
+  function calcularTroca() {
+    const dev = _getItensDevolver();
+    const totalDev = dev.reduce((s, i) => s + i.preco_unitario * i.quantidade, 0);
+    const totalNov = _trocaItensLevar.reduce((s, i) => s + i.preco_unitario * i.quantidade, 0);
+    const dif = totalNov - totalDev;
+    document.getElementById('troca-total-dev').textContent = Fmt.moeda(totalDev);
+    document.getElementById('troca-total-novo').textContent = Fmt.moeda(totalNov);
+    const difEl = document.getElementById('troca-diferenca');
+    difEl.textContent = (dif > 0 ? '+' : '') + Fmt.moeda(Math.abs(dif));
+    difEl.style.color = dif > 0 ? 'var(--danger)' : dif < 0 ? '#16a34a' : '';
+  }
+
+  async function confirmarTroca() {
+    if (!_trocaItensLevar.length) {
+      return mostrarToast('Adicione ao menos um produto novo para a troca.', 'warning');
+    }
+    const obs = document.getElementById('troca-obs').value.trim();
+    try {
+      const r = await DB.Vendas.registrarTroca(_trocaVendaId, _getItensDevolver(), _trocaItensLevar, obs);
+      let msg = `Troca registrada! Nova venda #${r.novaVenda.numero}.`;
+      if (r.diferenca > 0) msg += ` Cliente deve pagar ${Fmt.moeda(r.diferenca)}.`;
+      else if (r.diferenca < 0) msg += ` Crédito de ${Fmt.moeda(-r.diferenca)} para o cliente.`;
+      mostrarToast(msg, 'success');
+      Modal.fechar('modal-troca');
+      await carregar();
+    } catch (err) {
+      mostrarToast('Erro ao registrar troca: ' + (err.message || err), 'danger');
+    }
+  }
+
+  (async () => { await carregar(); })();
+</script>
+</body>
+</html>
