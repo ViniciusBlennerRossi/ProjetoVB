@@ -42,8 +42,7 @@
     @media print {
       .sidebar, .topbar, .stats-grid, .tabs, #filtros-bar,
       .carnes-grid, .modal-overlay, #toast-container, #global-loader { display: none !important; }
-      .main { margin-left: 0 !important; }
-      .layout { display: block !important; }
+      .layout { display: none !important; }
       .page-content { padding: 0 !important; }
       body { background: white !important; font-size: 12px; }
       #area-extrato { display: block !important; }
@@ -303,7 +302,10 @@
   function renderStats() {
     const ativos = _todosCarnes.filter(c => !['quitado','cancelado'].includes(c.status));
     const totalAberto = ativos.reduce((s, c) => s + (c.parcelas||[]).filter(p=>!p.pago).reduce((sp, p) => sp + (p.valor||0), 0), 0);
-    const totalRecebido = _todosCarnes.reduce((s, c) => s + (c.parcelas||[]).filter(p=>p.pago).reduce((sp, p) => sp + (p.valor||0), 0), 0);
+    const totalRecebido = _todosCarnes.reduce((s, c) => {
+      const pendente = (c.parcelas||[]).filter(p=>!p.pago).reduce((sp, p) => sp + (p.valor||0), 0);
+      return s + (c.valor_total||0) - pendente;
+    }, 0);
     const hoje_ = hoje();
     const vencidas = ativos.reduce((count, c) => count + (c.parcelas||[]).filter(p => !p.pago && p.vencimento < hoje_).length, 0);
 
@@ -581,8 +583,9 @@
     if (!c) return;
     const hoje_ = hoje();
     const pagas = (c.parcelas||[]).filter(p=>p.pago).length;
-    const valorPago = (c.parcelas||[]).filter(p=>p.pago).reduce((s,p)=>s+(p.valor||0),0);
-    const saldo = (c.valor_total||0) - valorPago;
+    const valorPendente = (c.parcelas||[]).filter(p=>!p.pago).reduce((s,p)=>s+(p.valor||0),0);
+    const valorPago = (c.valor_total||0) - valorPendente;
+    const saldo = valorPendente;
 
     let parcelasHtml = '';
     (c.parcelas||[]).forEach(p => {
@@ -724,7 +727,6 @@
         if (p.pago) {
           label = 'Pago'; cls = 'badge-pago';
           pgtoEm = Fmt.data(p.data_pagamento + 'T00:00:00');
-          totPago += (p.valor || 0);
         } else if (p.vencimento < hoje_) {
           label = 'Vencida'; cls = 'badge-vencido';
           pgtoEm = '—'; totPendente += (p.valor || 0);
@@ -742,6 +744,7 @@
         </tr>`;
       }).join('');
 
+      totPago = (c.valor_total || 0) - totPendente;
       totalGeralPago      += totPago;
       totalGeralPendente  += totPendente;
 
