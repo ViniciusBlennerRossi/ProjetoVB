@@ -15,12 +15,18 @@
     /* ── Painel esquerdo ── */
     .login-art {
       flex: 1;
-      position: relative;
       overflow: hidden;
-      background: url('Imagens/Fiore.jpeg') center center / 35% auto no-repeat,
-                  repeating-linear-gradient(90deg, #F5C7D3 0 14px, #FCEAEF 14px 28px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: repeating-linear-gradient(90deg, #F5C7D3 0 14px, #FCEAEF 14px 28px);
     }
-    .login-art-logo,
+    .login-art-logo {
+      display: block;
+      width: 40%;
+      max-width: 340px;
+      mix-blend-mode: multiply;
+    }
     .login-art-top,
     .login-art-bottom,
     .login-art-tag,
@@ -29,7 +35,7 @@
 
     /* Prateada */
     .login-art.tenant-prateada {
-      background: url('Imagens/Prateada.jpeg') center center / 35% auto no-repeat #EDE8F5;
+      background: #EDE8F5;
     }
 
     @media (max-width: 900px) { .login-art { display: none; } }
@@ -96,7 +102,7 @@
     <div class="login-art-top">
       <span class="login-art-tag" id="art-foot">Fiore · Pijamas</span>
     </div>
-    <img src="Imagens/logo.png" alt="Fiore" class="login-art-logo" id="art-logo" />
+    <img src="Imagens/Fiore-logo.png" alt="Fiore" class="login-art-logo" id="art-logo" />
     <div class="login-art-bottom">
       <div class="login-art-quote" id="art-quote">"Conforto que veste como uma carícia."</div>
     </div>
@@ -168,7 +174,7 @@
     _lojaAtual = loja;
     const artPanel = document.querySelector('.login-art');
     if (loja?.slug === 'fiore') {
-      document.getElementById('art-logo').src           = 'Imagens/logo.png';
+      document.getElementById('art-logo').src           = 'Imagens/Fiore-logo.png';
       document.getElementById('brand-name').textContent = 'Fiore';
       document.getElementById('brand-sub').textContent  = 'Pijamas · Gestão';
       document.getElementById('art-quote').textContent  = '"Conforto que veste como uma carícia."';
