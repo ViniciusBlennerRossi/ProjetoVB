@@ -401,6 +401,7 @@
     document.getElementById('venda-status-pgto').value = 'pago';
     document.getElementById('parcelas-wrap').classList.add('d-none');
     document.getElementById('status-pgto-wrap').classList.remove('d-none');
+    onFormaPgtoChange();
     calcularTotal();
     await adicionarItem();
     Modal.abrir('modal-venda');
@@ -502,8 +503,10 @@
 
     if (['cartao_credito', 'crediario', 'boleto'].includes(forma)) {
       parcelaWrap.style.opacity = '1';
+      document.getElementById('venda-parcelas').disabled = false;
     } else {
       document.getElementById('venda-parcelas').value = '1';
+      document.getElementById('venda-parcelas').disabled = true;
       parcelaWrap.style.opacity = '.5';
       onParcelasChange();
     }

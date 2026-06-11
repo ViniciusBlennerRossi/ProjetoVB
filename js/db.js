@@ -487,7 +487,22 @@ const DB = {
       return await _query(_sb.from('cobrancas').insert({ ...dados, id_loja: _idLoja() }).select().single());
     },
     async registrarPagamento(id, dataPgto) {
-      await _query(_sb.from('cobrancas').update({ pago: true, data_pagamento: dataPgto || hoje() }).eq('id', id));
+      const dataPagamento = dataPgto || hoje();
+      const cob = await this.porId(id);
+      await _query(_sb.from('cobrancas').update({ pago: true, data_pagamento: dataPagamento }).eq('id', id));
+
+      // Sincroniza a parcela correspondente na venda relacionada
+      if (cob && cob.venda_id && cob.parcela_num) {
+        const { data: venda } = await _sb.from('vendas').select('id, parcelas').eq('id', cob.venda_id).single();
+        if (venda && Array.isArray(venda.parcelas)) {
+          const parcelas = venda.parcelas.map(p =>
+            p.numero === cob.parcela_num ? { ...p, pago: true, data_pagamento: dataPagamento } : p
+          );
+          const todasPagas = parcelas.every(p => p.pago);
+          const upd = todasPagas ? { parcelas, status_pgto: 'pago' } : { parcelas };
+          await _sb.from('vendas').update(upd).eq('id', cob.venda_id);
+        }
+      }
     },
     async deletar(id) {
       await _query(_sb.from('cobrancas').delete().eq('id', id));

@@ -186,6 +186,24 @@
               </div>
             </div>
 
+            <div id="cartao-options" class="d-none" style="margin-bottom:10px;background:var(--bg);border-radius:var(--radius-sm);padding:12px;border:1px solid var(--border)">
+              <div class="form-group" style="margin:0">
+                <label class="form-label" style="font-size:12px">💳 Nº de Parcelas</label>
+                <select id="pdv-cartao-parcelas" class="form-control form-select" onchange="atualizarResumoCartao()">
+                  <option value="1">À vista (1x)</option>
+                  <option value="2">2x</option>
+                  <option value="3">3x</option>
+                  <option value="4">4x</option>
+                  <option value="5">5x</option>
+                  <option value="6">6x</option>
+                  <option value="8">8x</option>
+                  <option value="10">10x</option>
+                  <option value="12">12x</option>
+                </select>
+              </div>
+              <div id="cartao-resumo" style="font-size:11px;color:var(--text2);margin-top:6px"></div>
+            </div>
+
             <button id="btn-carne-pdv" class="btn btn-outline btn-full" style="margin-bottom:8px;font-size:13px" onclick="selecionarForma('carne')">
               📋 Carnê (parcelado)
             </button>
@@ -284,8 +302,28 @@
     btnCarne.style.color = val === 'carne' ? '#fff' : '';
     btnCarne.style.borderColor = val === 'carne' ? 'var(--primary)' : '';
     document.getElementById('carne-options').classList.toggle('d-none', val !== 'carne');
+    document.getElementById('cartao-options').classList.toggle('d-none', val !== 'cartao_credito');
+    if (val === 'cartao_credito') atualizarResumoCartao();
   }
   selecionarForma('dinheiro');
+
+  function atualizarResumoCartao() {
+    const num = parseInt(document.getElementById('pdv-cartao-parcelas').value) || 1;
+    const total = carrinho.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0) - calcularDescontoAtual();
+    const resumo = document.getElementById('cartao-resumo');
+    if (num > 1 && total > 0) {
+      resumo.textContent = `${num}x de ${Fmt.moeda(total / num)} — 1ª parcela em 30 dias`;
+    } else {
+      resumo.textContent = '';
+    }
+  }
+
+  function calcularDescontoAtual() {
+    const subtotal = carrinho.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0);
+    const descRaw = parseFloat(document.getElementById('pdv-desconto').value) || 0;
+    const descTipo = document.getElementById('pdv-desc-tipo').value;
+    return descTipo === 'pct' ? subtotal * descRaw / 100 : descRaw;
+  }
 
   // ===== TABS =====
   function mostrarTab(tab) {
@@ -489,6 +527,7 @@
     document.getElementById('pdv-desc-txt').textContent = Fmt.moeda(desconto);
     document.getElementById('pdv-total').textContent = Fmt.moeda(total);
     calcularTroco();
+    if (formaPgto === 'cartao_credito') atualizarResumoCartao();
   }
 
   function calcularTroco() {
@@ -514,6 +553,7 @@
     document.getElementById('pdv-carne-parcelas').value = '3';
     document.getElementById('pdv-carne-dia').value = '10';
     document.getElementById('pdv-carne-entrada').value = '';
+    document.getElementById('pdv-cartao-parcelas').value = '1';
     selecionarForma('dinheiro');
     filtrarProdutos();
   }
@@ -620,13 +660,34 @@
       return;
     }
 
-    // --- Fluxo normal ---
+    // --- Fluxo normal (cartão de crédito pode ser parcelado) ---
+    const numParcCartao = formaPgto === 'cartao_credito'
+      ? Math.max(1, parseInt(document.getElementById('pdv-cartao-parcelas').value) || 1)
+      : 1;
+
+    let parcelasVenda, statusPgto;
+    if (numParcCartao > 1) {
+      // Parcelado: divide com ajuste de centavos na última parcela
+      const valorParc = +(total / numParcCartao).toFixed(2);
+      const datas = gerarParcelasDatas(hoje(), numParcCartao);
+      parcelasVenda = Array.from({ length: numParcCartao }, (_, i) => ({
+        numero: i + 1,
+        valor: i === numParcCartao - 1 ? +(total - valorParc * (numParcCartao - 1)).toFixed(2) : valorParc,
+        vencimento: datas[i],
+        pago: false
+      }));
+      statusPgto = 'pendente';
+    } else {
+      parcelasVenda = [{ numero: 1, valor: total, vencimento: hoje(), pago: true, data_pagamento: hoje() }];
+      statusPgto = 'pago';
+    }
+
     const venda = await DB.Vendas.salvar({
       cliente: clienteNome || 'Consumidor', cliente_nome: clienteNome || 'Consumidor', cliente_id: clienteId,
       itens, subtotal, desconto, total,
-      forma_pagamento: formaPgto, num_parcelas: 1,
-      parcelas: [{ numero: 1, valor: total, vencimento: hoje(), pago: true, data_pagamento: hoje() }],
-      status_pgto: 'pago', status: 'ativa',
+      forma_pagamento: formaPgto, num_parcelas: numParcCartao,
+      parcelas: parcelasVenda,
+      status_pgto: statusPgto, status: 'ativa',
       vendedor_id: Auth.usuario().id, vendedor_nome: Auth.usuario().nome, origem: 'pdv'
     });
 
@@ -646,7 +707,7 @@
       <div style="background:var(--bg);padding:12px;border-radius:8px">
         ${desconto>0 ? `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Desconto</span><span class="text-danger">-${Fmt.moeda(desconto)}</span></div>` : ''}
         <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--primary)"><span>Total</span><span>${Fmt.moeda(total)}</span></div>
-        <div style="font-size:13px;margin-top:6px;color:var(--text2)">${labelFormaPgto(formaPgto)}</div>
+        <div style="font-size:13px;margin-top:6px;color:var(--text2)">${labelFormaPgto(formaPgto)}${numParcCartao > 1 ? ` em ${numParcCartao}x de ${Fmt.moeda(parcelasVenda[0].valor)}` : ''}</div>
         ${formaPgto==='dinheiro' && recibido > 0 ? `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--success);margin-top:4px"><span>Troco</span><span>${Fmt.moeda(troco)}</span></div>` : ''}
       </div>
       <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text2)">
