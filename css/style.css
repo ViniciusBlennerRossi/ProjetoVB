@@ -896,6 +896,35 @@ tbody tr:last-child td { border-bottom: none; }
 /* ============================================================================
    RESPONSIVE
    ============================================================================ */
+/* ============================================================================
+   NAVEGAÇÃO MOBILE / APP (PWA)
+   ============================================================================ */
+.topbar-nav-mobile { display: none; align-items: center; gap: 8px; margin-right: 4px; }
+.topbar-nav-btn {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--text);
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+  display: none;
+}
+.topbar-nav-btn:active { background: var(--bg); }
+/* Quando há navegação visível, o título ocupa o espaço restante */
+.topbar-title { flex: 1; min-width: 0; }
+/* Voltar: só no app instalado (standalone não tem botão do navegador) */
+body.pwa-standalone .topbar-nav-mobile { display: flex; }
+body.pwa-standalone .topbar-nav-btn.nav-voltar { display: flex; }
+.sidebar-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 90;
+}
+.sidebar-backdrop.show { display: block; }
+
 @media (max-width: 768px) {
   :root { --sidebar-width: 0px; }
 
@@ -908,6 +937,10 @@ tbody tr:last-child td { border-bottom: none; }
   .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .topbar-subtitle { display: none; }
+
+  /* Menu (3 pontinhos): visível no mobile e no app */
+  .topbar-nav-mobile { display: flex; }
+  .topbar-nav-btn.nav-menu { display: flex; }
 }
 
 /* Print-friendly */

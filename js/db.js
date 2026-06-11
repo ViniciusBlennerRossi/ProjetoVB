@@ -308,18 +308,22 @@ const DB = {
       }
 
       // 4. Criar cobranças para parcelas pendentes
-      for (const p of (dados.parcelas || [])) {
-        if (!p.pago) {
-          await DB.Cobrancas.salvar({
-            venda_id: venda.id,
-            numero_venda: numero,
-            cliente: dados.cliente_nome || dados.cliente,
-            cliente_id: dados.cliente_id || null,
-            parcela_num: p.numero,
-            valor: p.valor,
-            vencimento: p.vencimento,
-            pago: false
-          });
+      // Vendas em carnê NÃO geram cobranças: o carnê controla as próprias
+      // parcelas (a tela de cobranças exibe as parcelas do carnê diretamente)
+      if (dados.forma_pagamento !== 'carne') {
+        for (const p of (dados.parcelas || [])) {
+          if (!p.pago) {
+            await DB.Cobrancas.salvar({
+              venda_id: venda.id,
+              numero_venda: numero,
+              cliente: dados.cliente_nome || dados.cliente,
+              cliente_id: dados.cliente_id || null,
+              parcela_num: p.numero,
+              valor: p.valor,
+              vencimento: p.vencimento,
+              pago: false
+            });
+          }
         }
       }
 

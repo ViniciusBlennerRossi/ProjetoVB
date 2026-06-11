@@ -152,18 +152,22 @@
   async function carregar() {
     mostrarLoader();
     try {
-      const [cobr, carnes] = await Promise.all([DB.Cobrancas.todas(), DB.Carnes.ativos()]);
+      const [cobr, todosCarnes] = await Promise.all([DB.Cobrancas.todas(), DB.Carnes.todos()]);
+      const carnes = todosCarnes.filter(c => c.status !== 'cancelado');
 
       // Vendas que já têm um carnê vinculado (PDV #XXXXX na descrição do carnê)
-      // → suas cobranças na tabela cobrancas são duplicatas das parcelas do carnê
+      // → suas cobranças na tabela cobrancas são duplicatas das parcelas do carnê.
+      // IMPORTANTE: inclui carnês QUITADOS — senão as duplicatas "voltam" quando
+      // o carnê é finalizado
       const vendaNumsComCarne = new Set();
-      carnes.forEach(c => {
+      todosCarnes.forEach(c => {
         const match = (c.descricao || '').match(/PDV #(\w+)/i);
         if (match) vendaNumsComCarne.add(match[1]);
       });
       _todasCobrancas = cobr.filter(c => !c.numero_venda || !vendaNumsComCarne.has(c.numero_venda));
 
       // Transformar parcelas de carnê em pseudo-cobranças
+      // (inclui quitados: parcelas pagas aparecem no histórico da aba "Pagas")
       _parcelasCarne = [];
       carnes.forEach(c => {
         (c.parcelas || []).forEach(p => {

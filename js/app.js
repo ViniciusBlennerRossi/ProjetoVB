@@ -371,3 +371,53 @@ function setupClienteAutocomplete(inputId, hiddenId, onSelect) {
   input.addEventListener('blur', () => setTimeout(fecharDropdown, 200));
   function fecharDropdown() { if (dropdown) { dropdown.remove(); dropdown = null; } }
 }
+
+/* ============================================================================
+   NAVEGAÇÃO MOBILE / APP (PWA)
+   Botão de menu (3 pontinhos) no mobile + botão voltar no app instalado.
+   Injetado na .topbar de todas as páginas — sem editar os HTMLs.
+   ============================================================================ */
+(function _setupMobileNav() {
+  const montar = () => {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar) return; // página de login não tem topbar
+
+    const standalone =
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      window.navigator.standalone === true;
+    if (standalone) document.body.classList.add('pwa-standalone');
+
+    const nav = document.createElement('div');
+    nav.className = 'topbar-nav-mobile';
+    nav.innerHTML = `
+      <button class="topbar-nav-btn nav-voltar" onclick="history.back()" aria-label="Voltar" title="Voltar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <button class="topbar-nav-btn nav-menu" id="btn-menu-mobile" aria-label="Menu" title="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+      </button>`;
+    topbar.insertBefore(nav, topbar.firstChild);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(backdrop);
+
+    const fecharMenu = () => {
+      document.querySelector('.sidebar')?.classList.remove('open');
+      backdrop.classList.remove('show');
+    };
+    nav.querySelector('.nav-menu').addEventListener('click', () => {
+      const sb = document.querySelector('.sidebar');
+      if (!sb) return;
+      sb.classList.toggle('open');
+      backdrop.classList.toggle('show', sb.classList.contains('open'));
+    });
+    backdrop.addEventListener('click', fecharMenu);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', montar);
+  } else {
+    montar();
+  }
+})();
